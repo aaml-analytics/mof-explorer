@@ -73,7 +73,7 @@ MOF_data_filter = textwrap.wrap(' Using the sorting and filtering datatable, use
                                 'can take are '
                                 'specified '
                                 'in the manual. After filtering there are options to choose a logarithmic or linear '
-                                'axis scale, and choose a colorscale of choice from the Viridis color palette.'
+                                'axis scale, and choose a colorscale of choice from the viridis color palette.'
                                 , width=50)
 MOF_stat_analysis = textwrap.wrap('All structures, or top performing structures (1%, 5% or 10% of all structures) '
                                   'can be analysed in accordance to a set variable decided by the user e.g. '
@@ -124,7 +124,7 @@ app.layout = html.Div([
     html.Div([
         dcc.Tabs([
             dcc.Tab(label='About', style=tab_style, selected_style=tab_selected_style,
-                    children=[html.Div([html.H2(" What is AAML's MOF Explorer tool?",
+                    children=[html.Div([html.H2(" What are AAML's MOF Data Visualisation tools?",
                                                 style={'fontSize': 18, 'font-family': 'Arial', 'font-weight': 'bold'
                                                        }),
                                         html.Div([' '.join(MOF_tool_about)]
@@ -146,8 +146,8 @@ app.layout = html.Div([
                                                        style={'display': 'inline-block',
                                                               'fontSize': 14, }),
                                         html.Plaintext(
-                                            [" to explore AAML sample data and read more on"
-                                             " AAML MOF Explorer Tool Manual, FAQ's & Troubleshooting"
+                                            [" to explore AAML's sample data and read more on"
+                                             " AAML's MOF Explorer Tool Manual, FAQ's & Troubleshooting"
                                              " on GitHub... ", ]
                                             , style={'display': 'inline-block', 'fontSize': 14}),
                                                   html.Img(
@@ -165,7 +165,7 @@ app.layout = html.Div([
                         dcc.Tabs(id='sub-tabs1', style=tabs_styles, children=[
                             dcc.Tab(label='2D Animation', style=tab_style, selected_style=tab_selected_style,
                                     children=[html.Div([html.Div([dcc.Graph(id='my-graph', animate=False)],
-                                                                 style={'display': 'inline-block', 'width': '60%',
+                                                                 style={'display': 'inline-block', 'width': '58%',
                                                                         'height': '100%'}),
 
                                                         html.Div([
@@ -176,7 +176,7 @@ app.layout = html.Div([
                                                                                                            "for X")],
                                                                                  className="six columns"
                                                                                  )],
-                                                                     style={'width': '170%', 'display': 'inline-block',
+                                                                     style={'width': '100%', 'display': 'inline-block',
                                                                             'padding': 5}),
                                                             html.Div([html.Label(["Select Y variable:",
                                                                                   dcc.Dropdown(id='yaxis-anim',
@@ -185,24 +185,24 @@ app.layout = html.Div([
                                                                                                            'for Y')],
                                                                                  className="six columns"
                                                                                  ), ],
-                                                                     style={'width': '170%', 'display': 'inline-block',
+                                                                     style={'width': '100%', 'display': 'inline-block',
                                                                             'padding': 5}),
                                                             html.Div([html.Label(
-                                                                ["Select Size variable:",
+                                                                ["Select size variable:",
                                                                  dcc.Dropdown(id='saxis-anim', multi=False,
-                                                                              placeholder='Select an option for Size')],
+                                                                              placeholder='Select an option for size')],
                                                                 className="six columns"
-                                                            )], style={'width': '170%', 'display': 'inline-block',
+                                                            )], style={'width': '100%', 'display': 'inline-block',
                                                                        'padding': 5}),
                                                             html.Div([html.Label(
-                                                                ["Select Color variable:",
+                                                                ["Select color variable:",
                                                                  dcc.Dropdown(id="caxis-anim", multi=False,
-                                                                              placeholder='Select an option for Color')],
+                                                                              placeholder='Select an option for color')],
                                                                 className="six columns"
-                                                            )], style={'width': '170%', 'display': 'inline-block',
+                                                            )], style={'width': '100%', 'display': 'inline-block',
                                                                        'padding': 5})
                                                         ],
-                                                            style={'display': 'inline-block', 'width': '28%',
+                                                            style={'display': 'inline-block', 'width': '37%',
                                                                    'float': 'right',
                                                                    'padding': 15, 'backgroundColor': '#ffffff'})
                                                         ], style={'backgroundColor': '#ffffff'})]),
@@ -210,7 +210,7 @@ app.layout = html.Div([
                                     children=[html.Div([
                                         html.Div([dcc.Graph(id="graph"
                                                             )],
-                                                 style={"width": "70vw", "display": "inline-block"}),
+                                                 style={"width": "58%", "display": "inline-block", 'height': '100%'}),
                                         html.Div([
                                             html.Div([html.Label(["Select X variable:",
                                                                   dcc.Dropdown(id='xaxis-3D', multi=False,
@@ -219,39 +219,40 @@ app.layout = html.Div([
                                                                                )],
                                                                  className="six columns"
                                                                  )],
-                                                     style={'width': '170%', 'display': 'inline-block'}),
+                                                     style={'width': '100%', 'display': 'inline-block',
+                                                            'padding': 5}),
                                             html.Div([html.Label(["Select Y variable:",
                                                                   dcc.Dropdown(id='yaxis-3D', multi=False,
 
                                                                                placeholder='Select an option for Y')],
                                                                  className="six columns"
                                                                  ), ],
-                                                     style={'width': '170%', 'display': 'inline-block'}),
+                                                     style={'width': '100%', 'display': 'inline-block','padding': 5}),
                                             html.Div([html.Label(["Select Z variable:",
                                                                   dcc.Dropdown(id='zaxis-3D', multi=False,
 
                                                                                placeholder='Select an option for Z')],
                                                                  className="six columns"
                                                                  ), ],
-                                                     style={'width': '170%', 'display': 'inline-block'}),
+                                                     style={'width': '100%', 'display': 'inline-block','padding': 5}),
                                             html.Div([html.Label(
-                                                ["Select Size variable:",
+                                                ["Select size variable:",
                                                  dcc.Dropdown(id='saxis-3D', multi=False,
-                                                              placeholder='Select an option for Size',
+                                                              placeholder='Select an option for size',
 
                                                               )],
                                                 className="six columns"
-                                            )], style={'width': '170%', 'display': 'inline-block'}),
+                                            )], style={'width': '100%', 'display': 'inline-block','padding': 5}),
                                             html.Div([html.Label(
-                                                ["Select Color variable:",
+                                                ["Select color variable:",
                                                  dcc.Dropdown(id="caxis-3D", multi=False,
 
-                                                              placeholder='Select an option for Color')],
+                                                              placeholder='Select an option for color')],
                                                 className="six columns"
-                                            )], style={'width': '170%', 'display': 'inline-block'})
+                                            )], style={'width': '100%', 'display': 'inline-block','padding': 5})
                                         ],
-                                            style={'display': 'inline-block', 'width': '23%',
-                                                   'backgroundColor': '#ffffff'})
+                                            style={'display': 'inline-block', 'width': '37%', 'float':'right',
+                                                   'backgroundColor': '#ffffff', 'padding':15})
                                         ,
 
                                     ], style={'backgroundColor': '#ffffff'})])
@@ -282,48 +283,49 @@ app.layout = html.Div([
                                                   html.Div(id='data-table-container'), ], style={'padding': 15}),
 
                                         html.Div([html.Div([
-                                            html.Label(["Select X Variable:",
+                                            html.Label(["Select X variable:",
                                                         (dcc.Dropdown(id='xaxis', placeholder="Select an option for X",
                                                                       multi=False))
                                                         ], className="six columns",
                                                        style={'fontSize': 14, 'font-family': 'Arial',
-                                                              'width': '25%', 'display': 'inline-block', 'padding': 5
+                                                              'width': '20%', 'display': 'inline-block', 'padding': 5
                                                               })
                                         ]),
                                             html.Div([
-                                                html.Label(["Select Y Variable:",
+                                                html.Label(["Select Y variable:",
                                                             (dcc.Dropdown(id='yaxis',
                                                                           placeholder="Select an option for Y",
                                                                           multi=False))
                                                             ], className="six columns",
                                                            style={'fontSize': 14, 'font-family': 'Arial',
-                                                                  'width': '25%',
+                                                                  'width': '20%',
                                                                   'display': 'inline-block', 'padding': 5
                                                                   })
                                             ]),
                                             html.Div([
-                                                html.Label(["Select Size Variable:",
+                                                html.Label(["Select size variable:",
                                                             (dcc.Dropdown(id='saxis',
-                                                                          placeholder="Select an option for Size",
+                                                                          placeholder="Select an option for size",
                                                                           multi=False))],
                                                            className="six columns",
                                                            style={'fontSize': 14, 'font-family': 'Arial',
-                                                                  'width': '25%',
+                                                                  'width': '20%',
                                                                   'display': 'inline-block', 'padding': 5}
                                                            )
                                             ]),
                                             html.Div([
-                                                html.Label(["Select Color Variable:",
+                                                html.Label(["Select color variable:",
                                                             (dcc.Dropdown(id='caxis',
-                                                                          placeholder="Select an option for Color",
+                                                                          placeholder="Select an option for color",
                                                                           multi=False))
                                                             ], className="six columns",
                                                            style={'fontSize': 14, 'font-family': 'Arial',
-                                                                  'width': '25%',
+                                                                  'width': '20%',
                                                                   'display': 'inline-block', 'padding': 5
                                                                   })
                                             ]),
-                                        ], style={}
+                                        ],
+                                            style={'padding-left': '15%', 'padding-right': '5%'}
                                         ),
                                         html.Div([html.Label(["Select X axis scale:",
                                                               dcc.RadioItems(
@@ -383,7 +385,8 @@ app.layout = html.Div([
                                                      multi=False,
                                                  )]
                                             )], style={'padding': 10}),
-                                            html.Div([html.Label(["Select % of structures in dataset to analyse:"
+                                            html.Div([html.Label(["Select % of structures in dataset to analyse per "
+                                                                  "pressure:"
                                                                      , dcc.RadioItems(
                                                     id='percentile-type',
                                                     options=[{'label': 'All structures', 'value': 'All structures'},
@@ -397,7 +400,7 @@ app.layout = html.Div([
                                                     labelStyle={'display': 'inline-block'}
                                                 )]),
                                                       ], style={'padding': 10}),
-                                            html.Div([html.Label(["Select Variable (Geometrical Property):",
+                                            html.Div([html.Label(["Select variable (Geometrical Property):",
                                                                   dcc.Dropdown(id='yaxis-stat',
                                                                                placeholder="Select an option for Y",
                                                                                multi=False,
@@ -422,7 +425,7 @@ app.layout = html.Div([
                                     children=[
                                         html.Div([
                                             html.Div([dcc.Graph(id='dist-plot', animate=False)],
-                                                     style={'width': '70%', 'display': 'inline-block'
+                                                     style={'width': '65%', 'display': 'inline-block',
                                                             }),
                                             html.Div([html.Div([html.Label(
                                                 ['Select variable to determine top performing structures (will filter '
@@ -433,7 +436,8 @@ app.layout = html.Div([
                                                      multi=False,
                                                  )]
                                             )], style={'padding': 10}),
-                                                html.Div([html.Label(["Select % of structures in dataset to analyse:"
+                                                html.Div([html.Label(["Select % of structures in dataset to analyse per"
+                                                                      " pressure:"
                                                                          , dcc.RadioItems(
                                                         id='percentile-type-dist',
                                                         options=[{'label': 'All structures', 'value': 'All structures'},
@@ -462,10 +466,11 @@ app.layout = html.Div([
                                                                           value='None',
                                                                           labelStyle={'display': 'inline-block'})])
                                                           ])
-                                            ], style={'font-family': 'Arial', 'display': 'inline-block',
-                                                      'width': '23%', 'fontSize': 14, })
-                                        ], className='container', style={'backgroundColor': '#ffffff'}
-                                            # style={'padding': 40}
+                                            ], style={'fontSize': 14, 'font-family': 'Arial', 'width': '30%',
+                                                  'display': 'inline-block',
+                                                  'float': 'right' })
+
+                                        ], className='container', style={'backgroundColor': '#ffffff','padding': 40}
                                         )
                                     ]),
                         ]),
@@ -594,8 +599,9 @@ def update_figure(contents, x, y, color, size, filename):
                       hover_name=df.columns[0], color_continuous_scale='Viridis',
                       hover_data={}, template="none",
                       ).update_xaxes(showgrid=False, title=x, autorange=True, ticks='outside',
-                                     showline=True, showspikes=True, mirror=True).update_yaxes(
-        showgrid=False, title=y, autorange=True, ticks='outside', showspikes=True,
+                                     showline=True, showspikes=True, spikethickness=1, spikedash='solid',
+                                     mirror=True).update_yaxes(spikedash='solid',
+        showgrid=False, title=y, autorange=True, ticks='outside', showspikes=True, spikethickness=1,
         showline=True, mirror=True).update_layout(
         clickmode='event+select', hovermode='closest', margin={'l': 80}, autosize=True
     ).update_traces(marker=dict(opacity=0.7, showscale=True, line=dict(width=0.5, color='DarkSlateGrey'),
