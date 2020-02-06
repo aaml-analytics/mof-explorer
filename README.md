@@ -21,6 +21,7 @@ xcrun: error: invalid active developer path (/Library/Developer/CommandLineTools
 ```bash
 xcode-select --install
 ```
+### Running the app
 - Install virtualenv to create virtual environments 
 ```bash
 pip install virtualenv
