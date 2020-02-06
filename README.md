@@ -21,12 +21,12 @@ xcrun: error: invalid active developer path (/Library/Developer/CommandLineTools
 ```bash
 xcode-select --install
 ```
-### Running the app
 - Install virtualenv to create virtual environments 
 ```bash
 pip install virtualenv
 ```
 
+### Running the app
 To run this app first clone repository and then open a terminal to the app folder.
 ```bash
 git clone https://github.com/aaml-analytics/mof-explorer/
