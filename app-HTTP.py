@@ -19,7 +19,7 @@ import textwrap
 import dash_auth
 import waitress
 
-USERNAME_PASSWORD_PAIRS = [['username', 'password'], ['User', 'aaml-analytics']]
+USERNAME_PASSWORD_PAIRS = [[['User', 'aaml-analytics']]
 
 UPLOAD_DIRECTORY = "https://github.com/aaml-analytics/mof-explorer/tree/master/sample-data/"
 if not os.path.exists(UPLOAD_DIRECTORY):
