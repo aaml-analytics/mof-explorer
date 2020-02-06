@@ -57,5 +57,5 @@ For changes, please open an issue first to discuss what you would like to change
 
 ### Credit
 
-- [AAML Research Group](http://aam.ceb.cam.ac.uk) for developing this dashboard for the MOF community. Click [here[ (http://aam.ceb.cam.ac.uk/research.html) to read more about our work.
-- [Dash](https://plot.ly/dash/), the python framework used to build this web application.
+- [AAML Research Group](http://aam.ceb.cam.ac.uk) for developing this dashboard for the MOF community. Click [here] (http://aam.ceb.cam.ac.uk/research.html) to read more about our work.
+- [Dash](https://plot.ly/dash/) - the python framework used to build this web application.
