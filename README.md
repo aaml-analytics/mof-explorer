@@ -33,7 +33,7 @@ the following:
 
 On Windows:
 ```bash
-virtualenv vena
+virtualenv venv
 \venv\scripts\activate
 ```
 
@@ -48,6 +48,7 @@ Install the requirements:
 ```bash
 pip install -r requirements.txt
 ```
+
 Run the app:
 
 ```bash
