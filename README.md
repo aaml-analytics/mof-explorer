@@ -10,7 +10,7 @@ ADD_LINK
 ## How to run this app
 
 ### Requirements
-- Download [Python 3]if not already installed (https://www.python.org)
+- Download [Python 3](https://www.python.org) if not already installed 
 
 To run this app first clone repository and then open a terminal to the app folder.
 ```bash
