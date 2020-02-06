@@ -14,8 +14,8 @@ ADD_LINK
 
 To run this app first clone repository and then open a terminal to the app folder.
 ```bash
-git clone https://github.com/ADD_PATH
-cd ADD_PATH_TO_APP_FOLDER
+git clone https://github.com/aaml-analytics/mof-explorer/
+cd mof-explorer
 ```
 
 Create and activate a new virtual environment (recommended) by running
@@ -50,7 +50,7 @@ You can then run the app on your browser at http://127.0.0.1:5000/
 
 ## Screenshots
 
-![brain.png](brain.png)
+![mof-explorer.png](mof-explorer.png)
 ADD_SCREENSHOT
 
 ## Contributing
