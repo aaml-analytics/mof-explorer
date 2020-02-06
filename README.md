@@ -13,11 +13,11 @@ ADD_LINK
 - Download [Python 3](https://www.python.org) if not already installed 
 - Install [Git](https://git-scm.com/downloads) 
 -- Installation instructions using command line can be found [here](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) 
-Note: If you are using Git after upgrading to macOS Catalina and get the error
+Note: If you are using Git after upgrading to macOS Catalina and get the following error...:
 ```bash
 xcrun: error: invalid active developer path (/Library/Developer/CommandLineTools), missing xcrun at: /Library/Developer/CommandLineTools/usr/bin/xcrun
 ```
-run the following in your terminal:
+...run the following in your terminal:
 ```bash
 xcode-select --install
 ```
