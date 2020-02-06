@@ -11,7 +11,8 @@ ADD_LINK
 
 ### Requirements
 - Download [Python 3](https://www.python.org) if not already installed 
-- Install [Git](https://git-scm.com/downloads). Installation instructions using command line can be found [here](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) 
+- Install [Git](https://git-scm.com/downloads) 
+-- Installation instructions using command line can be found [here](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) 
 
 To run this app first clone repository and then open a terminal to the app folder.
 ```bash
