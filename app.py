@@ -505,25 +505,6 @@ def parse_contents(contents, filename):
     return df
 
 
-# SAVE UPLOADED FILES
-@app.callback(
-    Output("file-list", 'children'),
-    [Input('data-table-upload', 'filename'),
-     Input('data-table-upload', 'contents')],
-)
-def update_output_files(uploaded_filenames, uploaded_file_contents):
-    """Save uploaded files and regenerate the file list."""
-    if uploaded_filenames is not None and uploaded_file_contents is not None:
-        for name, data in zip(uploaded_filenames, uploaded_file_contents):
-            save_file(name, data)
-
-    files = uploaded_files()
-    if len(files) == 0:
-        return [html.Li("No files yet!")]
-    else:
-        return [html.Li(file_download_link(filename)) for filename in files]
-
-
 # POPULATE X AXIS DROPDOWN ANIM
 @app.callback(Output('xaxis-anim', 'options'),
               [Input('data-table-upload', 'contents')],
