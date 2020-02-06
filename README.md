@@ -51,7 +51,6 @@ You can then run the app on your browser at http://127.0.0.1:5000/
 ## Screenshots
 
 ![mof-explorer.png](mof-explorer.png)
-ADD_SCREENSHOT
 
 ## Contributing
 For changes, please open an issue first to discuss what you would like to change. You can also contact the AAML research group (enter email) to discuss further contributions and collaborations 
