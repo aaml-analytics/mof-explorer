@@ -2,8 +2,6 @@ import base64
 import io
 import os
 from urllib.parse import quote as urlquote
-
-import flask
 from flask import Flask, send_from_directory
 import dash
 from dash.dependencies import Input, Output, State
@@ -17,20 +15,19 @@ import plotly.express as px
 import json
 import textwrap
 import dash_auth
-import waitress
 
-USERNAME_PASSWORD_PAIRS = [[['User', 'aaml-analytics']]
+USERNAME_PASSWORD_PAIRS = [['username', 'password'], ['User', 'aaml-analytics']]
 
-UPLOAD_DIRECTORY = "https://github.com/aaml-analytics/mof-explorer/tree/master/sample-data/"
+UPLOAD_DIRECTORY = "/Users/mythilisutharson/documents/cam_work/explore_data"
 if not os.path.exists(UPLOAD_DIRECTORY):
     os.makedirs(UPLOAD_DIRECTORY)
 
 # CREATE DASH APP
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-server = Flask(__name__)
-app = dash.Dash(external_stylesheets=external_stylesheets, server=server)
-auth = dash_auth.BasicAuth(app, USERNAME_PASSWORD_PAIRS)
 
+app = dash.Dash(external_stylesheets=external_stylesheets)
+auth = dash_auth.BasicAuth(app, USERNAME_PASSWORD_PAIRS)
+server = app.server
 # PREDEFINED TAB STYLES
 styles = {
     'pre': {
@@ -125,12 +122,8 @@ app.layout = html.Div([
                                                        'font-family': 'Arial',
                                                        'color': '#004a4a'})],
                        style={}),
-              html.Div([' ', html.A('Download',
-                                    href='https://github.com/aaml-analytics/mof-explorer/tree/master/sample-data')],
-                       style={'fontSize': 16, 'font-family': 'Arial', 'display': 'inline-block'}),
-              html.H3("AAML's sample data files to explore tool functions...", style={'fontSize': 16,
-                                                                                                 'font-family': 'Arial',
-                                                                                 }),
+              html.H3("Download and use AAML's sample file to explore tool functions...", style={'fontSize': 16,
+                                                                                                 'font-family': 'Arial'}),
               html.U(id='file-list')], style={'display': 'inline-block', 'width': '44%', 'font-family': 'Arial'}),
     html.Div([
         dcc.Tabs([
@@ -964,4 +957,3 @@ def make_figure(x, dist_type, data_set, percentile_type, contents, filename):
 
 if __name__ == '__main__':
     app.run_server(debug=False)
-
