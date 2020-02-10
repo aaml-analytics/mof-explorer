@@ -943,7 +943,7 @@ def make_figure(x, dist_type, data_set, percentile_type, contents, filename):
                         color="MOF family" if dist_type == 'MOF family' else None,
                         animation_frame="Pressure (bar)",
                         hover_data=df.columns, hover_name=df.columns[0], template="none"
-                        ).update_xaxes(showgrid=False, title="Density", autorange=True, ticks='outside',
+                        ).update_xaxes(showgrid=False, title=x, autorange=True, ticks='outside',
                                        mirror=True, showline=True,
                                        ).update_yaxes(title='', showgrid=False, ticks='outside',
                                                       mirror=True, autorange=True, showline=True).update_layout(
