@@ -2,11 +2,11 @@
 Content from AAML Data Analytics Tool
 
 ## About this app
-These tools aim to provide a reproducible and consistent data visualisation platform where experimental and computational researchers can use big data and statistical analysis to find the best materials for specific applications.
+These tools aim to provide a reproducible and consistent data visualisation platform where experimental and computational researchers can use big data and statistical analysis to find the best materials for specific applications
 
 ## Running app on browser
 https://aaml-analytics.herokuapp.com/
-- Note: After a period of inactivity, Heroku shuts down the app's containers. Once the app gets a web request (the link above is used), it will wake up, but the initial response can take 10-20 seconds.
+- Note: After a period of inactivity, Heroku shuts down the app's containers. Once the app gets a web request (the link above is used), it will wake up, but the initial response can take 10-20 seconds
 
 ## How to run this app
 
@@ -28,7 +28,7 @@ pip install virtualenv
 ```
 
 ### Running the app
-To run this app first clone repository and then open a terminal to the app folder.
+To run this app first clone repository and then open a terminal to the app folder
 ```bash
 git clone https://github.com/aaml-analytics/mof-explorer/
 cd mof-explorer
@@ -74,5 +74,5 @@ For changes, please open an issue first to discuss what you would like to change
 
 ### Credit
 
-- [AAML Research Group](http://aam.ceb.cam.ac.uk) for developing this dashboard for the MOF community. Click [here](http://aam.ceb.cam.ac.uk/research.html) to read more about our work.
-- [Dash](https://plot.ly/dash/) - the python framework used to build this web application.
+- [AAML Research Group](http://aam.ceb.cam.ac.uk) for developing this dashboard for the MOF community. Click [here](http://aam.ceb.cam.ac.uk/research.html) to read more about our work
+- [Dash](https://plot.ly/dash/) - the python framework used to build this web application
