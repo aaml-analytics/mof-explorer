@@ -6,6 +6,7 @@ These tools aim to provide a reproducible and consistent data visualisation plat
 
 ## Running app on browser
 https://aaml-analytics.herokuapp.com/
+Note: After a period of inactivity, Heroky shuts down the app's containers. Once the app gets a web request (the link above is used), it will wake up, but the initial response can take 10-20 seconds.
 
 ## How to run this app
 
