@@ -5,7 +5,7 @@ Content from AAML Data Analytics Tool
 These tools aim to provide a reproducible and consistent data visualisation platform where experimental and computational researchers can use big data and statistical analysis to find the best materials for specific applications.
 
 ## Running app on browser
-ADD_LINK
+https://aaml-analytics.herokuapp.com/
 
 ## How to run this app
 
