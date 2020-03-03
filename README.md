@@ -11,7 +11,7 @@ These tools aim to provide a reproducible and consistent data visualisation plat
 https://a2ml-analytics.herokuapp.com
 - Note: After a period of inactivity, Heroku shuts down the app's containers. Once the app gets a web request (the link above is used), it will wake up, but the initial response can take 10-20 seconds
 
-## How to run this app
+## How to run this app locally
 
 ### Requirements
 - Download [Python 3](https://www.python.org) if not already installed 
