@@ -2,11 +2,10 @@
 Content from AAML Data Analytics Tool
 
 ## About this app
-These tools aim to provide a reproducible and consistent data visualisation platform where experimental and computational researchers can use big data and statistical analysis to find the best materials for specific applications
+These tools aim to provide a reproducible and consistent data visualisation platform where experimental and computational researchers can use big data and statistical analysis to explore their data or the adsorption related data we provide to find the best materials for specific applications
 
 ### App Manual
-- The [app manual](https://aaml-analytics.github.io/mof-explorer/), explaining data file upload requirements and features of the tool can be found in the manual
-
+- The app manual, explaining data file upload requirements and features of the tool can be found [here](https://aaml-analytics.github.io/mof-explorer/)
 
 ## Running app on browser
 https://a2ml-analytics.herokuapp.com
