@@ -88,10 +88,10 @@ Philippa Fawcett Dr<br>
 Cambridge <br>
 CB3 0AS
 
-### License
+## License
 This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/aaml-analytics/mof-explorer/blob/add-license-1/LICENSE) file for details
 
-### Acknowledgments
+## Acknowledgments
 <p> 
   <img width=200 height=100 src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/A2ML-logo-dark.png">
 </p>
