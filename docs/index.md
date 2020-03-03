@@ -5,7 +5,7 @@
     Note: After a period of inactivity, Heorku shuts down the app's containers. Once the app gets a web request (the link above is clicked), it will wake up, but the initial response can take 10-20 seconds
 
 ## **About**
-<p>These tools aim to provide a reproducible and consistent data visualisation platform where experimental and computational researchers can use big data and statistical analysis to explore their data or the adsorption related data we provide find the best materials for specific applications.  Improving from the [original](http://aam.ceb.cam.ac.uk/visualisedata.html) Metal-organic Framework (MOF) Explorer, this tool now allows  individuals  to  upload  their  own  data  set  to  analyse  data  in  a  2D  and3D environment, filter data through the interactive data table and also perform statistical analysis on top performing structures.</p>
+<p>These tools aim to provide a reproducible and consistent data visualisation platform where experimental and computational researchers can use big data and statistical analysis to explore their data or the adsorption related data we provide find the best materials for specific applications.  Improving from the [original](http://aam.ceb.cam.ac.uk/visualisedata.html) Metal-organic Framework (MOF) Explorer, this tool now allows  individuals  to  upload  their  own  data  set  to  analyse  data  in  a  2D  and 3D environment, filter data through the interactive data table and also perform statistical analysis on top performing structures.</p>
 <p align="center"> 
   <img src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/mof-explorer.png">
 </p>
