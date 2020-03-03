@@ -74,7 +74,7 @@ For changes, please open an issue first to discuss what you would like to change
 
 ### Credit
 <p> 
-  <img src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/A2ML-logo-dark.png">
+  <img width=200 height=100 src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/A2ML-logo-dark.png">
 </p>
 - [AAML Research Group](http://aam.ceb.cam.ac.uk) for developing this dashboard for the MOF community. Click [here](http://aam.ceb.cam.ac.uk/research.html) to read more about our work
 - [Dash](https://plot.ly/dash/) - the python framework used to build this web application
