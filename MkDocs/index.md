@@ -34,7 +34,7 @@ Example files showing datasets before and after being transposed can be seen in 
 | HOXKUB    | None   | 5        | 0.4167                | 16.0261               | 20.7236      | … |
 | …         | …      | …        | …                     | …                     | …            | … |
 
-The dashboard browser tab will show “Updating…” when the tool is updating the data. Wait for this  to return to ‘Dash’ before using the tool. This is when the file upload is complete.
+<br> The dashboard browser tab will show “Updating…” when the tool is updating the data. Wait for this  to return to ‘Dash’ before using the tool. This is when the file upload is complete.
 <br>
 
 ## **Functions found on 2D Plots**
@@ -135,7 +135,7 @@ The 3D Animation Environment provides a 5-Dimensional variable environment to ex
 Using the sorting and filtering data table, users are able to filter variables from their dataset to produce plots of their preference. All variables in the users dataset can be sorted, filtered and deleted in the interactive data table. The user can select and delete certain columns according to their preference. The arguments that the data table can take are specified below. After filtering there are options to choose a logarithmic or linear axis scale, and choose a color scale of choice from the viridis color palette. 
 #### **Interactive data table**
 <p align="center">
-  <img width="600" height="250" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/data-filtering.png">
+  <img width="500" height="250" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/data-filtering.png">
 </p>
 ***Figure 13: Interactive Data table *** <br>
 Populate ALL the dropdowns and radio items to produce your plot. The tab of the dashboard will be ‘Updating…’ and then return to ‘Dash’ once your command has been fully executed.
@@ -151,7 +151,7 @@ The syntax for the data table can be seen in table 2. These criteria will filter
 ***Table 2: Syntax for interactive data table*** 
 
 | Syntax                                                   | Description                                                                                   |
-|----------------------------------------------------------|-----------------------------------------------------------------------------------------------|
+|:--------------------------------------------------------:|-----------------------------------------------------------------------------------------------|
 | **>** or **gt (int)**                                         | Values greater than the integer specified                                          |
 | **<** or **lt (int)**                                            | Values less than the integer specified                                             |
 | **=** or **eq (str or int)**                                      | Values equal to the string or integer specified in column x                        |
@@ -163,6 +163,7 @@ The syntax for the data table can be seen in table 2. These criteria will filter
 | **contains (str)**                                           | Values equal to the text value specified                                           |
 | **datestartswith ‘yyyy-mm-dd 00:00’** (dates and times only) | Will match dates specified in the search. Can specify a particular, year, month, day or time. |
 
+<br>
 <sup>1</sup> If you have spaces or special characters (including -), these must be wrapped in quotes. Single quotes, double quotes, or backticks work. If you have quotes in the string, you can use a different quote, or escape the quote character. E.g. ‘Hello “There”! ’and “ Hello \ ”There! \ ” ” 
 
 ## **Statistical Analysis of Top Structures**
@@ -193,7 +194,7 @@ Like mentioned in MOF Explorer Animations, with all animations, auto range in fr
 
 The user must populate ALL the dropdowns and radio items to produce a graph. If the dataset uploaded does not provide the structures of families ‘None’ grouping will apply. The rugged plot above the histogram indicates the distribution of structures against the X variable selected. The histogram represents the X variable selected against the number of structures that apply.
 <p align="center">
-  <img width="300" height="200" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/dist-plot.png">
+  <img width="350" height="200" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/dist-plot.png">
 </p>
 ***Figure 18: Distribution plot*** 
 
