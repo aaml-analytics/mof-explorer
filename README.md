@@ -72,6 +72,19 @@ You can then run the app on your browser at http://127.0.0.1:5000/
 ## Contributing
 For changes, please open an issue first to discuss what you would like to change. You can also contact the AAML research group (enter email) to discuss further contributions and collaborations 
 
+## **Contact Us**
+**Email**: 
+[Mythili Sutharson](mailto:mls67@cam.ac.uk),
+[Nakul Rampal](mailto:nr472@cam.ac.uk),
+[Rocio Bueno Perez](mailto:rb901@cam.ac.uk),
+[David Fairen Jimenez](mailto:df334@cam.ac.uk) <br>
+**Website:** http://aam.ceb.cam.ac.uk/ <br>
+**Address:** <br>
+Cambridge University, <br>
+Philippa Fawcett Dr,<br>
+Cambridge <br>
+CB3 0AS
+
 ### Credit
 <p> 
   <img width=200 height=100 src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/A2ML-logo-dark.png">
