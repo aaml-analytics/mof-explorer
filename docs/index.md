@@ -108,7 +108,7 @@ Clicking Reset Camera to Last Save zooms it to the *last saved* position as set 
 #### **Auto scaling animations**
 With all animations, auto range in frames is currently not supported in Plotly. Therefore, the user must slide the maximum pressure frame and press the auto scale button on the toolbar at the top right side of the plot. The user can then press play and the range will auto scale automatically. 
 <p align="center">
-  <img width="250" height="70" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/autoscale.png">
+  <img width="250" height="50" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/autoscale.png">
 </p>
 ***Figure 11: Auto scale button*** 
 
