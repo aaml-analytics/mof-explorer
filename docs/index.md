@@ -217,7 +217,10 @@ Philippa Fawcett Dr,<br>
 Cambridge <br>
 CB3 0AS
 
-## **Credit**
+## **License**
+This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/aaml-analytics/mof-explorer/blob/add-license-1/LICENSE) file for details
+
+## **Acknowledgments**
 - [AAML Research Group](http://aam.ceb.cam.ac.uk) for developing this dashboard for the MOF community. Click [here](http://aam.ceb.cam.ac.uk/research.html) to read more about our work
 - [Dash](https://plot.ly/dash/) - the python framework used to build this web application
 
