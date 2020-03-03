@@ -73,7 +73,7 @@ You can then run the app on your browser at http://127.0.0.1:5000/
 ![mof-explorer.png](mof-explorer.png)
 
 ## Contributing
-For changes, please open an issue first to discuss what you would like to change. You can also contact the AAML research group (enter email) to discuss further contributions and collaborations 
+For changes, please open an issue first to discuss what you would like to change. You can also contact the AAML research group to discuss further contributions and collaborations 
 
 ## **Contact Us**
 **Email**: 
