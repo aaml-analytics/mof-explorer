@@ -1,7 +1,6 @@
 # Metal-organic Framework Visualisation Tools
-Content from AAML Data Analytics Tool
 
-## About this app
+## About
 These tools aim to provide a reproducible and consistent data visualisation platform where experimental and computational researchers can use big data and statistical analysis to explore their data or the adsorption related data we provide to find the best materials for specific applications
 
 ### App Manual
@@ -11,7 +10,7 @@ These tools aim to provide a reproducible and consistent data visualisation plat
 https://a2ml-analytics.herokuapp.com
 - Note: After a period of inactivity, Heroku shuts down the app's containers. Once the app gets a web request (the link above is used), it will wake up, but the initial response can take 10-20 seconds
 
-## How to run this app locally
+## Running app locally
 
 ### Requirements
 - Download [Python 3](https://www.python.org) if not already installed 
