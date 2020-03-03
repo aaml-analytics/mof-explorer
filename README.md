@@ -73,6 +73,8 @@ You can then run the app on your browser at http://127.0.0.1:5000/
 For changes, please open an issue first to discuss what you would like to change. You can also contact the AAML research group (enter email) to discuss further contributions and collaborations 
 
 ### Credit
-
+<p> 
+  <img src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/A2ML-logo-dark.png">
+</p>
 - [AAML Research Group](http://aam.ceb.cam.ac.uk) for developing this dashboard for the MOF community. Click [here](http://aam.ceb.cam.ac.uk/research.html) to read more about our work
 - [Dash](https://plot.ly/dash/) - the python framework used to build this web application
