@@ -73,7 +73,7 @@ You can then run the app on your browser at http://127.0.0.1:5000/
 ![mof-explorer.png](mof-explorer.png)
 
 ## Contributing
-For changes, please open an issue first to discuss what you would like to change. You can also contact the AAML research group to discuss further contributions and collaborations 
+When contributing to this repository, please first discuss the change you wish to make via issue, email, or any other method with the owners of this repository before making a change. You can also contact the AAML research group to discuss further contributions and collaborations 
 
 ## **Contact Us**
 **Email**: 
@@ -89,7 +89,10 @@ Philippa Fawcett Dr<br>
 Cambridge <br>
 CB3 0AS
 
-### Credit
+### License
+This project is licensed under the MIT License - see the [LICENSE.md](https://github.com/aaml-analytics/mof-explorer/blob/add-license-1/LICENSE) file for details
+
+### Acknowledgments
 <p> 
   <img width=200 height=100 src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/A2ML-logo-dark.png">
 </p>
