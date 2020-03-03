@@ -1,0 +1,6 @@
+{
+"name":"Metal-Organic Framework Data Visualisation Tools",
+"description": "A dash app",
+"repository":"https://github.com/aaml-analytics/mof-explorer",
+"keywords": ["node", "express","static"]
+}
