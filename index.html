@@ -171,10 +171,10 @@
  <strong><em>Figure 1: Screenshot of tool in use</em></strong> <br></p>
 <h2 id="data-file-requirements"><strong>Data File Requirements</strong></h2>
 <p>The data file to upload <strong>must</strong> meet the following requirements: <br>
-<strong>1.</strong>  A .xlsx, .csv or a .txt data file must be uploaded. Please note that large .xlsx files take a time to process so .csv or .txt files are preferred. <br>
+<strong>1.</strong>  A <em>.xlsx, .csv</em> or a <em>.txt</em> data file must be uploaded. Please note that large <em>.xlsx</em> files take time to process so <em>.csv</em> or <em>.txt</em> files are preferred. <br>
 <strong>2.</strong>  The uploaded datasheet must have the structure name or identifier on its first column (shown in table 1). <br>
 <strong>3.</strong>  The uploaded datasheet must be completely populated (no blank cells). Blank cells can be replaced to ‘0’ using the ‘Replace All’ function in Excel <br>
-<strong>4.</strong>  If required, data must be transposed so that there is a single column stating the variables simulated with a column of the pressures used. Example data files before e.g. AAML_Oxygen_Raw_Data.csv and after transposition AAML_Oxygen_Data.csv can be found <a href="https://github.com/aaml-analytics/mof-explorer/tree/master/sample-data">here</a> <br>
+<strong>4.</strong>  If required, data must be transposed so that there is a single column stating the variables simulated with a column of the pressures used. Example data files before e.g. <code>AAML_Oxygen_Raw_Data.csv</code> and after transposition <code>AAML_Oxygen_Data.csv</code> can be found <a href="https://github.com/aaml-analytics/mof-explorer/tree/master/sample-data">here</a> <br>
 <strong>5.</strong> For the MOF Explorer Animation, pressures for the pressure frame must have the column heading ‘Pressure’ <br>
 <strong>6.</strong>  If you have the Structure Groupings (MOF families for example) in your dataset, the column must have the heading ‘Family’ (shown in table 1). <br>
 Example files showing datasets before and after being transposed can be seen in the <a href="https://github.com/aaml-analytics/mof-explorer/tree/master/sample-data">Git Hub repository</a>. Excels formatting capabilities, Bash and Python were used to transpose and fit aforementioned files to the above criteria. <br></p>
@@ -271,31 +271,31 @@ Example files showing datasets before and after being transposed can be seen in 
 <h2 id="functions-found-on-2d-plots"><strong>Functions found on 2D Plots</strong></h2>
 <h4 id="download-plots"><strong>Download plots</strong></h4>
 <p><p> As shown in the picture, click on the camera icon and get the plot in PNG format. </p>
-<p align="center"> 
+<p> 
   <img width="300" height="50" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/camera-icon.png">
 </p>
  <strong><em>Figure 2: Download plot as PNG</em></strong> <br><br></p>
 <h4 id="pan-mode"><strong>Pan mode</strong></h4>
 <p>If the plot’s drag mode is set to ‘Pan’, click and drag on the plot to pan and double-click to reset the pan.
-<p align="center" > 
+<p> 
   <img width="300" height="50" display= "inline-block" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/pan-icon.png">
 </p>
  <strong><em>Figure 3: Pan feature</em></strong> <br><br></p>
 <h4 id="zoom-modes"><strong>Zoom modes</strong></h4>
 <p>If the plot’s mode is set to ‘Zoom’, click and drag on the plot to zoom-in and double click to zoom-out completely. i.e. auto scale of both axis. The user can also zoom in and out by clicking on the + and – buttons. Axes labels will automatically optimize as you zoom in.
- <p align="center" >
+ <p>
   <img width="300" height="50" display= "inline-block" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/zoom-icon.png">
 </p>
 <strong><em>Figure 4: Auto scale of both axis (Zoom)</em></strong> <br><br></p>
 <h4 id="reset-axes"><strong>Reset axes</strong></h4>
 <p>One can also drag the x and y axis in a horizontal and vertical motion respectively to move along the length of the axis (Figure 3).  Clicking ‘Reset axes’ will reset the axes.
-<p align="center">
+<p>
   <img width="300" height="250" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/reset-axes.png">
 </p>
 <strong><em>Figure 5: Reset axis </em></strong> <br><br></p>
 <h4 id="hover-options"><strong>Hover options</strong></h4>
 <p>One of these two buttons is selected at all times. Clicking ‘Show closest data on hover’ will display the data for just one point under the cursor. Clicking ‘Compare data on hover’ will show you the data for all points with the same x-value. 
-<p align="center">
+<p>
   <img width="550" height="50" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/hover-options.png">
 </p>
 <strong><em>Figure 6: Hover options </em></strong> <br></p>
@@ -303,62 +303,62 @@ Example files showing datasets before and after being transposed can be seen in 
 <p>As well as the icons found in 2D plots, 3D plots also have the following icons to assist with data exploration. The mode bar for 3D charts gives you additional options for controlling rotations and also lets you toggle between the default view and your last saved view.<br></p>
 <h4 id="orbital-rotation"><strong>Orbital rotation</strong></h4>
 <p>Orbital Rotation rotates the plot around its middle point in 3-Dimensional space. 
-<p align="center">
+<p>
   <img width="220" height="50" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/orbital-rotation.png">
 </p>
 <strong><em>Figure 7: Orital Rotation </em></strong> <br></p>
 <h4 id="turntable-rotation"><strong>Turntable rotation</strong></h4>
 <p>Turntable Rotation rotates the plot around its middle point while constraining the z-axis slightly. 
-<p align="center">
+<p>
   <img width="220" height="50" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/turntable-rotation.png">
 </p>
 <strong><em>Figure 8: Turntable Rotation </em></strong> <br></p>
 <h4 id="reset-camera-position-to-default"><strong>Reset camera position to default</strong></h4>
 <p>Clicking Reset Camera to Default zooms back to the <em>default</em> position at 45 degrees from all axes. 
-<p align="center">
+<p>
   <img width="220" height="50" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/default-camera.png">
 </p>
 <strong><em>Figure 9: Reset Camera to default </em></strong> <br></p>
 <h4 id="reset-camera-position-to-last-save"><strong>Reset camera position to last save</strong></h4>
 <p>Clicking Reset Camera to Last Save zooms it to the <em>last saved</em> position as set in the Organize view.
-<p align="center">
+<p>
   <img width="200" height="50" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/save-camera.png">
 </p>
 <strong><em>Figure 10: Reset Camera to last save </em></strong> <br></p>
 <h2 id="mof-explorer-animation"><strong>MOF Explorer Animation</strong></h2>
 <h4 id="auto-scaling-animations"><strong>Auto scaling animations</strong></h4>
 <p>With all animations, auto range in frames is currently not supported in Plotly. Therefore, the user must slide the maximum pressure frame and press the auto scale button on the toolbar at the top right side of the plot. The user can then press play and the range will auto scale automatically. 
-<p align="center">
-  <img width="250" height="70" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/autoscale.png">
+<p>
+  <img width="250" height="50" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/autoscale.png">
 </p>
 <strong><em>Figure 11: Auto scale button</em></strong> </p>
 <h3 id="2d-animation-environment"><strong>2D Animation Environment</strong></h3>
-<p><p align="center">
+<p><p>
   <img width="450" height="250" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/2d-anim.png">
 </p>
 The 2D Animation Environment provides a 2, 3, and 4 Dimensional variable environment to explore specific structures against pressure to find the best materials for the users applications. Pressing the ‘2’, ‘3’, ‘4’ tab plots a 2D, 3D and 4D variable environment respectively. Populate ALL the dropdowns to produce your plot. The tab of the dashboard will be ‘Updating…’ and then return to ‘Dash’ once your command has been fully executed. Clicking Play and pause will play and pause your animation respectively. You can also use the slider to pause the animation at a specific pressure.</p>
 <h4 id="zoom-in-animation-tools"><strong>Zoom in animation tools</strong></h4>
 <p>Double clicking on one structure will result in the plot focussing on said single structure. Running the animation will allow you to see the focussed structure during the animation frame. To return the standard plot double click the plot. 
-<p align="center">
+<p>
   <img width="300" height="250" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/zoom-tool.png">
 </p>
 <strong><em>Figure 12: Zoom in tool</em></strong> </p>
 <h3 id="3d-animation-environment"><strong>3D Animation Environment</strong></h3>
 <p>The 3D Animation Environment provides a 5-Dimensional variable environment to explore specific structures against pressure to find the best materials for the users applications. Populate ALL the dropdowns to produce your plot. The tab of the dashboard will be ‘Updating…’ and then return to ‘Dash’ once your command has been fully executed. Clicking Play and pause will play and pause your animation respectively. You can also use the slider to pause the animation at a specific pressure.
-<p align="center">
+<p>
   <img width="450" height="250" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/3d-anim.png">
 </p></p>
 <h2 id="mof-data-filtering"><strong>MOF Data Filtering</strong></h2>
 <p>Using the sorting and filtering data table, users are able to filter variables from their dataset to produce plots of their preference. All variables in the users dataset can be sorted, filtered and deleted in the interactive data table. The user can select and delete certain columns according to their preference. The arguments that the data table can take are specified below. After filtering there are options to choose a logarithmic or linear axis scale, and choose a color scale of choice from the viridis color palette. </p>
 <h4 id="interactive-data-table"><strong>Interactive data table</strong></h4>
-<p><p align="center">
+<p><p>
   <img width="500" height="250" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/data-filtering.png">
 </p>
 <strong><em>Figure 13: Interactive Data table </em></strong> <br>
 Populate ALL the dropdowns and radio items to produce your plot. The tab of the dashboard will be ‘Updating…’ and then return to ‘Dash’ once your command has been fully executed.</p>
 <h4 id="filtering-plots-using-the-data-table"><strong>Filtering plots using the data table</strong></h4>
 <p>The syntax for the data table can be seen in table 2. These criteria will filter both the data table that is present but also filter the data on your plot. For example, figure 11 shows the reproduced plot when the ‘Pressure’ column has the argument ‘&gt;50’ and the ‘Family’ column has the argument ‘ZIF’. X and Y axis are linear and the ‘Plasma’ color scale is chosen. 
-<p align="center">
+<p>
   <img width="280" height="220" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/data-table-plot.png">
 </p></p>
 <p><strong><em>Figure 14: Data table plot example</em></strong> </p>
@@ -418,18 +418,18 @@ Populate ALL the dropdowns and radio items to produce your plot. The tab of the 
 <h2 id="statistical-analysis-of-top-structures"><strong>Statistical Analysis of Top Structures</strong></h2>
 <p>All structures, or top performing structures (1%, 5% or 10% of all structures) can be analysed in accordance to a set variable decided by the user e.g. Deliverable Capacity. In the violin plot, geometric properties can then be analysed against pressure to determine Q1, Q3, IQR, mean, median, maximum and minimum points for a dataset of the users choice, alongside the distribution of MOFs in said violin plot. In the distribution plot, the number of structures against a variable in the users data frame can be analysed to determine the spread of structures in the users data. The distribution can be further filtered by MOF families (if the user has uploaded this information in its data frame). An animation feature is also available to view these frames in accordance to pressure. <br></p>
 <h3 id="violin-plot"><strong>Violin Plot</strong></h3>
-<p><p align="center">
+<p><p>
   <img width="350" height="200" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/violin-plot.png">
 </p>
 <strong><em>Figure 15: Violin plot</em></strong> </p>
 <h4 id="using-the-legend-to-interact-with-your-plot"><strong>Using the legend to interact with your plot</strong></h4>
 <p>The legend can be used to interact with the violin plots that are in the plot. Double clicking on a legend box will isolate the plot to said violin plot. Double clicking the legend will return the plot to the original plot.
-<p align="center">
+<p>
   <img width="250" height="200" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/violin-single-select.png">
 </p>
 <strong><em>Figure 16: Violin plot single select</em></strong> </p>
 <h4 id="using-the-range-slider-to-interact-with-your-plot"><strong>Using the range slider to interact with your plot</strong></h4>
-<p><p align="center">
+<p><p>
   <img width="250" height="200" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/violin-range-slider.png">
 </p>
 <strong><em>Figure 17: Violin plot range slider</em></strong> </p>
@@ -437,7 +437,7 @@ Populate ALL the dropdowns and radio items to produce your plot. The tab of the 
 <h3 id="distrbution-plot"><strong>Distrbution Plot</strong></h3>
 <p>Like mentioned in MOF Explorer Animations, with all animations, auto range in frames is currently not supported in Plotly. Therefore, the user must slide the maximum pressure frame and press the auto scale button on the toolbar at the top right side of the plot. The user can then press play and the range will auto scale automatically.</p>
 <p>The user must populate ALL the dropdowns and radio items to produce a graph. If the dataset uploaded does not provide the structures of families ‘None’ grouping will apply. The rugged plot above the histogram indicates the distribution of structures against the X variable selected. The histogram represents the X variable selected against the number of structures that apply.
-<p align="center">
+<p>
   <img width="350" height="200" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/dist-plot.png">
 </p>
 <strong><em>Figure 18: Distribution plot</em></strong> </p>
@@ -506,5 +506,5 @@ CB3 0AS</p>
 
 <!--
 MkDocs version : 1.1
-Build Date UTC : 2020-03-03 12:44:23
+Build Date UTC : 2020-03-03 15:52:20
 -->
