@@ -83,9 +83,9 @@ For changes, please open an issue first to discuss what you would like to change
 [David Fairen Jimenez](mailto:df334@cam.ac.uk) <br>
 **Website:** http://aam.ceb.cam.ac.uk/ <br>
 **Address:** <br>
-Department of Chemical Engineering and Biotechnology, <br>
-Cambridge University, <br>
-Philippa Fawcett Dr,<br>
+Department of Chemical Engineering and Biotechnology <br>
+Cambridge University <br>
+Philippa Fawcett Dr<br>
 Cambridge <br>
 CB3 0AS
 
