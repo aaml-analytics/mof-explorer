@@ -4,6 +4,10 @@ Content from AAML Data Analytics Tool
 ## About this app
 These tools aim to provide a reproducible and consistent data visualisation platform where experimental and computational researchers can use big data and statistical analysis to find the best materials for specific applications
 
+### App Manual
+- The [app manual](https://aaml-analytics.github.io/mof-explorer/), explaining data file upload requirements and features of the tool can be found in the manual
+
+
 ## Running app on browser
 https://a2ml-analytics.herokuapp.com
 - Note: After a period of inactivity, Heroku shuts down the app's containers. Once the app gets a web request (the link above is used), it will wake up, but the initial response can take 10-20 seconds
