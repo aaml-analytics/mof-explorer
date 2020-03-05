@@ -166,20 +166,20 @@
     Note: After a period of inactivity, Heorku shuts down the app's containers. Once the app gets a web request (the link above is clicked), it will wake up, but the initial response can take 10-20 seconds</li>
 </ul>
 <h2 id="about"><strong>About</strong></h2>
-<p><p>These tools aim to provide a reproducible and consistent data visualisation platform where experimental and computational researchers can use big data and statistical analysis to explore their data or the adsorption related data we provide find the best materials for specific applications.  Improving from the <a href="http://aam.ceb.cam.ac.uk/visualisedata.html">original</a> Metal-organic Framework (MOF) Explorer, this tool now allows  individuals  to  upload  their  own  data  set  to  analyse  data  in  a  2D  and 3D environment, filter data through the interactive data table and also perform statistical analysis on top performing structures.</p>
+<p><p>These tools aim to provide a reproducible and consistent data visualisation platform where experimental and computational researchers can use big data and statistical analysis to explore their data or the adsorption related data we provide to find the best materials for specific applications.  Improving from the <a href="http://aam.ceb.cam.ac.uk/visualisedata.html">original</a> Metal-organic Framework (MOF) Explorer, this tool now allows  individuals  to  upload  their  own  data  set  to  analyse  data  in  a  2D  and 3D environment, filter data through the interactive data table and also perform statistical analysis on top performing structures.</p>
 <p align="center"> 
-  <img src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/mof-explorer.png">
+  <img src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/explorer-screenshot.png">
 </p>
  <strong><em>Figure 1: Screenshot of tool in use</em></strong> <br></p>
 <h2 id="data-file-requirements"><strong>Data File Requirements</strong></h2>
 <p>The data file to upload <strong>must</strong> meet the following requirements: <br>
-<strong>1.</strong>  A <em>.xlsx, .csv</em> or a <em>.txt</em> data file must be uploaded. Please note that large <em>.xlsx</em> files take time to process so <em>.csv</em> or <em>.txt</em> files are preferred. <br>
+<strong>1.</strong>  A <code>.xlsx, .csv</code> or a <code>.txt</code> data file must be uploaded. Please note that large <code>.xlsx</code> files take time to process so <code>.csv</code> or <code>.txt</code> files are preferred. <br>
 <strong>2.</strong>  The uploaded datasheet must have the structure name or identifier on its first column (shown in table 1). <br>
 <strong>3.</strong>  The uploaded datasheet must be completely populated (no blank cells). Blank cells can be replaced to ‘0’ using the ‘Replace All’ function in Excel <br>
 <strong>4.</strong>  If required, data must be transposed so that there is a single column stating the variables simulated with a column of the pressures used. Example data files before e.g. <code>AAML_Oxygen_Raw_Data.csv</code> and after transposition <code>AAML_Oxygen_Data.csv</code> can be found <a href="https://github.com/aaml-analytics/mof-explorer/tree/master/sample-data">here</a> <br>
 <strong>5.</strong> For the MOF Explorer Animation, pressures for the pressure frame must have the column heading ‘Pressure’ <br>
 <strong>6.</strong>  If you have the Structure Groupings (MOF families for example) in your dataset, the column must have the heading ‘Family’ (shown in table 1). <br>
-Example files showing datasets before and after being transposed can be seen in the <a href="https://github.com/aaml-analytics/mof-explorer/tree/master/sample-data">Git Hub repository</a>. Excels formatting capabilities, Bash and Python were used to transpose and fit aforementioned files to the above criteria. <br></p>
+Example files showing datasets before and after being transposed can be seen in the <a href="https://github.com/aaml-analytics/mof-explorer/tree/master/sample-data">GitHub repository</a>. Excels formatting capabilities, Bash and Python were used to transpose and fit aforementioned files to the above criteria. <br></p>
 <p><strong><em>Table 1: Example File Upload</em></strong></p>
 <table>
 <thead>
@@ -510,5 +510,5 @@ CB3 0AS</p>
 
 <!--
 MkDocs version : 1.1
-Build Date UTC : 2020-03-03 17:13:41
+Build Date UTC : 2020-03-05 12:45:58
 -->
