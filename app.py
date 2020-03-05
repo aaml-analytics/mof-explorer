@@ -1,6 +1,5 @@
 import base64
 import io
-import os
 from urllib.parse import quote as urlquote
 import dash
 from dash.dependencies import Input, Output, State
@@ -208,7 +207,7 @@ app.layout = html.Div([
                                                                                  id='my-2D-graph', animate=False)],
                                                                                  style={
                                                                                      'display': 'inline-block',
-                                                                                     'width': '74%',
+                                                                                     'width': '65%',
                                                                                  }),
                                                                                  html.Div([
                                                                                      html.Div([html.Label(
@@ -234,13 +233,13 @@ app.layout = html.Div([
                                                                                  ],
                                                                                      style={
                                                                                          'display': 'inline-block',
-                                                                                         'width': '25%',
+                                                                                         'width': '32%',
                                                                                          'float': 'right',
                                                                                          'fontSize': 14,
                                                                                          'font-family': 'Arial',
                                                                                          'backgroundColor': '#ffffff'})
                                                                              ], className='container',
-                                                                                 style={'padding': 40,
+                                                                                 style={'padding': 20,
                                                                                         'backgroundColor': '#ffffff'})
                                                                          ]),
                                                                  dcc.Tab(label='3', style=tab_mini_style,
@@ -258,7 +257,7 @@ app.layout = html.Div([
                                                                                                  ],
                                                                                                  style={
                                                                                                      'display': 'inline-block',
-                                                                                                     'width': '74%',
+                                                                                                     'width': '65%',
                                                                                                  }
                                                                                              ),
                                                                                              html.Div(
@@ -326,14 +325,13 @@ app.layout = html.Div([
                                                                                                          style={
                                                                                                              'fontSize': 14,
                                                                                                              'font-family': 'Arial',
-                                                                                                             'height': '20%',
                                                                                                              'padding': 15,
                                                                                                          }
                                                                                                      )
                                                                                                  ],
                                                                                                  style={
                                                                                                      'display': 'inline-block',
-                                                                                                     'width': '25%',
+                                                                                                     'width': '32%',
                                                                                                      'float': 'right',
                                                                                                      'fontSize': 14,
                                                                                                      'font-family': 'Arial',
@@ -342,7 +340,7 @@ app.layout = html.Div([
                                                                                          ],
                                                                                          className='container',
                                                                                          style={
-                                                                                             'padding': 40,
+                                                                                             'padding': 20,
                                                                                              'backgroundColor': '#ffffff'
                                                                                          }
                                                                                      )
@@ -354,7 +352,7 @@ app.layout = html.Div([
                                                                          children=[html.Div([html.Div(
                                                                              [dcc.Graph(id='my-graph', animate=False)],
                                                                              style={'display': 'inline-block',
-                                                                                    'width': '74%',
+                                                                                    'width': '65%',
                                                                                     }),
 
                                                                              html.Div([
@@ -427,19 +425,18 @@ app.layout = html.Div([
                                                                                      'fontSize': 14,
                                                                                      'font-family': 'Arial',
                                                                                      'padding': 7,
-                                                                                     'width': '100%'
                                                                                  }
                                                                                  )
                                                                              ],
                                                                                  style={
                                                                                      'display': 'inline-block',
-                                                                                     'width': '25%',
+                                                                                     'width': '32%',
                                                                                      'float': 'right',
                                                                                      'fontSize': 14,
                                                                                      'font-family': 'Arial',
                                                                                      'backgroundColor': '#ffffff'})
                                                                          ], className='container',
-                                                                             style={'padding': 40,
+                                                                             style={'padding': 20,
                                                                                     'backgroundColor': '#ffffff'})]
                                                                          )]
                                                        ), ]),
@@ -447,7 +444,7 @@ app.layout = html.Div([
                                     children=[html.Div([
                                         html.Div([dcc.Graph(id="graph"
                                                             )],
-                                                 style={"width": "74%", "display": "inline-block", }),
+                                                 style={"width": "65%", "display": "inline-block", }),
                                         html.Div([
                                             html.Div([html.Label(["Select X variable:",
                                                                   dcc.Dropdown(id='xaxis-3D', multi=False,
@@ -507,16 +504,15 @@ app.layout = html.Div([
                                                 'fontSize': 14,
                                                 'font-family': 'Arial',
                                                 'padding': 7,
-                                                'width': '100%'
                                             }
                                             ),
                                         ],
                                             style={'fontSize': 14, 'fpmt-family': 'Arial', 'display': 'inline-block',
-                                                   'width': '25%', 'float': 'right',
+                                                   'width': '32%', 'float': 'right',
                                                    'backgroundColor': '#ffffff'})
                                         ,
 
-                                    ], className='container', style={'backgroundColor': '#ffffff', 'padding': 40})])
+                                    ], className='container', style={'backgroundColor': '#ffffff', 'padding': 20})])
                         ])
                     ]),
             dcc.Tab(label='MOF Data Filtering', style=tab_style, selected_style=tab_selected_style,
@@ -600,7 +596,24 @@ app.layout = html.Div([
                                                            style={'fontSize': 14, 'font-family': 'Arial',
                                                                   'width': '20%',
                                                                   'display': 'inline-block', 'padding': 5
-                                                                  })
+                                                                  }),
+dbc.Modal(
+                                                    [
+                                                        dbc.ModalHeader(
+                                                            "Selection Error!"),
+                                                        dbc.ModalBody(
+                                                            "Please select a color variable that contains numerical values."),
+                                                        dbc.ModalFooter(
+                                                            dbc.Button("Close",
+                                                                       id="close-datac",
+                                                                       className="ml-auto")
+                                                        ),
+                                                    ],
+                                                    id="modal-datac",
+                                                    is_open=False,
+                                                    centered=True,
+                                                    size="xl"
+                                                )
                                             ]),
                                         ],
                                             style={'padding-left': '15%', 'padding-right': '5%'}
@@ -1112,7 +1125,7 @@ def update_figure(x, y, color, size, color_value, data):
                                 ))
 
 
-# POPULATE AXIS DROPDOWN 5VAR ENV ANIM
+# POPULATE AXIS DROPDOWN 5VAR (3D) ENV ANIM
 @app.callback([Output('xaxis-3D', 'options'),
                Output('yaxis-3D', 'options'),
                Output('zaxis-3D', 'options'),
@@ -1128,7 +1141,7 @@ def populate_dropdown_2var_anim(data):
     return options, options, options, options, options
 
 
-# SIZE MODAL CALLBACK 5VAR ENV ANIM
+# SIZE MODAL CALLBACK 5VAR (3D) ENV ANIM
 @app.callback(
     Output('modal-5Var', 'is_open'),
     [Input('saxis-3D', 'value'),
@@ -1157,7 +1170,7 @@ def update_output_modal5(size_value, contents, modal_close, filename):
             return [], True
 
 
-# POPULATE COLORBAR SLIDER SCATTER 5VAR ENV ANIM
+# POPULATE COLORBAR SLIDER SCATTER 5VAR (3D) ENV ANIM
 @app.callback([Output('colorbar-slider-5D', 'min'),
                Output('colorbar-slider-5D', 'max'),
                Output('colorbar-slider-5D', 'step'),
@@ -1185,7 +1198,7 @@ def update_output(value):
     return 'You have selected "{}"'.format(value)
 
 
-# POPULATE GRAPH 5VAR ENV ANIM
+# POPULATE GRAPH 5VAR (3D) ENV ANIM
 @app.callback(Output("graph", "figure"),
               [Input('xaxis-3D', "value"),
                Input('yaxis-3D', 'value'),
@@ -1261,6 +1274,35 @@ def update_output(size_value, contents, modal_close, filename):
         return [], False
 
     for item in size_list:
+        if any(c.isalpha() for c in item):
+            return [], True
+
+
+# COLOR MODAL CALLBACK SCATTER DATA TABLE
+@app.callback(
+    Output('modal-datac', 'is_open'),
+    [Input('caxis', 'value'),
+     Input('data-table-upload', 'contents'),
+     Input('close-datac', 'n_clicks')],
+    [State('data-table-upload', 'filename')])
+def update_output(color_value, contents, modal_close, filename):
+    ctx = dash.callback_context
+    user_clicked = ctx.triggered[0]['prop_id'].split('.')[0]
+    df = parse_contents(contents, filename)
+    color_list = df[color_value].to_list()
+    if not user_clicked or user_clicked == 'close':
+        return dash.no_update, False
+
+    if contents is None:
+        return [], False
+
+    if filename is None:
+        return [], False
+
+    if color_value is None:
+        return [], False
+
+    for item in color_list:
         if any(c.isalpha() for c in item):
             return [], True
 
@@ -1343,7 +1385,7 @@ def update_figure(rows, derived_virtual_data, derived_virtual_selected_rows, xax
 
                             },
                             )
-                  ], style={'textAlign': 'center', 'padding': 25, 'width': '50%', 'height': '100%',
+                  ], style={'textAlign': 'center', 'padding': 25, 'width': '30%', 'height': '100%',
                             'horizontal-align': 'middle',
                             'padding-left': '25%', 'padding-right': '25%'
                             })
@@ -1373,9 +1415,11 @@ def populate_yaxis_stat(contents, filename):
 
 
 # VIRIDIS AND PLASMA COLOR PALETTE
-colors2 = ('rgb(13, 8, 135)', 'rgb(70, 3, 159)', 'rgb(114, 1, 168)', 'rgb(156, 23, 158)', 'rgb(189, 55, 134)',
-           'rgb(216, 87, 107)', 'rgb(237, 121, 83)', 'rgb(251, 159, 58)', 'rgb(253, 202, 38)', 'rgb(240, 249, 33)')
-colors = ('rgb(68, 1, 84)', 'rgb(72, 40, 120)', 'rgb(62, 73, 137)', 'rgb(49, 104, 142)', 'rgb(38, 130, 142)',
+colors = ('rgb(240, 249, 33)', 'rgb(253, 202, 38)',  'rgb(251, 159, 58)',  'rgb(237, 121, 83)', 'rgb(216, 87, 107)',
+'rgb(189, 55, 134)', 'rgb(156, 23, 158)',  'rgb(114, 1, 168)',  'rgb(70, 3, 159)', 'rgb(13, 8, 135)',
+
+           )
+colors2 = ('rgb(68, 1, 84)', 'rgb(72, 40, 120)', 'rgb(62, 73, 137)', 'rgb(49, 104, 142)', 'rgb(38, 130, 142)',
           'rgb(31, 158, 137)', 'rgb(53, 183, 121)', 'rgb(110, 206, 88)', 'rgb(181, 222, 43)', 'rgb(253, 231, 37)')
 
 
