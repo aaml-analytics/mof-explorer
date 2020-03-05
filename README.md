@@ -11,6 +11,15 @@ Version 1.0 <br>
 https://a2ml-analytics.herokuapp.com
 - Note: After a period of inactivity, Heroku shuts down the app's containers. Once the app gets a web request (the link above is used), it will wake up, but the initial response can take 10-20 seconds
 
+## Deploying to Heroku
+```bash
+heroku create
+git push heroku master
+heroku open
+```
+Alternatively, you can deploy your own copy of the app using this button and creating your own Heroku account:
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
 ## Running app locally
 
 ### Requirements
