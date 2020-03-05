@@ -1,7 +1,7 @@
 # Metal-organic Framework Visualisation Tools
 
 ## About
-These tools aim to provide a reproducible and consistent data visualisation platform where experimental and computational researchers can use big data and statistical analysis to explore their data or the adsorption related data we provide to find the best materials for specific applications
+These tools aim to provide a reproducible and consistent data visualisation platform where experimental and computational researchers can use big data and statistical analysis to explore their data or the adsorption related data we provide to find the best materials for specific applications.
 
 ### App Manual
 - The app manual, explaining data file upload requirements and features of the tool can be found [here](https://aaml-analytics.github.io/mof-explorer/)
@@ -9,7 +9,7 @@ These tools aim to provide a reproducible and consistent data visualisation plat
 ## Running app on browser
 Version 1.0 <br>
 https://a2ml-analytics.herokuapp.com
-- Note: After a period of inactivity, Heroku shuts down the app's containers. Once the app gets a web request (the link above is used), it will wake up, but the initial response can take 10-20 seconds
+- Note: After a period of inactivity, Heroku shuts down the app's containers. Once the app gets a web request (the link above is used), it will wake up, but the initial response can take 10-20 seconds.
 
 ## Deploying to Heroku
 ```bash
@@ -40,14 +40,13 @@ pip install virtualenv
 ```
 
 ### Running the app
-To run this app first clone repository and then open a terminal to the app folder
+To run this app first clone repository and then open a terminal to the app folder.
 ```bash
 git clone https://github.com/aaml-analytics/mof-explorer/
 cd mof-explorer
 ```
 
-Create and activate a new virtual environment (recommended) by running
-the following:
+Create and activate a new virtual environment (recommended) by running the following:
 
 On Windows:
 ```bash
