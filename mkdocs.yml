@@ -1,6 +1,4 @@
 site_name: AAML Data Visualisation Tools Manual 
-theme:
-  name: 'readthedocs'
-  logo: <p align="center">
-  <img width="200" height="100" src="https://github.com/aaml-analytics/mof-explorer/blob/master/docs/A2ML-logo-dark.png">
-</p> 
+ theme: readthedocs
+   name: 'readthedocs'
+   logo: images/logo.svg' 
