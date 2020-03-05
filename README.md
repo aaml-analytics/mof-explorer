@@ -77,7 +77,7 @@ You can then run the app on your browser at http://127.0.0.1:5000/
 
 ## Screenshots
 
-![mof-explorer.png](mof-explorer.png)
+![mof-explorer2.png](mof-explorer2.png)
 
 ## Contributing
 When contributing to this repository, please first discuss the change you wish to make via issue, email, or any other method with the owners of this repository before making a change. You can also contact the AAML research group to discuss further contributions and collaborations. Please read [CONTRIBUTING.md](https://github.com/aaml-analytics/mof-explorer/blob/master/CONTRIBUTING.md) for details on our code of conduct.
