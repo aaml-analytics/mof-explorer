@@ -1,4 +1,7 @@
 site_name: AAML Data Visualisation Tools Manual 
 theme: 
   name: readthedocs
-  logo: 'docs/A2ML-logo-dark.png'
+  logo: 'A2ML-logo-dark.png'
+ repo_url: https://github.com/aaml-analytics/mof-explorer
+ extra:
+  logo: 'logo.jpg'
