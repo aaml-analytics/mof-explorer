@@ -1,5 +1,5 @@
 site_name: AAML Data Visualisation Tools Manual 
-theme: readthedocs
+theme: mkdocs
 extra:
  logo: 'logo.jpg'
  repo_url: https://github.com/aaml-analytics/mof-explorer
