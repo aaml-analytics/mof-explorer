@@ -61,9 +61,7 @@ pip install -r requirements.txt
 Run the app:
 
 ```bash
-export FLASK_APP=app.py
-export FLASK_ENV=development
-flask run
+python app.py
 ```
 
 You can then run the app on your browser at http://127.0.0.1:5000/
