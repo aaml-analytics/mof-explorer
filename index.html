@@ -176,7 +176,7 @@
 <strong>1.</strong>  A <code>.xlsx, .csv</code> or a <code>.txt</code> data file must be uploaded. Please note that large <code>.xlsx</code> files take time to process so <code>.csv</code> or <code>.txt</code> files are preferred. <br>
 <strong>2.</strong>  The uploaded datasheet must have the structure name or identifier on its first column (shown in table 1). <br>
 <strong>3.</strong>  The uploaded datasheet must be completely populated (no blank cells). Blank cells can be replaced to ‘0’ using the ‘Replace All’ function in Excel <br>
-<strong>4.</strong>  If required, data must be transposed so that there is a single column stating the variables simulated with a column of the pressures used. Example data files before e.g. <code>AAML_Oxygen_Raw_Data.csv</code> and after transposition <code>AAML_Oxygen_Data.csv</code> can be found <a href="https://github.com/aaml-analytics/mof-explorer/tree/master/sample-data">here</a> <br>
+<strong>4.</strong>  If required, data must be transposed so that there is a single column stating the variables simulated with a column for the desired animation frame containing discrete numerical values (e.g. pressures). Example data files before e.g. <code>AAML_Oxygen_Raw_Data.csv</code> and after transposition <code>AAML_Oxygen_Data.csv</code> can be found <a href="https://github.com/aaml-analytics/mof-explorer/tree/master/sample-data">here</a> <br>
 <strong>5.</strong> For the MOF Explorer Animation, a discrete numerical data variable column must be present in your data set. This is a column that contains integer type values (not floats). A suitable column for example would be a column containing different pressures used to run simulations/experiments of 1, 5, 10, 20 and 50 bar. Include this column even if your data does not have multiple pressures and state the pressure your simulation has run on as you must have at least one animation frame column type to run the MOF Explorer Animation tab. <br>
 <strong>6.</strong>  If you have the Structure Groupings (MOF families for example) in your dataset, the column must have the heading ‘Family’ (shown in table 1). <br>
 Example files showing datasets before and after being transposed can be seen in the <a href="https://github.com/aaml-analytics/mof-explorer/tree/master/sample-data">GitHub repository</a>. Excels formatting capabilities, Bash and Python were and can be used to transpose and fit aforementioned files to the above criteria. <br></p>
@@ -338,7 +338,7 @@ Example files showing datasets before and after being transposed can be seen in 
 <p><p>
   <img width="450" height="250" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/2d-anim.png">
 </p>
-The 2D Animation Environment provides a 2, 3, and 4 Dimensional variable environment to explore specific structures against pressure to find the best materials for the users applications. Pressing the ‘2’, ‘3’, ‘4’ tab plots a 2D, 3D and 4D variable environment respectively. Populate ALL the dropdowns to produce your plot. The tab of the dashboard will be ‘Updating…’ and then return to ‘Dash’ once your command has been fully executed. Clicking Play and pause will play and pause your animation respectively. You can also use the slider to pause the animation at a specific frame.</p>
+The 2D Animation Environment provides a 2, 3, and 4 Dimensional variable environment to explore specific structures against an animation frame of choice to find the best materials for the users applications. Pressing the ‘2’, ‘3’, ‘4’ tab plots a 2D, 3D and 4D variable environment respectively. Populate ALL the dropdowns to produce your plot. The tab of the dashboard will be ‘Updating…’ and then return to ‘Dash’ once your command has been fully executed. Clicking Play and pause will play and pause your animation respectively. You can also use the slider to pause the animation at a specific frame.</p>
 <h4 id="zoom-in-animation-tools"><strong>Zoom in animation tools</strong></h4>
 <p>Double clicking on one structure will result in the plot focussing on said single structure. Running the animation will allow you to see the focussed structure during the animation frame. To return the standard plot double click the plot. 
 <p>
@@ -510,5 +510,5 @@ CB3 0AS</p>
 
 <!--
 MkDocs version : 1.1
-Build Date UTC : 2020-04-15 17:00:47
+Build Date UTC : 2020-04-15 17:06:45
 -->
