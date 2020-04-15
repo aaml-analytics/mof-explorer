@@ -7,7 +7,7 @@ These tools aim to provide a reproducible and consistent data visualisation plat
 - The app manual, explaining data file upload requirements and features of the tool can be found [here](https://aaml-analytics.github.io/mof-explorer/)
 
 ## Running app on browser
-Version 1.0 <br>
+Version 2.0 <br>
 https://a2ml-analytics.herokuapp.com
 - Note: After a period of inactivity, Heroku shuts down the app's containers. Once the app gets a web request (the link above is used), it will wake up, but the initial response can take 10-20 seconds.
 
