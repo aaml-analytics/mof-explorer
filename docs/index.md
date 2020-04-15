@@ -5,7 +5,7 @@
     Note: After a period of inactivity, Heorku shuts down the app's containers. Once the app gets a web request (the link above is clicked), it will wake up, but the initial response can take 10-20 seconds
 
 ## **About**
-<p>These tools aim to provide a reproducible and consistent data visualisation platform where experimental and computational researchers can use big data and statistical analysis to explore their data or the adsorption related data we provide to find the best materials for specific applications.  Improving from the [original](http://aam.ceb.cam.ac.uk/visualisedata.html) Metal-organic Framework (MOF) Explorer, this tool now allows  individuals  to  upload  their  own  data  set  to  analyse  data  in  a  2D  and 3D environment, filter data through the interactive data table and also perform statistical analysis on top performing structures.</p>
+<p>These tools aim to provide a reproducible and consistent data visualisation platform where experimental and computational researchers can use big data and statistical analysis to explore their data or the adsorption related data we provide to find the best materials for specific applications.  Improving from the [original](http://aam.ceb.cam.ac.uk/visualisedata.html) Metal-organic Framework (MOF) Explorer, this tool now allows  individuals  to  upload  their  own  data  set  to  analyse  data  in  a  2D  and 3D environment in a animation frame, filter data through the interactive data table and also perform statistical analysis on top performing structures.</p>
 <p align="center"> 
   <img src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/explorer-screenshot.png">
 </p>
@@ -17,9 +17,9 @@ The data file to upload **must** meet the following requirements: <br>
 **2.**	The uploaded datasheet must have the structure name or identifier on its first column (shown in table 1). <br>
 **3.**	The uploaded datasheet must be completely populated (no blank cells). Blank cells can be replaced to ‘0’ using the ‘Replace All’ function in Excel <br>
 **4.**	If required, data must be transposed so that there is a single column stating the variables simulated with a column of the pressures used. Example data files before e.g. ```AAML_Oxygen_Raw_Data.csv``` and after transposition ``` AAML_Oxygen_Data.csv``` can be found [here](https://github.com/aaml-analytics/mof-explorer/tree/master/sample-data) <br>
-**5.** For the MOF Explorer Animation, pressures for the pressure frame must have the column heading ‘Pressure’. Include this column even if your data does not have multiple pressures and state the pressure your simulation has run on. <br>
+**5.** For the MOF Explorer Animation, a discrete numerical data variable column must be present in your data set. This is a column that contains integer type values (not floats). A suitable column for example would be a column containing different pressures used to run simulations/experiments of 1, 5, 10, 20 and 50 bar. Include this column even if your data does not have multiple pressures and state the pressure your simulation has run on as you must have at least one animation frame column type to run the MOF Explorer Animation tab. <br>
 **6.**	If you have the Structure Groupings (MOF families for example) in your dataset, the column must have the heading ‘Family’ (shown in table 1). <br>
-Example files showing datasets before and after being transposed can be seen in the [GitHub repository](https://github.com/aaml-analytics/mof-explorer/tree/master/sample-data). Excels formatting capabilities, Bash and Python were used to transpose and fit aforementioned files to the above criteria. <br>
+Example files showing datasets before and after being transposed can be seen in the [GitHub repository](https://github.com/aaml-analytics/mof-explorer/tree/master/sample-data). Excels formatting capabilities, Bash and Python were and can be used to transpose and fit aforementioned files to the above criteria. <br>
 
 ***Table 1: Example File Upload***
 
@@ -106,7 +106,7 @@ Clicking Reset Camera to Last Save zooms it to the *last saved* position as set 
 
 ## **MOF Explorer Animation**
 #### **Auto scaling animations**
-With all animations, auto range in frames is currently not supported in Plotly. Therefore, the user must slide the maximum pressure frame and press the auto scale button on the toolbar at the top right side of the plot. The user can then press play and the range will auto scale automatically. 
+With all animations, auto range in frames is currently not supported in Plotly. Therefore, the user must slide the maximum animation frame and press the auto scale button on the toolbar at the top right side of the plot. The user can then press play and the range will auto scale automatically. 
 <p>
   <img width="250" height="50" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/autoscale.png">
 </p>
@@ -116,7 +116,7 @@ With all animations, auto range in frames is currently not supported in Plotly. 
 <p>
   <img width="450" height="250" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/2d-anim.png">
 </p>
-The 2D Animation Environment provides a 2, 3, and 4 Dimensional variable environment to explore specific structures against pressure to find the best materials for the users applications. Pressing the ‘2’, ‘3’, ‘4’ tab plots a 2D, 3D and 4D variable environment respectively. Populate ALL the dropdowns to produce your plot. The tab of the dashboard will be ‘Updating…’ and then return to ‘Dash’ once your command has been fully executed. Clicking Play and pause will play and pause your animation respectively. You can also use the slider to pause the animation at a specific pressure.
+The 2D Animation Environment provides a 2, 3, and 4 Dimensional variable environment to explore specific structures against pressure to find the best materials for the users applications. Pressing the ‘2’, ‘3’, ‘4’ tab plots a 2D, 3D and 4D variable environment respectively. Populate ALL the dropdowns to produce your plot. The tab of the dashboard will be ‘Updating…’ and then return to ‘Dash’ once your command has been fully executed. Clicking Play and pause will play and pause your animation respectively. You can also use the slider to pause the animation at a specific frame.
 
 #### **Zoom in animation tools**
 Double clicking on one structure will result in the plot focussing on said single structure. Running the animation will allow you to see the focussed structure during the animation frame. To return the standard plot double click the plot. 
@@ -126,7 +126,7 @@ Double clicking on one structure will result in the plot focussing on said singl
 ***Figure 12: Zoom in tool*** 
 
 ### **3D Animation Environment**
-The 3D Animation Environment provides a 5-Dimensional variable environment to explore specific structures against pressure to find the best materials for the users applications. Populate ALL the dropdowns to produce your plot. The tab of the dashboard will be ‘Updating…’ and then return to ‘Dash’ once your command has been fully executed. Clicking Play and pause will play and pause your animation respectively. You can also use the slider to pause the animation at a specific pressure.
+The 3D Animation Environment provides a 5-Dimensional variable environment to explore specific structures against an animation frame of choice to find the best materials for the users applications. Populate ALL the dropdowns to produce your plot. The tab of the dashboard will be ‘Updating…’ and then return to ‘Dash’ once your command has been fully executed. Clicking Play and pause will play and pause your animation respectively. You can also use the slider to pause the animation at a specific frame.
 <p>
   <img width="450" height="250" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/3d-anim.png">
 </p>
@@ -167,7 +167,7 @@ The syntax for the data table can be seen in table 2. These criteria will filter
 <sup>1</sup> If you have spaces or special characters (including -), these must be wrapped in quotes. Single quotes, double quotes, or backticks work. If you have quotes in the string, you can use a different quote, or escape the quote character. E.g. ‘Hello “There”! ’and “ Hello \ ”There! \ ” ” 
 
 ## **Statistical Analysis of Top Structures**
-All structures, or top performing structures (1%, 5% or 10% of all structures) can be analysed in accordance to a set variable decided by the user e.g. Deliverable Capacity. In the violin plot, geometric properties can then be analysed against pressure to determine Q1, Q3, IQR, mean, median, maximum and minimum points for a dataset of the users choice, alongside the distribution of MOFs in said violin plot. In the distribution plot, the number of structures against a variable in the users data frame can be analysed to determine the spread of structures in the users data. The user can also decide if they would like the absolute data or original data to be analysed. The distribution can be further filtered by MOF families (if the user has uploaded this information in its data frame). An animation feature is also available to view these frames in accordance to pressure. <br>
+All structures, or top performing structures (1%, 5% or 10% of all structures) can be analysed in accordance to a set variable decided by the user e.g. Deliverable Capacity. In the violin plot, geometric properties can then be analysed against a discrete variable of choice to determine Q1, Q3, IQR, mean, median, maximum and minimum points for a dataset of the users choice, alongside the distribution of MOFs in said violin plot. In the distribution plot, the number of structures against a variable in the users data frame can be analysed to determine the spread of structures in the users data. The user can also decide if they would like the absolute data or original data to be analysed. The distribution can be further filtered by MOF families (if the user has uploaded this information in its data frame). An animation feature is also available to view these frames in accordance to a discrete variable of choice. <br>
 
 ### **Violin Plot**
 <p>
@@ -188,9 +188,9 @@ The legend can be used to interact with the violin plots that are in the plot. D
 </p>
 ***Figure 17: Violin plot range slider*** 
 
-Single clicking on a desired legend box will remove the respective violin plot from the graph. Single click on the same pressure in the legend will add the violin plot back into the graph. Using the range slider (tool directly below the x-axis) can also isolate one or multiple violin plots. Dragging the left and right toggle will produce the same reflection that is on the range slider.
+Single clicking on a desired legend box will remove the respective violin plot from the graph. Single click on the same X axis grouping in the legend will add the violin plot back into the graph. Using the range slider (tool directly below the x-axis) can also isolate one or multiple violin plots. Dragging the left and right toggle will produce the same reflection that is on the range slider.
 ### **Distrbution Plot**
-Like mentioned in MOF Explorer Animations, with all animations, auto range in frames is currently not supported in Plotly. Therefore, the user must slide the maximum pressure frame and press the auto scale button on the toolbar at the top right side of the plot. The user can then press play and the range will auto scale automatically.
+As mentioned in MOF Explorer Animations, with all animations, auto range in frames is currently not supported in Plotly. Therefore, the user must slide the maximum animation frame and press the auto scale button on the toolbar at the top right side of the plot. The user can then press play and the range will auto scale automatically.
 
 The user must populate ALL the dropdowns and radio items to produce a graph. If the dataset uploaded does not provide the structures of families ‘None’ grouping will apply. The rugged plot above the histogram indicates the distribution of structures against the X variable selected. The histogram represents the X variable selected against the number of structures that apply.
 <p>
