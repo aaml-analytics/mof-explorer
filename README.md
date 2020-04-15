@@ -6,11 +6,6 @@ These tools aim to provide a reproducible and consistent data visualisation plat
 ### App Manual
 - The app manual, explaining data file upload requirements and features of the tool can be found [here](https://aaml-analytics.github.io/mof-explorer/)
 
-## Running app on browser
-Version 2.0 <br>
-https://a2ml-analytics.herokuapp.com
-- Note: After a period of inactivity, Heroku shuts down the app's containers. Once the app gets a web request (the link above is used), it will wake up, but the initial response can take 10-20 seconds.
-
 ## Deploying to Heroku
 ```bash
 heroku create
@@ -19,6 +14,8 @@ heroku open
 ```
 Alternatively, you can deploy your own copy of the app using this button and creating your own Heroku account:
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
+- Note: Once you have created your own copy of the app, after a period of inactivity Heroku shuts down the app's containers. Once the app gets a web request (the link above is used), it will wake up, but the initial response can take 10-20 seconds.
 
 ## Running app locally
 
