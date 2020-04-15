@@ -1665,7 +1665,7 @@ def update_output(size_value, contents, modal_close, filename):
               [State('data-table-upload', 'filename')])
 def populate_animation_frame_dist(contents, filename):
     df = parse_contents(contents, filename)
-    dff = df.select_dtypes(exclude=['float', 'object'])
+    dff = df.select_dtypes(exclude=['float'])
     return [{'label': i, 'value': i} for i in dff.columns]
 
 
