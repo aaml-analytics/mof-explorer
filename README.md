@@ -17,7 +17,7 @@ Alternatively, you can deploy your own copy of the app using this button and cre
 
 - Note: Once you have created your own copy of the app, after a period of inactivity Heroku shuts down the app's containers. Once the app gets a web request (the link above is used), it will wake up, but the initial response can take 10-20 seconds.
 
-## Deploy app on server by Gunicorn
+## Deploy app on server (production and development)
 
 ### Requirements
 - Download [Python 3](https://www.python.org) if not already installed 
@@ -63,12 +63,19 @@ Install the requirements:
 pip install -r requirements.txt
 ```
 
-Run the app:
+#### Run the app on development server:
+```bash
+python app.py
+```
+You can then run the app on your browser at http://127.0.0.1:8050
+- To quit the app press (CTRL +C). You will have to run the app again with this command everytime you leave your terminal/ quit the app.
+
+#### Run the app on production server:
 ```bash
 gunicorn app:server -b :8000
 ```
-
-You can then run the app on your browser at http://0.0.0.0:8000
+You can then run the app on your browser at http://0.0.0.0:8080
+- This URL will continue running and can be used to access the app even after you have left your terminal.
 
 ## Screenshots
 
