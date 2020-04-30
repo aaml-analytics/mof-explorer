@@ -64,9 +64,9 @@ pip install -r requirements.txt
 ```
 
 Run the app:
-Deploy Dash on production server by Gunicorn
+- Deploy Dash on production server by Gunicorn
 ```bash
-gunicorn graph:server -b :8000
+gunicorn app:server -b :8000
 ```
 
 You can then run the app on your browser at http://0.0.0.0:8000
