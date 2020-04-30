@@ -1,27 +1,25 @@
+import base64
+import io
+from urllib.parse import quote as urlquote
 import dash
+from dash.dependencies import Input, Output, State
 import dash_core_components as dcc
 import dash_html_components as html
-import gunicorn as gunicorn
-import plotly.graph_objs as go
-from dash.dependencies import Input, Output, State
-import flask
-import pandas as pd
-import urllib.parse
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
-from sklearn.decomposition import PCA
-import numpy as np
-import math
-import scipy.stats
 import dash_table
 from dash_table.Format import Format, Scheme
-from colour import Color
-from waitress import serve
+import pandas as pd
+import plotly.graph_objs as go
+from textwrap import dedent as d
+import plotly.express as px
+import json
+import textwrap
+import dash_bootstrap_components as dbc
 
-external_stylesheets = ["https://codepen.io/sutharson/pen/dyYzEGZ.css"]
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+# CREATE DASH APP
+app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP, 'https://codepen.io/chriddyp/pen/bWLwgP.css'])
 server = app.server
-# "external_url": "https://codepen.io/chriddyp/pen/brPBPO.css"
-# https://raw.githubusercontent.com/aaml-analytics/pca-explorer/master/LoadingStatusStyleSheet.css
+
+# PREDEFINED TAB STYLES
 styles = {
     'pre': {
         'border': 'thin lightgrey solid',
@@ -35,2395 +33,1868 @@ tab_style = {
     'fontWeight': 'bold'
 }
 
+tab_mini_style = {
+    'borderBottom': '1px solid #d6d6d6',
+    'padding': '6px',
+    'fontWeight': 'bold',
+    'width': '50px',
+    'color': '#000000',
+    'fontColor': '#000000',
+}
+
+tab_mini_selected_style = {
+    'borderTop': '3px solid #5e5e5e',
+    'borderBottom': '1px solid #d6d6d6 ',
+    'backgroundColor': '#5e5e5e',
+    'color': '#ffffff',
+    # 'fontColor': '#004a4a',
+    'fontWeight': 'bold',
+    'padding': '6px',
+    'width': '50px'
+}
+
 tab_selected_style = {
-    'borderTop': '3px solid #4a4a4a',
+    'borderTop': '3px solid #004a4a',
     'borderBottom': '1px solid #d6d6d6 ',
     'backgroundColor': '#f6f6f6',
-    'color': '#4a4a4a',
+    'color': '#004a4a',
     # 'fontColor': '#004a4a',
     'fontWeight': 'bold',
     'padding': '6px'
 }
 
-####################
-# ORIGINAL DATA NOT SCALED#
-####################
-file_path = "https://raw.githubusercontent.com/aaml-analytics/pca-explorer/master/AAML_Oxygen_Data.csv"
-df = pd.read_csv(file_path)
-dff = df.select_dtypes(exclude=['object'])
+# SUPERSCRIPT NOTATION
+SUP = str.maketrans("0123456789", "⁰¹²³⁴⁵⁶⁷⁸⁹")
 
-# correlation coefficient and coefficient of determination
-correlation_dff = dff.corr(method='pearson', )
-r2_dff = correlation_dff * correlation_dff
-features1 = dff.columns
-features = list(features1)
+# APP ABOUT DESCRIPTION
+MOF_tool_about = textwrap.wrap(' These tools aim to provide a reproducible and consistent data visualisation platform '
+                               'where experimental and computational researchers can use big data and statistical '
+                               'analysis to find the best materials for specific applications',
+                               width=50)
+twoD_threeD_about = textwrap.wrap(' The 2D Animated MOF Explorer and 3D Animated MOF Explorer provides a 2, 3, 4 and '
+                                  '5-Dimensional variable environment to explore specific structures '
+                                  'against a discrete data variable (animation frame) of their choice to find the best '
+                                  'materials for the users applications', width=50)
+MOF_data_filter = textwrap.wrap(' Using the sorting and filtering datatable, users are able to filter variables '
+                                'from their dataset to '
+                                'produce plots of their preference. All variables in the users dataset can be sorted, '
+                                'filtered and deleted in the interactive datatable. The arguments that the datatable '
+                                'can take are '
+                                'specified '
+                                'in the manual. After filtering there are options to choose a logarithmic or linear '
+                                'axis scale, and choose a colorscale of choice from the viridis color palette.'
+                                , width=50)
+MOF_stat_analysis = textwrap.wrap('All structures, or top performing structures (1%, 5% or 10% of all structures) '
+                                  'can be analysed in accordance to a set variable decided by the user e.g. '
+                                  'Deliverable Capacity. In the violin plot, geometric properties can then be '
+                                  'analysed against a discrete data variable (X axis) to determine Q1, Q3, IQR, '
+                                  'mean, median, maximum and'
+                                  ' minimum points for a dataset of the users choice, alongside the distribution of '
+                                  'MOFs in said violin plot. In the distribution plot, the number of structures against '
+                                  'a variable in the users data frame can be analysed to determine the spread of '
+                                  'structures in the users data. The distribution can be further filtered by MOF '
+                                  'families (if the user has uploaded this information in its data frame). '
+                                  'An animation feature is also available to view these frames in accordance'
+                                  ' to a discrete data variable of the users choice.', width=50, )
+MOF_GH = textwrap.wrap(" to explore AAML's sample data and read more on"
+                       " AAML's MOF Explorer Tool Manual, FAQ's & Troubleshooting"
+                       " on GitHub... ", width=50)
 
-x = dff.loc[:, features].values
-# Separating out the target (if any)
-y = dff.loc[:, ].values
-# Standardizing the features to {mean, variance} = {0, 1}
-x = StandardScaler().fit_transform(x)
-
-pca = PCA(n_components=len(features))
-principalComponents = pca.fit_transform(x)
-principalDf = pd.DataFrame(data=principalComponents
-                           , columns=['PC' + str(i + 1) for i in range(len(features))])
-# combining principle components and target
-finalDf = pd.concat([df[[df.columns[0]]], principalDf], axis=1)
-dfff = finalDf
-# explained variance of the the two principal components
-# print(pca.explained_variance_ratio_)
-# Explained variance tells us how much information (variance) can be attributed to each of the principal components
-
-# loading of each feature in principle components
-loading = pca.components_.T * np.sqrt(pca.explained_variance_)
-# or you can use
-# corr = pd.DataFrame(data=[[np.corrcoef(dff[c], principalComponents[:, n])[1, 0]
-#                            for n in range(pca.n_components_)] for c in dff],
-#                     columns=[0, 1],
-#                     index=dff.columns)
-loading_df = pd.DataFrame(data=loading[0:, 0:], index=features,
-                          columns=['PC' + str(i + 1) for i in range(loading.shape[1])])
-loading_dff = loading_df.T
-Var = pca.explained_variance_ratio_
-PC_df = pd.DataFrame(data=['PC' + str(i + 1) for i in range(len(features))], columns=['Principal Component'])
-PC_num = [float(i + 1) for i in range(len(features))]
-Var_df = pd.DataFrame(data=Var, columns=['Cumulative Proportion of Explained Variance'])
-Var_cumsum = Var_df.cumsum()
-Var_dff = pd.concat([PC_df, (Var_cumsum * 100)], axis=1)
-PC_interp = np.interp(70, Var_dff['Cumulative Proportion of Explained Variance'], PC_num)
-PC_interp_int = math.ceil(PC_interp)
-eigenvalues = pca.explained_variance_
-Eigen_df = pd.DataFrame(data=eigenvalues, columns=['Eigenvalues'])
-Eigen_dff = pd.concat([PC_df, Eigen_df], axis=1)
-
-####################
-# OUTLIER DATA NO SCALE #
-####################
-z_scores = scipy.stats.zscore(dff)
-abs_z_scores = np.abs(z_scores)
-filtered_entries = (abs_z_scores < 3).all(axis=1)
-outlier_dff = dff[filtered_entries]
-features1_outlier = outlier_dff.columns
-features_outlier = list(features1_outlier)
-outlier_names1 = df[filtered_entries]
-outlier_names = outlier_names1.iloc[:, 0]
-
-# correlation coefficient and coefficient of determination
-correlation_dff_outlier = outlier_dff.corr(method='pearson', )
-r2_dff_outlier = correlation_dff_outlier * correlation_dff_outlier
-
-x_outlier = outlier_dff.loc[:, features_outlier].values
-# Separating out the target (if any)
-y_outlier = outlier_dff.loc[:, ].values
-# Standardizing the features
-x_outlier = StandardScaler().fit_transform(x_outlier)
-
-pca_outlier = PCA(n_components=len(features_outlier))
-principalComponents_outlier = pca_outlier.fit_transform(x_outlier)
-principalDf_outlier = pd.DataFrame(data=principalComponents_outlier
-                                   , columns=['PC' + str(i + 1) for i in range(len(features_outlier))])
-# combining principle components and target
-finalDf_outlier = pd.concat([outlier_names, principalDf_outlier], axis=1)
-dfff_outlier = finalDf_outlier
-# calculating loading
-loading_outlier = pca_outlier.components_.T * np.sqrt(pca_outlier.explained_variance_)
-loading_df_outlier = pd.DataFrame(data=loading_outlier[0:, 0:], index=features_outlier,
-                                  columns=['PC' + str(i + 1) for i in range(loading_outlier.shape[1])])
-loading_dff_outlier = loading_df_outlier.T
-
-Var_outlier = pca_outlier.explained_variance_ratio_
-PC_df_outlier = pd.DataFrame(data=['PC' + str(i + 1) for i in range(len(features_outlier))],
-                             columns=['Principal Component'])
-PC_num_outlier = [float(i + 1) for i in range(len(features_outlier))]
-Var_df_outlier = pd.DataFrame(data=Var_outlier, columns=['Cumulative Proportion of Explained Variance'])
-Var_cumsum_outlier = Var_df_outlier.cumsum()
-Var_dff_outlier = pd.concat([PC_df_outlier, (Var_cumsum_outlier * 100)], axis=1)
-PC_interp_outlier = np.interp(70, Var_dff_outlier['Cumulative Proportion of Explained Variance'], PC_num_outlier)
-PC_interp_int_outlier = math.ceil(PC_interp_outlier)
-eigenvalues_outlier = pca_outlier.explained_variance_
-Eigen_df_outlier = pd.DataFrame(data=eigenvalues_outlier, columns=['Eigenvalues'])
-Eigen_dff_outlier = pd.concat([PC_df_outlier, Eigen_df_outlier], axis=1)
-
-####################
-# APP LAYOUT #
-####################
-fig = go.Figure()
-fig1 = go.Figure()
+# APP LAYOUT
 app.layout = html.Div([
     html.Div([
         html.Img(
             src='https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/UOC.png',
-            height='35', width='140', style={'display': 'inline-block', 'padding-left': '1%'}),
+            height='30', width='140', style={'display': 'inline-block', 'padding-left': '1%'}),
         html.Img(src='https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/A2ML-logo.png',
-                 height='55', width='125', style={'float': 'right', 'display': 'inline-block', 'padding-right': '2%'}),
-        html.H1("Principal Component Analysis Visualisation Tools",
-                style={'display': 'inline-block', 'padding-left': '15%', 'text-align': 'center', 'fontSize': 32,
-                       'color': 'white', }),
+                 height='60', width='160', style={'float': 'right', 'display': 'inline-block', 'padding-right': '2%'}),
+        html.H1("Metal-Organic Framework Data Visualisation Tools",
+                style={'display': 'inline-block', 'padding-left': '10%', 'text-align': 'center', 'fontSize': 36,
+                       'color': 'white', 'font-family': 'Georgia'}),
         html.H1("...", style={'fontColor': '#3c3c3c', 'fontSize': 6})
-    ], style={'backgroundColor': '#3d0027'}),
-    html.Div([dcc.Tabs([dcc.Tab(label='Scree Plot', style=tab_style, selected_style=tab_selected_style,
-                                children=[
-                                    html.Div([dcc.Graph(id='PC-Eigen-plot')
-                                              ],
-                                             style={'display': 'inline-block',
-                                                    'width': '49%'}),
-                                    html.Div([dcc.Graph(id='PC-Var-plot')
-                                              ], style={'display': 'inline-block', 'float': 'right',
-                                                        'width': '49%'}),
-                                    html.Div(
-                                        [html.Label(["Remove outliers (if any) in analysis:", dcc.RadioItems(
-                                            id='outlier-value',
-                                            options=[{'label': 'Yes', 'value': 'Yes'},
-                                                     {'label': 'No', 'value': 'No'}],
-                                            value='No')
-                                                     ])
-                                         ], style={'display': 'inline-block',
-                                                   'width': '49%'}),
-                                    html.Div([
-                                        html.Label(["You should use attempt to use at least..."
+    ], style={'backgroundColor': '#004040'}),
+    html.Div([html.A('Refresh', href='/')], style={}),
+    html.Div([
+        html.H2("Upload Data", style={'fontSize': 24, 'font-family': 'Arial', 'color': '#004a4a'}, ),
+        html.H3("Upload .txt, .csv or .xls files to starting exploring data...", style={'fontSize': 16,
+                                                                                        'font-family': 'Arial'}),
+        dcc.Store(id='csv-data', storage_type='session', data=None),
+        html.Div([dcc.Upload(
+            id='data-table-upload',
+            children=html.Div([html.Button('Upload File')],
+                              style={'width': '49%', 'height': "60px", 'borderWidth': '1px',
+                                     'borderRadius': '5px',
+                                     'textAlign': 'center',
 
-                                                       , html.Div(id='var-output-container-filter')])
-                                    ], style={}
-                                    ),
-                                    html.Div([
-                                        html.Label(["As a rule of thumb for the Scree Plot"
-                                                    " Eigenvalues, the point where the slope of the curve "
-                                                    "is clearly "
-                                                    "leveling off (the elbow), indicates the number of "
-                                                    "components that "
-                                                    "should be retained as significant."])
-                                    ]),
-                                    html.Div([
-                                        html.Label(["Note: Data has been standardised (scaled)"])
-                                    ])
-                                ]),
-                        dcc.Tab(label='Feature correlation', style=tab_style,
-                                selected_style=tab_selected_style,
-                                children=[html.Div([html.Div([dcc.Graph(id='PC-feature-heatmap')
-                                                              ], style={'width': '44%',
-                                                                        'display': 'inline-block',
-                                                                        'float': 'right'}),
-                                                    html.Div([dcc.Graph(id='feature-heatmap')
-                                                              ], style={'width': '54%',
-                                                                        'display': 'inline-block',
-                                                                        'float': 'left'}),
-                                                    html.Div(
-                                                        [html.Label(
-                                                            ["Remove outliers (if any) in analysis:",
-                                                             dcc.RadioItems(
-                                                                 id='PC-feature-outlier-value',
-                                                                 options=[{'label': 'Yes', 'value': 'Yes'},
-                                                                          {'label': 'No', 'value': 'No'}],
-                                                                 value='No')
-                                                             ])
-                                                        ], style={'display': 'inline-block',
-                                                                  'width': '49%'}),
-                                                    html.Div([html.Label(["Select color scale:",
-                                                                          dcc.RadioItems(
-                                                                              id='colorscale',
-                                                                              options=[{'label': i, 'value': i}
-                                                                                       for i in
-                                                                                       ['Viridis', 'Plasma']],
-                                                                              value='Plasma'
-                                                                          )]),
-                                                              ], style={'display': 'inline-block',
-                                                                        'width': '49%', }),
-                                                    html.Div([
-                                                        html.P("There are usually two ways multicollinearity, "
-                                                               "which is when there are a number of variables "
-                                                               "that are highly correlated, is dealt with "
-                                                               "before analysis:"),
-                                                        html.P("1) Use PCA to obtain a set of orthogonal ("
-                                                               "not correlated) variables to analyse."),
-                                                        html.P("2) Use correlation of determination (R²) to "
-                                                               "determine which variables are highly "
-                                                               "correlated and use only 1 in analysis. "
-                                                               "Cut off for highly correlated variables "
-                                                               "is ~0.7."),
-                                                        html.P(
-                                                            "In any case, it depends on the machine learning algorithm you may apply later. For correlation robust algorithms,"
-                                                            " such as Random Forest, correlation of features will not be a concern. For non-correlation robust algorithms such as Linear Regression, "
-                                                            "all high correlation variables should be removed.")
+                                     }),
+            multiple=False
+        ),
+            html.Div(id='output-data-upload'),
+            dbc.Modal(
+                [
+                    dbc.ModalHeader(
+                        "Upload Error!"),
+                    dbc.ModalBody(
+                        "Please upload a .txt, .csv or .xls file."),
+                    dbc.ModalFooter(
+                        dbc.Button("Close",
+                                   id="close-upload",
+                                   className="ml-auto")
+                    ),
+                ],
+                id="modal-upload",
+                is_open=False,
+                centered=True,
+                size="xl"
+            )
+        ]), ], style={'display': 'inline-block', 'width': '48%', 'padding-left': '1%', }),
+    html.Div([html.Div([html.H2("Explore Data", style={'fontSize': 24,
+                                                       'font-family': 'Arial',
+                                                       'color': '#004a4a'})],
+                       style={}),
+              html.Div(['', html.A('Download',
+                                   href='https://github.com/aaml-analytics/mof-explorer/tree/master/sample-data')]),
+              html.H3("...AAML's sample file to explore tool functions...", style={'fontSize': 16,
+                                                                                   'font-family': 'Arial',
+                                                                                   'display': 'inline-block'}),
+              html.U(id='file-list')], style={'display': 'inline-block', 'width': '44%', 'font-family': 'Arial'}),
+    html.Div([
+        dcc.Tabs([
+            dcc.Tab(label='About', style=tab_style, selected_style=tab_selected_style,
+                    children=[html.Div([html.H2(" What are AAML's MOF Data Visualisation tools?",
+                                                style={'fontSize': 18, 'font-family': 'Arial', 'font-weight': 'bold'
+                                                       }),
+                                        html.Div([' '.join(MOF_tool_about)]
+                                                 , style={'font-family': 'Arial'}),
+                                        html.H2([" 2D and 3D Animation Environment"],
+                                                style={'fontSize': 18,
+                                                       'font-family': 'Arial', 'font-weight': 'bold'}),
+                                        html.Div([' '.join(twoD_threeD_about)], style={'font-family': 'Arial'}),
+                                        html.H2([" MOF Data Filtering Environment"], style={'fontSize': 18,
+                                                                                            'font-weight': 'bold',
+                                                                                            'font-family': 'Arial'}),
+                                        html.Div([' '.join(MOF_data_filter)], style={'font-family': 'Arial', }),
+                                        html.H2([" MOF Statistical Analysis Environment"],
+                                                style={'fontSize': 18, 'font-weight': 'bold',
+                                                       'font-family': 'Arial'}),
+                                        html.Div([' '.join(MOF_stat_analysis)], style={'font-family': 'Arial'}),
+                                        # ADD LINK
+                                        html.Div([html.Plaintext(
+                                            [' Click ', html.A('here ',
+                                                               href='https://github.com/aaml-analytics/mof-explorer')],
+                                            style={'display': 'inline-block',
+                                                   'fontSize': 14, 'font-family': 'Arial'}),
+                                            html.Div([' '.join(MOF_GH)], style={'display': 'inline-block',
+                                                                                'fontSize': 14,
+                                                                                'font-family': 'Arial'}),
+                                            html.Img(
+                                                src='https://raw.githubusercontent.com/aaml-analytics/mof'
+                                                    '-explorer/master/github.png',
+                                                height='40', width='40',
+                                                style={'display': 'inline-block', 'float': "right"
+                                                       })
+                                        ]
+                                            , style={'display': 'inline-block'})
+                                        ], style={'backgroundColor': '#ffffff'}
+                                       )]),
+            dcc.Tab(label='MOF Explorer Animation', style=tab_style, selected_style=tab_selected_style,
+                    children=[
+                        dcc.Tabs(id='sub-tabs1', style=tabs_styles, children=[
+                            dcc.Tab(label='2D Animation', style=tab_style, selected_style=tab_selected_style,
+                                    children=[dcc.Tabs(id='subsub-tabs', style=tabs_styles,
+                                                       children=[dcc.Tab(label='2', style=tab_mini_style,
+                                                                         selected_style=tab_mini_selected_style,
+                                                                         children=[
+                                                                             html.Div([html.Div([dcc.Graph(
+                                                                                 id='my-2D-graph', animate=False)],
+                                                                                 style={
+                                                                                     'display': 'inline-block',
+                                                                                     'width': '56%',
+                                                                                 }),
+                                                                                 html.Div([
+                                                                                     html.Div([html.Label(
+                                                                                         ["Select X variable:",
+                                                                                          dcc.Dropdown(
+                                                                                              id='xaxis-anim-2D',
+                                                                                              multi=False,
+                                                                                              placeholder="Select an option "
+                                                                                                          "for X")],
+                                                                                     )],
+                                                                                         style={
+                                                                                             'padding': 10}),
+                                                                                     html.Div([html.Label(
+                                                                                         ["Select Y variable:",
+                                                                                          dcc.Dropdown(
+                                                                                              id='yaxis-anim-2D',
+                                                                                              multi=False,
+                                                                                              placeholder='Select an option '
+                                                                                                          'for Y')],
+                                                                                     ), ],
+                                                                                         style={
+                                                                                             'padding': 10}),
+                                                                                     html.Div([html.Label(
+                                                                                         ["Select Animation Frame:",
+                                                                                          dcc.Dropdown(
+                                                                                              id='anim-frame-2D',
+                                                                                              multi=False,
+                                                                                              placeholder='Select an option '
+                                                                                                          'for Animation Frame')],
+                                                                                     ), ],
+                                                                                         style={
+                                                                                             'padding': 10}),
+                                                                                 ],
+                                                                                     style={
+                                                                                         'display': 'inline-block',
+                                                                                         'width': '32%',
+                                                                                         'float': 'right',
+                                                                                         'fontSize': 14,
+                                                                                         'font-family': 'Arial',
+                                                                                         'backgroundColor': '#ffffff'})
+                                                                             ], className='container',
+                                                                                 style={'padding': 20,
+                                                                                        'backgroundColor': '#ffffff'})
+                                                                         ]),
+                                                                 dcc.Tab(label='3', style=tab_mini_style,
+                                                                         selected_style=tab_mini_selected_style,
+                                                                         children=[
+                                                                             html.Div(
+                                                                                 [
+                                                                                     html.Div(
+                                                                                         [
+                                                                                             html.Div(
+                                                                                                 [
+                                                                                                     dcc.Graph(
+                                                                                                         id='my-3D-graph',
+                                                                                                         animate=False)
+                                                                                                 ],
+                                                                                                 style={
+                                                                                                     'display': 'inline-block',
+                                                                                                     'width': '56%',
+                                                                                                 }
+                                                                                             ),
+                                                                                             html.Div(
+                                                                                                 [
+                                                                                                     html.Div(
+                                                                                                         [
+                                                                                                             html.Label(
+                                                                                                                 [
+                                                                                                                     "Select X variable:",
+                                                                                                                     dcc.Dropdown(
+                                                                                                                         id='xaxis-anim-3D',
+                                                                                                                         multi=False,
+                                                                                                                         placeholder="Select an option for X")
+                                                                                                                 ],
+                                                                                                             )
+                                                                                                         ],
+                                                                                                         style={
+                                                                                                             'padding': 10
+                                                                                                         }
+                                                                                                     ),
+                                                                                                     html.Div(
+                                                                                                         [
+                                                                                                             html.Label(
+                                                                                                                 [
+                                                                                                                     "Select Y variable:",
+                                                                                                                     dcc.Dropdown(
+                                                                                                                         id='yaxis-anim-3D',
+                                                                                                                         multi=False,
+                                                                                                                         placeholder='Select an option for Y'
+                                                                                                                     )
+                                                                                                                 ],
+                                                                                                             ),
+                                                                                                         ],
+                                                                                                         style={
+                                                                                                             'padding': 10}
+                                                                                                     ),
+                                                                                                     html.Div(
+                                                                                                         [
+                                                                                                             html.Label(
+                                                                                                                 [
+                                                                                                                     "Select color variable:",
+                                                                                                                     dcc.Dropdown(
+                                                                                                                         id='caxis-anim-3D',
+                                                                                                                         multi=False,
+                                                                                                                         placeholder='Select an option for color')
+                                                                                                                 ],
+                                                                                                             )
+                                                                                                         ],
+                                                                                                         style={
+                                                                                                             'padding': 10}
+                                                                                                     ),
+                                                                                                     html.Div(
+                                                                                                         [
+                                                                                                             html.Label(
+                                                                                                                 [
+                                                                                                                     "Select color bar range:",
+                                                                                                                     dcc.RangeSlider(
+                                                                                                                         id='colorbar-slider',
+                                                                                                                     ),
+                                                                                                                     html.Div(
+                                                                                                                         id='slider-output-container')
+                                                                                                                 ]
+                                                                                                             )
+                                                                                                         ],
+                                                                                                         style={
+                                                                                                             'fontSize': 14,
+                                                                                                             'font-family': 'Arial',
+                                                                                                             'padding': 15,
+                                                                                                         }
+                                                                                                     ),
+                                                                                                     html.Div(
+                                                                                                         [html.Label(
+                                                                                                             [
+                                                                                                                 "Select Animation Frame:",
+                                                                                                                 dcc.Dropdown(
+                                                                                                                     id='anim-frame-3Var',
+                                                                                                                     multi=False,
+                                                                                                                     placeholder='Select an option '
+                                                                                                                                 'for Animation Frame')],
+                                                                                                         ), ],
+                                                                                                         style={
+                                                                                                             'padding': 10})
+                                                                                                 ],
+                                                                                                 style={
+                                                                                                     'display': 'inline-block',
+                                                                                                     'width': '32%',
+                                                                                                     'float': 'right',
+                                                                                                     'fontSize': 14,
+                                                                                                     'font-family': 'Arial',
+                                                                                                     'backgroundColor': '#ffffff'}
+                                                                                             )
+                                                                                         ],
+                                                                                         className='container',
+                                                                                         style={
+                                                                                             'padding': 20,
+                                                                                             'backgroundColor': '#ffffff'
+                                                                                         }
+                                                                                     )
+                                                                                 ]
+                                                                             )
+                                                                         ]),
+                                                                 dcc.Tab(label='4', style=tab_mini_style,
+                                                                         selected_style=tab_mini_selected_style,
+                                                                         children=[html.Div([html.Div(
+                                                                             [dcc.Graph(id='my-graph', animate=False)],
+                                                                             style={'display': 'inline-block',
+                                                                                    'width': '56%',
+                                                                                    }),
 
-                                                    ], style={}
+                                                                             html.Div([
+                                                                                 html.Div([html.Label([
+                                                                                     "Select X variable:",
+                                                                                     dcc.Dropdown(
+                                                                                         id='xaxis-anim',
+                                                                                         multi=False,
+                                                                                         placeholder="Select an option "
+                                                                                                     "for X")],
+                                                                                 )],
+                                                                                     style={
+                                                                                         'padding': 10}),
+                                                                                 html.Div([html.Label([
+                                                                                     "Select Y variable:",
+                                                                                     dcc.Dropdown(
+                                                                                         id='yaxis-anim',
+                                                                                         multi=False,
+                                                                                         placeholder='Select an option '
+                                                                                                     'for Y')],
+                                                                                 ), ],
+                                                                                     style={
+                                                                                         'padding': 10}),
+                                                                                 html.Div([html.Label(
+                                                                                     [
+                                                                                         "Select size variable:",
+                                                                                         dcc.Dropdown(
+                                                                                             id='saxis-anim',
+                                                                                             multi=False,
+                                                                                             placeholder='Select an option for size'),
+                                                                                         html.Div(
+                                                                                             id='size-container-4D')
+                                                                                     ],
+                                                                                 ),
+                                                                                     dbc.Modal(
+                                                                                         [
+                                                                                             dbc.ModalHeader(
+                                                                                                 "Selection Error!"),
+                                                                                             dbc.ModalBody(
+                                                                                                 "Please select a size variable that contains numerical values."),
+                                                                                             dbc.ModalFooter(
+                                                                                                 dbc.Button("Close",
+                                                                                                            id="close",
+                                                                                                            className="ml-auto")
+                                                                                             ),
+                                                                                         ],
+                                                                                         id="modal-4Var",
+                                                                                         is_open=False,
+                                                                                         centered=True,
+                                                                                         size="xl"
+                                                                                     )
+                                                                                 ], style={
+                                                                                     'padding': 10}),
+                                                                                 html.Div([html.Label(
+                                                                                     [
+                                                                                         "Select color variable:",
+                                                                                         dcc.Dropdown(
+                                                                                             id="caxis-anim",
+                                                                                             multi=False,
+                                                                                             placeholder='Select an option for color')],
+                                                                                 )], style={
+                                                                                     'padding': 10}),
+                                                                                 html.Div([html.Label(
+                                                                                     [
+                                                                                         "Select color bar range:",
+                                                                                         dcc.RangeSlider(
+                                                                                             id='colorbar-slider-4D',
+                                                                                         ),
+                                                                                         html.Div(
+                                                                                             id='slider-output-container-4D')
+                                                                                     ]
+                                                                                 )], style={
+                                                                                     'fontSize': 14,
+                                                                                     'font-family': 'Arial',
+                                                                                     'padding': 7,
+                                                                                 }
+                                                                                 ),
+                                                                                 html.Div(
+                                                                                     [html.Label(
+                                                                                         [
+                                                                                             "Select Animation Frame:",
+                                                                                             dcc.Dropdown(
+                                                                                                 id='anim-frame-4Var',
+                                                                                                 multi=False,
+                                                                                                 placeholder='Select an option '
+                                                                                                             'for Animation Frame')],
+                                                                                     ), ],
+                                                                                     style={
+                                                                                         'padding': 10})
+                                                                             ],
+                                                                                 style={
+                                                                                     'display': 'inline-block',
+                                                                                     'width': '32%',
+                                                                                     'float': 'right',
+                                                                                     'fontSize': 14,
+                                                                                     'font-family': 'Arial',
+                                                                                     'backgroundColor': '#ffffff'})
+                                                                         ], className='container',
+                                                                             style={'padding': 20,
+                                                                                    'backgroundColor': '#ffffff'})]
+                                                                         )]
+                                                       ), ]),
+                            dcc.Tab(label='3D Animation', style=tab_style, selected_style=tab_selected_style,
+                                    children=[html.Div([
+                                        html.Div([dcc.Graph(id="graph"
+                                                            )],
+                                                 style={"width": "65%", "display": "inline-block", }),
+                                        html.Div([
+                                            html.Div([html.Label(["Select X variable:",
+                                                                  dcc.Dropdown(id='xaxis-3D', multi=False,
+                                                                               placeholder="Select an option for X", )],
+                                                                 )],
+                                                     style={'padding': 10}),
+                                            html.Div([html.Label(["Select Y variable:",
+                                                                  dcc.Dropdown(id='yaxis-3D', multi=False,
+
+                                                                               placeholder='Select an option for Y')],
+                                                                 ), ],
+                                                     style={'padding': 10}),
+                                            html.Div([html.Label(["Select Z variable:",
+                                                                  dcc.Dropdown(id='zaxis-3D', multi=False,
+
+                                                                               placeholder='Select an option for Z')],
+                                                                 ), ],
+                                                     style={'padding': 10}),
+                                            html.Div([html.Label(
+                                                ["Select size variable:",
+                                                 dcc.Dropdown(id='saxis-3D', multi=False,
+                                                              placeholder='Select an option for size',
+
+                                                              ),
+                                                 html.Div(
+                                                     id='size-slider-container-5D')
+                                                 ],
+                                            ), dbc.Modal(
+                                                [
+                                                    dbc.ModalHeader(
+                                                        "Selection Error!"),
+                                                    dbc.ModalBody(
+                                                        "Please select a size variable that contains numerical values."),
+                                                    dbc.ModalFooter(
+                                                        dbc.Button("Close",
+                                                                   id="close-5D",
+                                                                   className="ml-auto")
                                                     ),
-                                                    html.Div([
-                                                        html.Label(["Note: Data has been standardised (scale)"])
-                                                    ])
-                                                    ])
-                                          ]),
-                        dcc.Tab(label='Plots', style=tab_style,
-                                selected_style=tab_selected_style,
-                                children=[html.Div([
+                                                ],
+                                                id="modal-5Var",
+                                                is_open=False,
+                                                centered=True,
+                                                size="xl"
+                                            )], style={'padding': 10}),
+                                            html.Div([html.Label(
+                                                ["Select color variable:",
+                                                 dcc.Dropdown(id="caxis-3D", multi=False,
 
-                                    html.Div([
-                                        html.P("Input here affects all plots, datatables and downloadable data output"),
-                                        html.Label([
-                                            "Would you like to analyse all variables or choose custom variables to "
-                                            "analyse:",
-                                            dcc.RadioItems(
-                                                id='all-custom-choice',
-                                                options=[{'label': 'All',
-                                                          'value': 'All'},
-                                                         {'label': 'Custom',
-                                                          'value': 'Custom'}],
-                                                value='All'
-                                            )])
-                                    ]),
-                                    html.Div([
-                                        html.P("For custom variables..."),
-                                        html.P(
-                                            " Input variables you would not like as features in your PCA:"),
-                                        html.Label(
-                                            [
-                                                "Note: Only input numerical variables (non-numerical variables have already "
-                                                "been removed from your dataframe)",
-                                                dcc.Dropdown(id='feature-input',
-                                                             multi=True,
-                                                             )])
-                                    ], style={'padding': 10}),
-                                ]), dcc.Tabs(id='sub-tabs1', style=tabs_styles,
-                                             children=[
-                                                 dcc.Tab(label='Biplot (Scores + loadings)', style=tab_style,
-                                                         selected_style=tab_selected_style,
-                                                         children=[
-                                                             html.Div([dcc.Graph(id='biplot', figure=fig)
-                                                                       ], style={'height': '100%', 'width': '60%',
-                                                                                 'padding-left': '15%',
-                                                                                 'padding-right': '15%'},
-                                                                      ),
-                                                             html.Div(
-                                                                 [html.Label(
-                                                                     ["Remove outliers (if any) in analysis:",
-                                                                      dcc.RadioItems(
-                                                                          id='outlier-value-biplot',
-                                                                          options=[
-                                                                              {'label': 'Yes', 'value': 'Yes'},
-                                                                              {'label': 'No', 'value': 'No'}],
-                                                                          value='No')
-                                                                      ])
-                                                                 ], style={'display': 'inline-block',
-                                                                           'width': '49%'}),
-                                                             html.Div([
-                                                                 html.Label([
-                                                                     "Graph Update to show either loadings (Loading Plot) or "
-                                                                     "scores and loadings (Biplot):",
-                                                                     dcc.RadioItems(
-                                                                         id='customvar-graph-update',
-                                                                         options=[{'label': 'Biplot',
-                                                                                   'value': 'Biplot'},
-                                                                                  {'label': 'Loadings',
-                                                                                   'value': 'Loadings'}],
-                                                                         value='Biplot')
-                                                                 ])
-                                                             ], style={'display': 'inline-block',
-                                                                       'width': '49%'}),
-                                                             html.Div([
-                                                                 html.P(
-                                                                     "Note that PCA is an unsupervised technique. It only "
-                                                                     "looks at the input features and does not take "
-                                                                     "into account the output or the target"
-                                                                     " (response) variable.")
-                                                             ]),
-                                                             html.Div([
-                                                                 html.P("For custom variables..."),
-                                                                 html.Label([
-                                                                     "Would you like to introduce a first target variable"
-                                                                     " into your data visualisation?"
-                                                                     " (Graph type must be Biplot): "
-                                                                     "",
-                                                                     dcc.RadioItems(
-                                                                         id='radio-target-item',
-                                                                         options=[{'label': 'Yes',
-                                                                                   'value': 'Yes'},
-                                                                                  {'label': 'No',
-                                                                                   'value': 'No'}],
-                                                                         value='No'
-                                                                     )])
-                                                             ], style={'width': '49%',
-                                                                       'display': 'inline-block'}),
-                                                             html.Div([
-                                                                 html.Label([
-                                                                     "Select first target variable for color scale of scores: ",
-                                                                     dcc.Dropdown(
-                                                                         id='color-scale-scores',
-                                                                     )])
-                                                             ], style={'width': '49%',
-                                                                       'display': 'inline-block'}),
-                                                             html.Div([
-                                                                 html.Label([
-                                                                     "Would you like to introduce a second target variable"
-                                                                     " into your data visualisation??"
-                                                                     " (Graph type must be Biplot):",
-                                                                     dcc.RadioItems(
-                                                                         id='radio-target-item-second',
-                                                                         options=[{'label': 'Yes',
-                                                                                   'value': 'Yes'},
-                                                                                  {'label': 'No',
-                                                                                   'value': 'No'}],
-                                                                         value='No'
-                                                                     )])
-                                                             ], style={'width': '49%',
-                                                                       'display': 'inline-block'}),
-                                                             html.Div([
-                                                                 html.Label([
-                                                                     "Select second target variable for size scale of scores:",
-                                                                     dcc.Dropdown(
-                                                                         id='size-scale-scores',
-                                                                     )])
-                                                             ], style={'width': '49%',
-                                                                       'display': 'inline-block'}),
-                                                             html.Div([html.Label(["Size range:"
-                                                                                      , html.Div(
-                                                                     id='size-second-target-container')])
-                                                                       ], style={'display': 'inline-block',
-                                                                                 'float': 'right',
-                                                                                 'padding-right': '5%'}
-                                                                      ),
-                                                             html.Div([
-                                                                 html.P(),
-                                                                 html.P(
-                                                                     "A loading plot shows how "
-                                                                     "strongly each characteristic (variable)"
-                                                                     " influences a principal component. The angles between the vectors"
-                                                                     " tell us how characteristics correlate with one another... "),
-                                                                 html.P(
-                                                                     "1) When two vectors are close, forming a small angle, the two "
-                                                                     "variables they represent are positively correlated. "
-                                                                     "2) If they meet each other at 90°, they are not likely to be correlated. "
-                                                                     "3) When they diverge and form a large angle (close to 180°), they are negative correlated."),
-                                                                 html.P(
-                                                                     "The Score Plot involves the projection of the data onto the PCs in two dimensions."
-                                                                     "The plot contains the original date but in the rotated (PC) coordinate system"),
-                                                                 html.P(
-                                                                     "A biplot merges a score plot and loading plot together.")
-                                                             ], style={}
-                                                             ),
-
-                                                         ]),
-                                                 dcc.Tab(label='Cos2', style=tab_style,
-                                                         selected_style=tab_selected_style,
-                                                         children=[
-                                                             html.Div([dcc.Graph(id='cos2-plot', figure=fig)
-                                                                       ], style={'width': '40%',
-                                                                                 'padding-left': '29%'},
-                                                                      ),
-                                                             html.Div(
-                                                                 [html.Label(["Remove outliers (if any) in analysis:",
-                                                                              dcc.RadioItems(
-                                                                                  id='outlier-value-cos2',
-                                                                                  options=[
-                                                                                      {'label': 'Yes', 'value': 'Yes'},
-                                                                                      {'label': 'No', 'value': 'No'}],
-                                                                                  value='No')
-                                                                              ])
-                                                                  ], style={'display': 'inline-block',
-                                                                            'width': '49%'}),
-                                                         ]),
-                                                 dcc.Tab(label='Contribution', style=tab_style,
-                                                         selected_style=tab_selected_style,
-                                                         children=[
-                                                             html.Div([dcc.Graph(id='contrib-plot', figure=fig)
-                                                                       ], style={'width': '40%',
-                                                                                 'padding-left': '29%'},
-                                                                      ),
-                                                             html.Div(
-                                                                 [html.Label(["Remove outliers (if any) in analysis:",
-                                                                              dcc.RadioItems(
-                                                                                  id='outlier-value-contrib',
-                                                                                  options=[
-                                                                                      {'label': 'Yes', 'value': 'Yes'},
-                                                                                      {'label': 'No', 'value': 'No'}],
-                                                                                  value='No')
-                                                                              ])
-                                                                  ], style={'display': 'inline-block',
-                                                                            'width': '49%'}),
-                                                         ])
-
-                                             ])
-                                ]),
-                        dcc.Tab(label='Data tables', style=tab_style,
-                                selected_style=tab_selected_style,
-                                children=[html.Div([
-                                    html.Div([
-                                        html.Label(
-                                            ["Note: Input in 'Plots' tab will provide output of data tables and the"
-                                             " downloadable PCA data and data table data"])
-                                    ], style={'font-weight': 'bold'}),
-                                    html.Div([html.A(
-                                        'Download PCA Data',
-                                        id='download-link',
-                                        href="",
-                                        target="_blank"
-                                    )]),
-                                    html.Div([html.Label(["Remove outliers (if any) in analysis:",
-                                                          dcc.RadioItems(id="eigenA-outlier",
-                                                                         options=[{'label': 'Yes',
-                                                                                   'value': 'Yes'},
-                                                                                  {'label': 'No',
-                                                                                   'value': 'No'}],
-                                                                         value='No'
-                                                                         )])]),
-                                    html.Div([
-                                        html.Div([
-                                            html.Label(["Correlation between Features"])
-                                        ], style={'font-weight': 'bold'}),
-                                        html.Div([
-                                            dash_table.DataTable(id='data-table-correlation',
-                                                                 editable=False,
-                                                                 filter_action='native',
-                                                                 sort_action='native',
-                                                                 sort_mode='multi',
-                                                                 selected_columns=[],
-                                                                 selected_rows=[],
-                                                                 page_action='native',
-                                                                 column_selectable='single',
-                                                                 page_current=0,
-                                                                 page_size=20,
-                                                                 style_data={'height': 'auto'},
-                                                                 style_table={'overflowX': 'scroll',
-                                                                              'maxHeight': '300px',
-                                                                              'overflowY': 'scroll'},
-                                                                 style_cell={
-                                                                     'minWidth': '0px', 'maxWidth': '220px',
-                                                                     'whiteSpace': 'normal',
-                                                                 }
-                                                                 ),
-                                            html.Div(id='data-table-correlation-container'),
-                                        ]),
-                                        html.Div([html.A(
-                                            'Download Feature Correlation data',
-                                            id='download-link-correlation',
-                                            href="",
-                                            target="_blank"
-                                        )]),
-
-                                    ], style={'padding': 20}),
-
-                                    html.Div([
-                                        html.Div([
-                                            html.Label(["Eigen Analysis of the correlation matrix"]),
-                                        ], style={'font-weight': 'bold'}),
-                                        html.Div([
-                                            dash_table.DataTable(id='data-table-eigenA',
-                                                                 editable=False,
-                                                                 filter_action='native',
-                                                                 sort_action='native',
-                                                                 sort_mode='multi',
-                                                                 selected_columns=[],
-                                                                 selected_rows=[],
-                                                                 page_action='native',
-                                                                 column_selectable='single',
-                                                                 page_current=0,
-                                                                 page_size=20,
-                                                                 style_data={'height': 'auto'},
-                                                                 style_table={'overflowX': 'scroll',
-                                                                              'maxHeight': '300px',
-                                                                              'overflowY': 'scroll'},
-                                                                 style_cell={
-                                                                     'minWidth': '0px', 'maxWidth': '220px',
-                                                                     'whiteSpace': 'normal',
-                                                                 }
-                                                                 ),
-                                            html.Div(id='data-table-eigenA-container'),
-
-                                        ]),
-                                        html.Div([html.A(
-                                            'Download Eigen Analysis data',
-                                            id='download-link-eigenA',
-                                            href="",
-                                            download='Eigen_Analysis_data.csv',
-                                            target="_blank"
-                                        )]),
-                                    ], style={'padding': 20}),
-                                    html.Div([
-                                        html.Div([
-                                            html.Label(["Loadings (Feature and PC correlation) from PCA"]),
-                                        ], style={'font-weight': 'bold'}),
-                                        html.Div([
-                                            dash_table.DataTable(id='data-table-loadings',
-                                                                 editable=False,
-                                                                 filter_action='native',
-                                                                 sort_action='native',
-                                                                 sort_mode='multi',
-                                                                 selected_columns=[],
-                                                                 selected_rows=[],
-                                                                 page_action='native',
-                                                                 column_selectable='single',
-                                                                 page_current=0,
-                                                                 page_size=20,
-                                                                 style_data={'height': 'auto'},
-                                                                 style_table={'overflowX': 'scroll',
-                                                                              'maxHeight': '300px',
-                                                                              'overflowY': 'scroll'},
-                                                                 style_cell={
-                                                                     'minWidth': '0px', 'maxWidth': '220px',
-                                                                     'whiteSpace': 'normal',
-                                                                 }
-                                                                 ),
-                                            html.Div(id='data-table-loadings-container'),
-                                        ]),
-                                        html.Div([html.A(
-                                            'Download Loadings data',
-                                            id='download-link-loadings',
-                                            download='Loadings_data.csv',
-                                            href="",
-                                            target="_blank"
-                                        )]),
-                                    ], style={'padding': 20}),
-                                    html.Div([
-                                        html.Div([
-                                            html.Label(["Cos2 from PCA"])
-                                        ], style={'font-weight': 'bold'}),
-                                        html.Div([
-                                            dash_table.DataTable(id='data-table-cos2',
-                                                                 editable=False,
-                                                                 filter_action='native',
-                                                                 sort_action='native',
-                                                                 sort_mode='multi',
-                                                                 selected_columns=[],
-                                                                 selected_rows=[],
-                                                                 page_action='native',
-                                                                 column_selectable='single',
-                                                                 page_current=0,
-                                                                 page_size=20,
-                                                                 style_data={'height': 'auto'},
-                                                                 style_table={'overflowX': 'scroll',
-                                                                              'maxHeight': '300px',
-                                                                              'overflowY': 'scroll'},
-                                                                 style_cell={
-                                                                     'minWidth': '0px', 'maxWidth': '220px',
-                                                                     'whiteSpace': 'normal',
-                                                                 }
-                                                                 ),
-                                            html.Div(id='data-table-cos2-container'),
-                                        ]),
-                                        html.Div([html.A(
-                                            'Download Cos2 data',
-                                            id='download-link-cos2',
-                                            download='Cos2_data.csv',
-                                            href="",
-                                            target="_blank"
-                                        )]),
-                                    ], style={'padding': 20}),
-                                    html.Div([
-                                        html.Div([
-                                            html.Label(["Contributions from PCA"])
-                                        ], style={'font-weight': 'bold'}),
-                                        html.Div([
-                                            dash_table.DataTable(id='data-table-contrib',
-                                                                 editable=False,
-                                                                 filter_action='native',
-                                                                 sort_action='native',
-                                                                 sort_mode='multi',
-                                                                 selected_columns=[],
-                                                                 selected_rows=[],
-                                                                 page_action='native',
-                                                                 column_selectable='single',
-                                                                 page_current=0,
-                                                                 page_size=20,
-                                                                 style_data={'height': 'auto'},
-                                                                 style_table={'overflowX': 'scroll',
-                                                                              'maxHeight': '300px',
-                                                                              'overflowY': 'scroll'},
-                                                                 style_cell={
-                                                                     'minWidth': '0px', 'maxWidth': '220px',
-                                                                     'whiteSpace': 'normal',
-                                                                 }
-                                                                 ),
-                                            html.Div(id='data-table-contrib-container'),
-                                        ]),
-                                        html.Div([html.A(
-                                            'Download Contributions data',
-                                            id='download-link-contrib',
-                                            download='Contributions_data.csv',
-                                            href="",
-                                            target="_blank"
-                                        )]),
-                                    ], style={'padding': 20}),
-                                ])])
-                        ])
-              ])])
-
-
-@app.callback(Output('PC-Var-plot', 'figure'),
-              [
-                  Input('outlier-value', 'value'),
-              ]
-              )
-def update_graph_stat(outlier):
-    traces = []
-    if outlier == 'No':
-        data = Var_dff
-    elif outlier == 'Yes':
-        data = Var_dff_outlier
-    traces.append(go.Scatter(x=data['Principal Component'], y=data['Cumulative Proportion of Explained Variance'],
-                             mode='lines', line=dict(color='Red')))
-    return {'data': traces,
-
-            'layout': go.Layout(title='<b>Cumulative Scree Plot Proportion of Explained Variance</b>',
-                                titlefont=dict(family='Georgia', size=16),
-                                xaxis={'title': 'Principal Component'}, yaxis={'title': 'Cumulative Explained Variance',
-                                                                               'range': [0, 100]},
-                                hovermode='closest', font=dict(family="Georgia", size=14), template="simple_white")
-            }
-
-
-@app.callback(
-    Output('var-output-container-filter', 'children'),
-    [Input('outlier-value', 'value'), ],
-)
-def update_output(outlier):
-    if outlier == 'No':
-        return "'{}' principal components (≥70% of explained variance) to avoid losing too much of your " \
-               "data. Note that there is no required threshold in order for PCA to be valid." \
-               " ".format(PC_interp_int)
-    elif outlier == 'Yes':
-        return "'{}' principal components (≥70% of explained variance) to avoid losing too much of your " \
-               "data. Note that there is no required threshold in order for PCA to be valid." \
-               " ".format(PC_interp_int_outlier)
-
-
-@app.callback(Output('PC-Eigen-plot', 'figure'),
-              [
-                  Input('outlier-value', 'value'),
-              ]
-              )
-def update_graph_stat(outlier):
-    traces = []
-    if outlier == 'No':
-        data = Eigen_dff
-    elif outlier == 'Yes':
-        data = Eigen_dff_outlier
-    traces.append(go.Scatter(x=data['Principal Component'], y=data['Eigenvalues'], mode='lines'))
-    return {'data': traces,
-
-            'layout': go.Layout(title='<b>Scree Plot Eigenvalues</b>', xaxis={'title': 'Principal Component'},
-                                titlefont=dict(family='Georgia', size=16),
-                                yaxis={'title': 'Eigenvalues'}, hovermode='closest',
-                                font=dict(family="Helvetica"), template="simple_white", )
-            }
-
-
-@app.callback(Output('PC-feature-heatmap', 'figure'),
-              [
-                  Input('PC-feature-outlier-value', 'value'),
-                  Input('colorscale', 'value')
-              ]
-              )
-def update_graph_stat(outlier, colorscale):
-    traces = []
-    if outlier == 'No':
-        data = loading_dff
-    elif outlier == 'Yes':
-        data = loading_dff_outlier
-    traces.append(go.Heatmap(
-        z=data, x=features_outlier, y=['PC' + str(i + 1) for i in range(loading_outlier.shape[1])],
-        colorscale="Viridis" if colorscale == 'Viridis' else "Plasma",
-        # coord: represent the correlation between the various feature and the principal component itself
-        colorbar={"title": "Loading"}))
-    return {'data': traces,
-            'layout': go.Layout(title='<b>PC and Feature Correlation Analysis</b>', xaxis={'title': 'Features'},
-                                titlefont=dict(family='Georgia', size=16),
-                                yaxis={'title': 'Principal Component'},
-                                hovermode='closest', margin={'b': 110, 't': 50, 'l': 50},
-                                font=dict(family="Helvetica", size=11)),
-            }
-
-
-@app.callback(Output('feature-heatmap', 'figure'),
-              [
-                  Input('PC-feature-outlier-value', 'value'),
-                  Input('colorscale', 'value')
-              ]
-              )
-def update_graph_stat(outlier, colorscale):
-    traces = []
-    if outlier == 'No':
-        data = r2_dff
-        feat = features
-    elif outlier == 'Yes':
-        feat = features_outlier
-        data = r2_dff_outlier
-    traces.append(go.Heatmap(
-        z=data, x=feat, y=feat, colorscale="Viridis" if colorscale == 'Viridis' else "Plasma",
-        # coord: represent the correlation between the various feature and the principal component itself
-        colorbar={"title": "R²"}))
-    return {'data': traces,
-            'layout': go.Layout(title='<b>Feature Correlation Analysis</b>', xaxis={},
-                                titlefont=dict(family='Georgia', size=16),
-                                yaxis={},
-                                hovermode='closest', margin={'b': 110, 't': 50, 'l': 170, 'r': 50},
-                                font=dict(family="Helvetica", size=11)),
-            }
-
-
-@app.callback(Output('feature-input', 'options'),
-              [Input('all-custom-choice', 'value')])
-def activate_input(all_custom):
-    if all_custom == 'All':
-        options = []
-    elif all_custom == 'Custom':
-        options = [{'label': i, 'value': i} for i in dff.columns]
-    return options
-
-
-@app.callback(Output('color-scale-scores', 'options'),
-              [Input('feature-input', 'value'),
-               Input('radio-target-item', 'value'),
-               Input('outlier-value-biplot', 'value'),
-               Input('customvar-graph-update', 'value')])
-def populate_color_dropdown(input, target, outlier, graph_type):
-    dff_target = dff[input]
-    z_scores_target = scipy.stats.zscore(dff_target)
-    abs_z_scores_target = np.abs(z_scores_target)
-    filtered_entries_target = (abs_z_scores_target < 3).all(axis=1)
-    dff_target_outlier = dff_target[filtered_entries_target]
-    if target == 'Yes' and outlier == 'Yes' and graph_type == 'Biplot':
-        options = [{'label': i, 'value': i} for i in dff_target_outlier.columns]
-    elif target == 'Yes' and outlier == 'No' and graph_type == 'Biplot':
-        options = [{'label': i, 'value': i} for i in dff_target.columns]
-    elif target == 'No' or graph_type == 'Loadings':
-        options = []
-    return options
-
-
-@app.callback(Output('size-scale-scores', 'options'),
-              [Input('feature-input', 'value'),
-               Input('radio-target-item-second', 'value'),
-               Input('outlier-value-biplot', 'value'),
-               Input('customvar-graph-update', 'value')])
-def populate_color_dropdown(input, target, outlier, graph_type):
-    dff_target = dff[input]
-    z_scores_target = scipy.stats.zscore(dff_target)
-    abs_z_scores_target = np.abs(z_scores_target)
-    filtered_entries_target = (abs_z_scores_target < 3).all(axis=1)
-    dff_target_outlier = dff_target[filtered_entries_target]
-    if target == 'Yes' and outlier == 'Yes' and graph_type == 'Biplot':
-        options = [{'label': i, 'value': i} for i in dff_target_outlier.columns]
-    elif target == 'Yes' and outlier == 'No' and graph_type == 'Biplot':
-        options = [{'label': i, 'value': i} for i in dff_target.columns]
-    elif target == 'No' or graph_type == 'Loadings':
-        options = []
-    return options
-
-
-@app.callback(Output('biplot', 'figure'),
-              [
-                  Input('outlier-value-biplot', 'value'),
-                  Input('feature-input', 'value'),
-                  Input('customvar-graph-update', 'value'),
-                  Input('color-scale-scores', 'value'),
-                  Input('radio-target-item', 'value'),
-                  Input('size-scale-scores', 'value'),
-                  Input('radio-target-item-second', 'value'),
-                  Input('all-custom-choice', 'value')
-              ]
-              )
-def update_graph_custom(outlier, input, graph_update, color, target, size, target2, all_custom):
-    features1 = dff.columns
-    features = list(features1)
-    if all_custom == 'All':
-        # x_scale = MinMaxScaler(feature_range=(0, 1), copy=True).fit_transform(x_scale)
-        # OUTLIER DATA
-        z_scores = scipy.stats.zscore(dff)
-        abs_z_scores = np.abs(z_scores)
-        filtered_entries = (abs_z_scores < 3).all(axis=1)
-        outlier_dff = dff[filtered_entries]
-        features1_outlier = outlier_dff.columns
-        features_outlier = list(features1_outlier)
-        outlier_names1 = df[filtered_entries]
-        outlier_names = outlier_names1.iloc[:, 0]
-
-        # def rescale(data, new_min=0, new_max=1):
-        #     """Rescale the data to be within the range [new_min, new_max]"""
-        #     return (data - data.min()) / (data.max() - data.min()) * (new_max - new_min) + new_min
-
-        # ORIGINAL DATA WITH OUTLIERS
-        x_scale = dff.loc[:, features].values
-        y_scale = dff.loc[:, ].values
-        x_scale = StandardScaler().fit_transform(x_scale)
-        # x_scale = rescale(x_scale, new_min=0, new_max=1)
-        pca_scale = PCA(n_components=len(features))
-        principalComponents_scale = pca_scale.fit_transform(x_scale)
-        principalDf_scale = pd.DataFrame(data=principalComponents_scale
-                                         , columns=['PC' + str(i + 1) for i in range(len(features))])
-        # combining principle components and target
-        finalDf_scale = pd.concat([df[[df.columns[0]]], principalDf_scale], axis=1)
-        dfff_scale = finalDf_scale.fillna(0)
-        Var_scale = pca_scale.explained_variance_ratio_
-        # calculating loading vector plot
-        loading_scale = pca_scale.components_.T * np.sqrt(pca_scale.explained_variance_)
-        loading_scale_df = pd.DataFrame(data=loading_scale[:, 0:2],
-                                        columns=["PC1", "PC2"])
-        line_group_scale_df = pd.DataFrame(data=features, columns=['line_group'])
-        loading_scale_dff = pd.concat([loading_scale_df, line_group_scale_df], axis=1)
-        a = (len(features), 2)
-        zero_scale = np.zeros(a)
-        zero_scale_df = pd.DataFrame(data=zero_scale, columns=["PC1", "PC2"])
-        zero_scale_dff = pd.concat([zero_scale_df, line_group_scale_df], axis=1)
-        loading_scale_line_graph = pd.concat([loading_scale_dff, zero_scale_dff], axis=0)
-
-        # ORIGINAL DATA WITH REMOVING OUTLIERS
-        x_outlier_scale = outlier_dff.loc[:, features_outlier].values
-        y_outlier_scale = outlier_dff.loc[:, ].values
-        x_outlier_scale = StandardScaler().fit_transform(x_outlier_scale)
-
-        # x_outlier_scale = MinMaxScaler().fit_transform(x_outlier_scale)
-
-        # def rescale(data, new_min=0, new_max=1):
-        #     """Rescale the data to be within the range [new_min, new_max]"""
-        #     return (data - data.min()) / (data.max() - data.min()) * (new_max - new_min) + new_min
-
-        # x_outlier_scale = rescale(x_outlier_scale, new_min=0, new_max=1)
-        # uses covariance matrix
-        pca_outlier_scale = PCA(n_components=len(features_outlier))
-        principalComponents_outlier_scale = pca_outlier_scale.fit_transform(x_outlier_scale)
-        principalDf_outlier_scale = pd.DataFrame(data=principalComponents_outlier_scale
-                                                 , columns=['PC' + str(i + 1) for i in range(len(features_outlier))])
-        # combining principle components and target
-        finalDf_outlier_scale = pd.concat([outlier_names, principalDf_outlier_scale], axis=1)
-        dfff_outlier_scale = finalDf_outlier_scale.fillna(0)
-        # calculating loading
-        Var_outlier_scale = pca_outlier_scale.explained_variance_ratio_
-        # calculating loading vector plot
-        loading_outlier_scale = pca_outlier_scale.components_.T * np.sqrt(pca_outlier_scale.explained_variance_)
-        loading_outlier_scale_df = pd.DataFrame(data=loading_outlier_scale[:, 0:2],
-                                                columns=["PC1", "PC2"])
-        line_group_df = pd.DataFrame(data=features_outlier, columns=['line_group'])
-        loading_outlier_scale_dff = pd.concat([loading_outlier_scale_df, line_group_df], axis=1)
-        a = (len(features_outlier), 2)
-        zero_outlier_scale = np.zeros(a)
-        zero_outlier_scale_df = pd.DataFrame(data=zero_outlier_scale, columns=["PC1", "PC2"])
-        zero_outlier_scale_dff = pd.concat([zero_outlier_scale_df, line_group_df], axis=1)
-        loading_outlier_scale_line_graph = pd.concat([loading_outlier_scale_dff, zero_outlier_scale_dff], axis=0)
-        if outlier == 'No':
-            dat = dfff_scale
-        elif outlier == 'Yes':
-            dat = dfff_outlier_scale
-        trace2_all = go.Scatter(x=dat['PC1'], y=dat['PC2'], mode='markers',
-                                text=dat[dat.columns[0]],
-                                marker=dict(opacity=0.7, showscale=False, size=12,
-                                            line=dict(width=0.5, color='DarkSlateGrey'),
+                                                              placeholder='Select an option for color')],
+                                            )], style={'padding': 10}),
+                                            html.Div([html.Label(
+                                                [
+                                                    "Select color bar range:",
+                                                    dcc.RangeSlider(
+                                                        id='colorbar-slider-5D',
+                                                    ),
+                                                    html.Div(id='slider-output-container-5D')
+                                                ]
+                                            )], style={
+                                                'fontSize': 14,
+                                                'font-family': 'Arial',
+                                                'padding': 7,
+                                            }
                                             ),
-                                )
+                                            html.Div(
+                                                [html.Label(
+                                                    [
+                                                        "Select Animation Frame:",
+                                                        dcc.Dropdown(
+                                                            id='anim-frame-5D',
+                                                            multi=False,
+                                                            placeholder='Select an option '
+                                                                        'for Animation Frame')],
+                                                ), ],
+                                                style={
+                                                    'padding': 10})
+                                        ],
+                                            style={'fontSize': 14, 'fpmt-family': 'Arial', 'display': 'inline-block',
+                                                   'width': '32%', 'float': 'right',
+                                                   'backgroundColor': '#ffffff'})
+                                        ,
 
-        ####################################################################################################
-        if outlier == 'No':
-            data = loading_scale_line_graph
-            variance = Var_scale
-        elif outlier == 'Yes':
-            data = loading_outlier_scale_line_graph
-            variance = Var_outlier_scale
-        counter = 0
-        lists = [[] for i in range(len(data['line_group'].unique()))]
-        for i in data['line_group'].unique():
-            dataf_all = data[data['line_group'] == i]
-            trace1_all = go.Scatter(x=dataf_all['PC1'], y=dataf_all['PC2'], line=dict(color="#4f4f4f"),
-                                    name=i,
-                                    # text=i,
-                                    mode='lines+text',
-                                    textposition='bottom right', textfont=dict(size=12)
-                                    )
-            lists[counter] = trace1_all
-            counter = counter + 1
-        ####################################################################################################
-        if graph_update == 'Biplot':
-            lists.insert(0, trace2_all)
-            return {'data': lists,
-                    'layout': go.Layout(xaxis=dict(title='PC1 ({}%)'.format(round((variance[0] * 100), 2))),
-                                        yaxis=dict(title='PC2 ({}%)'.format(round((variance[1] * 100), 2))),
-                                        showlegend=False, margin={'r': 0},
-                                        # shapes=[dict(type="circle", xref="x", yref="y", x0=-1,
-                                        #              y0=-1, x1=1, y1=1,
-                                        #              line_color="DarkSlateGrey")]
+                                    ], className='container', style={'backgroundColor': '#ffffff', 'padding': 20})])
+                        ])
+                    ]),
+            dcc.Tab(label='MOF Data Filtering', style=tab_style, selected_style=tab_selected_style,
+                    children=[html.Div([html.Div([dash_table.DataTable(id='data-table-interact',
+                                                                       editable=True,
+                                                                       filter_action='native',
+                                                                       sort_action='native',
+                                                                       sort_mode='multi',
+                                                                       selected_columns=[],
+                                                                       selected_rows=[],
+                                                                       page_action='native',
+                                                                       column_selectable='single',
+                                                                       page_current=0,
+                                                                       page_size=20,
+                                                                       style_data={'height': 'auto'},
+                                                                       style_table={'overflowX': 'scroll',
+                                                                                    'maxHeight': '300px',
+                                                                                    'overflowY': 'scroll'},
+                                                                       style_cell={
+                                                                           'minWidth': '0px', 'maxWidth': '220px',
+                                                                           'whiteSpace': 'normal',
+                                                                       }
+                                                                       ),
+                                                  html.Div(id='data-table-container'), ], style={'padding': 15}),
+
+                                        html.Div([html.Div([
+                                            html.Label(["Select X variable:",
+                                                        (dcc.Dropdown(id='xaxis', placeholder="Select an option for X",
+                                                                      multi=False))
+                                                        ], className="six columns",
+                                                       style={'fontSize': 14, 'font-family': 'Arial',
+                                                              'width': '20%', 'display': 'inline-block', 'padding': 5
+                                                              })
+                                        ]),
+                                            html.Div([
+                                                html.Label(["Select Y variable:",
+                                                            (dcc.Dropdown(id='yaxis',
+                                                                          placeholder="Select an option for Y",
+                                                                          multi=False))
+                                                            ], className="six columns",
+                                                           style={'fontSize': 14, 'font-family': 'Arial',
+                                                                  'width': '20%',
+                                                                  'display': 'inline-block', 'padding': 5
+                                                                  })
+                                            ]),
+                                            html.Div([
+                                                html.Label(["Select size variable:",
+                                                            dcc.Dropdown(id='saxis',
+                                                                         placeholder="Select an option for size",
+                                                                         multi=False),
+                                                            ],
+                                                           className="six columns",
+                                                           style={'fontSize': 14, 'font-family': 'Arial',
+                                                                  'width': '20%',
+                                                                  'display': 'inline-block', 'padding': 5}
+                                                           ),
+                                                dbc.Modal(
+                                                    [
+                                                        dbc.ModalHeader(
+                                                            "Selection Error!"),
+                                                        dbc.ModalBody(
+                                                            "Please select a size variable that contains numerical values."),
+                                                        dbc.ModalFooter(
+                                                            dbc.Button("Close",
+                                                                       id="close-data",
+                                                                       className="ml-auto")
+                                                        ),
+                                                    ],
+                                                    id="modal-data",
+                                                    is_open=False,
+                                                    centered=True,
+                                                    size="xl"
+                                                )
+
+                                            ]),
+                                            html.Div([
+                                                html.Label(["Select color variable:",
+                                                            (dcc.Dropdown(id='caxis',
+                                                                          placeholder="Select an option for color",
+                                                                          multi=False))
+                                                            ], className="six columns",
+                                                           style={'fontSize': 14, 'font-family': 'Arial',
+                                                                  'width': '20%',
+                                                                  'display': 'inline-block', 'padding': 5
+                                                                  }),
+                                                dbc.Modal(
+                                                    [
+                                                        dbc.ModalHeader(
+                                                            "Selection Error!"),
+                                                        dbc.ModalBody(
+                                                            "Please select a color variable that contains numerical values."),
+                                                        dbc.ModalFooter(
+                                                            dbc.Button("Close",
+                                                                       id="close-datac",
+                                                                       className="ml-auto")
+                                                        ),
+                                                    ],
+                                                    id="modal-datac",
+                                                    is_open=False,
+                                                    centered=True,
+                                                    size="xl"
+                                                )
+                                            ]),
+                                        ],
+                                            style={'padding-left': '15%', 'padding-right': '5%'}
                                         ),
+                                        html.Div([html.Label(["Select X axis scale:",
+                                                              dcc.RadioItems(
+                                                                  id='xaxis-type',
+                                                                  options=[{'label': i, 'value': i} for i in
+                                                                           ['Linear', 'Log']],
+                                                                  value='Linear',
+                                                                  labelStyle={'display': 'inline-block', }
+                                                              )]),
+                                                  ], style={'display': 'inline-block', 'width': '24%'}),
+                                        html.Div([html.Label(["Select Y axis scale:",
+                                                              dcc.RadioItems(
+                                                                  id='yaxis-type',
+                                                                  options=[{'label': i, 'value': i} for i in
+                                                                           ['Linear', 'Log']],
+                                                                  value='Linear',
+                                                                  labelStyle={'display': 'inline-block'}
+                                                              )]),
+                                                  ], style={'display': 'inline-block', 'width': '24%'}),
+                                        html.Div([html.Label(["Select color scale:",
+                                                              dcc.RadioItems(
+                                                                  id='colorscale',
+                                                                  options=[{'label': i, 'value': i} for i in
+                                                                           ['Viridis', 'Plasma']],
+                                                                  value='Plasma'
+                                                              )]),
+                                                  ], style={'display': 'inline-block', 'width': '24%', }),
+                                        html.Div([html.Label(["Size range:"
+                                                                 , html.Div(id='size-output-container-filter')])
+                                                  ], style={'display': 'inline-block', 'width': '24%', }
+                                                 ),
+                                        app.css.append_css({
+                                            'external_url': 'https://codepen.io/chriddyp/pen/bWLwgP.css'
+                                        })
+                                        ], style={'backgroundColor': '#ffffff'})]
+                    ),
+            dcc.Tab(label='Statistical Analysis of Top Structures', style=tab_style,
+                    selected_style=tab_selected_style,
+                    children=[
 
-                    }
-        elif graph_update == 'Loadings':
-            return {'data': lists,
-                    'layout': go.Layout(xaxis=dict(title='PC1 ({}%)'.format(round((variance[0] * 100), 2))),
-                                        yaxis=dict(title='PC2 ({}%)'.format(round((variance[1] * 100), 2))),
-                                        showlegend=False, margin={'r': 0},
-                                        # shapes=[dict(type="circle", xref="x", yref="y", x0=-1,
-                                        #              y0=-1, x1=1, y1=1,
-                                        #              line_color="DarkSlateGrey")]
-                                        ),
+                        dcc.Tabs(id="subtabs2", style=tabs_styles, children=[
+                            dcc.Tab(label='Violin Plot', style=tab_style,
+                                    selected_style=tab_selected_style,
+                                    children=[html.Div([html.Div([dcc.Graph(id='violin-plot')
+                                                                  ],
+                                                                 style={'width': '65%', 'display': 'inline-block', })
+                                                           , html.Div([
+                                            html.Div([html.Label(
+                                                ['Select variable to determine top performing structures (will filter '
+                                                 'percentiles according to selected column):',
+                                                 dcc.Dropdown(
+                                                     id='data-set',
+                                                     placeholder="Select an option for dataset",
+                                                     multi=False,
+                                                 )]
+                                            ),
+                                                dbc.Modal(
+                                                    [
+                                                        dbc.ModalHeader(
+                                                            "Selection Error!"),
+                                                        dbc.ModalBody(
+                                                            "Please select a variable that contains numerical values."),
+                                                        dbc.ModalFooter(
+                                                            dbc.Button("Close",
+                                                                       id="close-violin",
+                                                                       className="ml-auto")
+                                                        ),
+                                                    ],
+                                                    id="modal-violin",
+                                                    is_open=False,
+                                                    centered=True,
+                                                    size="xl"
+                                                )
+                                            ], style={'padding': 10}),
+                                            html.Div([html.Label(["Select % of structures in dataset to analyse per "
+                                                                  "pressure:"
+                                                                     , dcc.RadioItems(
+                                                    id='percentile-type',
+                                                    options=[{'label': 'All structures', 'value': 'All structures'},
+                                                             {'label': 'Top 1% of structures',
+                                                              'value': 'Top 1% of structures'},
+                                                             {'label': 'Top 5% of structures',
+                                                              'value': 'Top 5% of structures'},
+                                                             {'label': 'Top 10% of structures',
+                                                              'value': 'Top 10% of structures'}],
+                                                    value='All structures',
 
-                    }
+                                                )]),
+                                                      ], style={'padding': 10}),
+                                            html.Div([html.Label(
+                                                ["Select X variable:",
+                                                 dcc.Dropdown(
+                                                     id='anim-frame-violin',
+                                                     multi=False,
+                                                     placeholder='Select an option '
+                                                                 'for X')],
+                                            ), ],
+                                                style={
+                                                    'padding': 10}),
+                                            html.Div([html.Label(["Select Y variable (Geometrical Property):",
+                                                                  dcc.Dropdown(id='yaxis-stat',
+                                                                               placeholder="Select an option for Y",
+                                                                               multi=False,
+                                                                               )])
+                                                      ], style={'padding': 10}),
+                                            html.Div([html.Label(["Take absolute values of data:",
+                                                                  dcc.RadioItems(id='abs-value',
+                                                                                 options=[
+                                                                                     {'label': 'Yes', 'value': 'Yes'},
+                                                                                     {'label': 'No', 'value': 'No'}],
+                                                                                 value='Yes'
 
-    elif all_custom == 'Custom':
-        # Dropping Data variables
-        dff_input = dff.drop(columns=dff[input])
-        features1_input = dff_input.columns
-        features_input = list(features1_input)
-        dff_target = dff[input]
-        # OUTLIER DATA INPUT
-        z_scores_input = scipy.stats.zscore(dff_input)
-        abs_z_scores_input = np.abs(z_scores_input)
-        filtered_entries_input = (abs_z_scores_input < 3).all(axis=1)
-        dff_input_outlier = dff_input[filtered_entries_input]
-        features1_input_outlier = dff_input_outlier.columns
-        features_input_outlier = list(features1_input_outlier)
-        outlier_names_input1 = df[filtered_entries_input]
-        outlier_names_input = outlier_names_input1.iloc[:, 0]
-        # OUTLIER DATA TARGET
-        z_scores_target = scipy.stats.zscore(dff_target)
-        abs_z_scores_target = np.abs(z_scores_target)
-        filtered_entries_target = (abs_z_scores_target < 3).all(axis=1)
-        dff_target_outlier = dff_target[filtered_entries_target]
-        # INPUT DATA WITH OUTLIERS
-        x_scale_input = dff_input.loc[:, features_input].values
-        y_scale_input = dff_input.loc[:, ].values
-        x_scale_input = StandardScaler().fit_transform(x_scale_input)
+                                                                                 )])
+                                                      ], style={'padding': 10}),
+                                            dcc.Markdown(d("""
+               **Click Data**
 
-        # x_scale_input = MinMaxScaler(feature_range=(0, 1), copy=True).fit_transform(x_scale_input)
-        # def rescale(data, new_min=0, new_max=1):
-        #     """Rescale the data to be within the range [new_min, new_max]"""
-        #     return (data - data.min()) / (data.max() - data.min()) * (new_max - new_min) + new_min
+               Click on points in the graph.
+           """)),
+                                            html.Pre(id='click-data-stat'),
 
-        # x_scale_input = rescale(x_scale_input, new_min=0, new_max=1)
+                                        ], style={'fontSize': 14, 'font-family': 'Arial', 'width': '30%',
+                                                  'display': 'inline-block',
+                                                  'float': 'right'})
+                                                           ,
 
-        pca_scale_input = PCA(n_components=len(features_input))
-        principalComponents_scale_input = pca_scale_input.fit_transform(x_scale_input)
-        principalDf_scale_input = pd.DataFrame(data=principalComponents_scale_input
-                                               , columns=['PC' + str(i + 1) for i in range(len(features_input))])
-        finalDf_scale_input = pd.concat([df[[df.columns[0]]], principalDf_scale_input, dff_target], axis=1)
-        dfff_scale_input = finalDf_scale_input.fillna(0)
-        Var_scale_input = pca_scale_input.explained_variance_ratio_
-        # calculating loading vector plot
-        loading_scale_input = pca_scale_input.components_.T * np.sqrt(pca_scale_input.explained_variance_)
-        loading_scale_input_df = pd.DataFrame(data=loading_scale_input[:, 0:2],
-                                              columns=["PC1", "PC2"])
-        line_group_scale_input_df = pd.DataFrame(data=features_input, columns=['line_group'])
-        loading_scale_input_dff = pd.concat([loading_scale_input_df, line_group_scale_input_df],
-                                            axis=1)
-        a = (len(features_input), 2)
-        zero_scale_input = np.zeros(a)
-        zero_scale_input_df = pd.DataFrame(data=zero_scale_input, columns=["PC1", "PC2"])
-        zero_scale_input_dff = pd.concat([zero_scale_input_df, line_group_scale_input_df], axis=1)
-        loading_scale_input_line_graph = pd.concat([loading_scale_input_dff, zero_scale_input_dff],
-                                                   axis=0)
+                                                        ], className='container', style={'padding': 40,
+                                                                                         'backgroundColor': '#ffffff'})]),
+                            dcc.Tab(label='Distribution Plot', style=tab_style,
+                                    selected_style=tab_selected_style,
+                                    children=[
+                                        html.Div([
+                                            html.Div([dcc.Graph(id='dist-plot', animate=False)],
+                                                     style={'width': '65%', 'display': 'inline-block',
+                                                            }),
+                                            html.Div([html.Div([html.Label(
+                                                ['Select variable to determine top performing structures (will filter '
+                                                 'percentiles according to selected column):',
+                                                 dcc.Dropdown(
+                                                     id='data-set-dist',
+                                                     placeholder="Select an option for dataset",
+                                                     multi=False,
+                                                 )]
+                                            ),
+                                                dbc.Modal(
+                                                    [
+                                                        dbc.ModalHeader(
+                                                            "Selection Error!"),
+                                                        dbc.ModalBody(
+                                                            "Please select a variable that contains numerical values."),
+                                                        dbc.ModalFooter(
+                                                            dbc.Button("Close",
+                                                                       id="close-dist",
+                                                                       className="ml-auto")
+                                                        ),
+                                                    ],
+                                                    id="modal-dist",
+                                                    is_open=False,
+                                                    centered=True,
+                                                    size="xl"
+                                                )
+                                            ], style={'padding': 10}),
+                                                html.Div([html.Label(["Select % of structures in dataset to analyse per"
+                                                                      " pressure:"
+                                                                         , dcc.RadioItems(
+                                                        id='percentile-type-dist',
+                                                        options=[{'label': 'All structures', 'value': 'All structures'},
+                                                                 {'label': 'Top 1% of structures',
+                                                                  'value': 'Top 1% of structures'},
+                                                                 {'label': 'Top 5% of structures',
+                                                                  'value': 'Top 5% of structures'},
+                                                                 {'label': 'Top 10% of structures',
+                                                                  'value': 'Top 10% of structures'}],
+                                                        value='All structures',
 
-        # INPUT DATA WITH REMOVING OUTLIERS
-        x_scale_input_outlier = dff_input_outlier.loc[:, features_input_outlier].values
-        y_scale_input_outlier = dff_input_outlier.loc[:, ].values
-        x_scale_input_outlier = StandardScaler().fit_transform(x_scale_input_outlier)
+                                                    )]),
+                                                          ], style={'padding': 10}),
+                                                html.Div([html.Label(["Select X variable:",
+                                                                      dcc.Dropdown(id='xaxis-dist',
+                                                                                   multi=False,
+                                                                                   placeholder="Select an option for X"
+                                                                                   )]), ],
+                                                         style={'padding': 10
+                                                                }),
+                                                html.Div([html.Label(["Take absolute values of data:",
+                                                                      dcc.RadioItems(id='abs-value-dist',
+                                                                                     options=[{'label': 'Yes',
+                                                                                               'value': 'Yes'},
+                                                                                              {'label': 'No',
+                                                                                               'value': 'No'}],
+                                                                                     value='Yes'
 
-        # x_scale_input_outlier = MinMaxScaler(feature_range=(0, 1), copy=True).fit_transform(x_scale_input_outlier)
-        # def rescale(data, new_min=0, new_max=1):
-        #     """Rescale the data to be within the range [new_min, new_max]"""
-        #     return (data - data.min()) / (data.max() - data.min()) * (new_max - new_min) + new_min
+                                                                                     )])
+                                                          ], style={'padding': 10}),
+                                                html.Div([html.Label(["Select Grouping:",
+                                                                      dcc.RadioItems(
+                                                                          id='dist-grouping',
+                                                                          options=[{'label': i, 'value': i} for i in
+                                                                                   ['None', 'Family']],
+                                                                          value='None',
+                                                                          labelStyle={'display': 'inline-block'})])
+                                                          ]),
+                                                html.Div([html.Label(
+                                                    ["Select Animation Frame:",
+                                                     dcc.Dropdown(
+                                                         id='anim-frame-dist',
+                                                         multi=False,
+                                                         placeholder='Select an option '
+                                                                     'for Animation Frame')],
+                                                ), ],
+                                                    style={
+                                                        'padding': 10})
+                                            ], style={'fontSize': 14, 'font-family': 'Arial', 'width': '30%',
+                                                      'display': 'inline-block',
+                                                      'float': 'right'})
 
-        # x_scale_input_outlier = rescale(x_scale_input_outlier, new_min=0, new_max=1)
-        pca_scale_input_outlier = PCA(n_components=len(features_input_outlier))
-        principalComponents_scale_input_outlier = pca_scale_input_outlier.fit_transform(x_scale_input_outlier)
-        principalDf_scale_input_outlier = pd.DataFrame(data=principalComponents_scale_input_outlier
-                                                       , columns=['PC' + str(i + 1) for i in
-                                                                  range(len(features_input_outlier))])
-        finalDf_scale_input_outlier = pd.concat(
-            [outlier_names_input, principalDf_scale_input_outlier, dff_target_outlier],
-            axis=1)
-        dfff_scale_input_outlier = finalDf_scale_input_outlier.fillna(0)
-        Var_scale_input_outlier = pca_scale_input_outlier.explained_variance_ratio_
-        # calculating loading vector plot
-        loading_scale_input_outlier = pca_scale_input_outlier.components_.T * np.sqrt(
-            pca_scale_input_outlier.explained_variance_)
-        loading_scale_input_outlier_df = pd.DataFrame(data=loading_scale_input_outlier[:, 0:2],
-                                                      columns=["PC1", "PC2"])
-        line_group_scale_input_outlier_df = pd.DataFrame(data=features_input_outlier, columns=['line_group'])
-        loading_scale_input_outlier_dff = pd.concat([loading_scale_input_outlier_df, line_group_scale_input_outlier_df],
-                                                    axis=1)
-        a = (len(features_input_outlier), 2)
-        zero_scale_input_outlier = np.zeros(a)
-        zero_scale_input_outlier_df = pd.DataFrame(data=zero_scale_input_outlier, columns=["PC1", "PC2"])
-        zero_scale_input_outlier_dff = pd.concat([zero_scale_input_outlier_df, line_group_scale_input_outlier_df],
-                                                 axis=1)
-        loading_scale_input_outlier_line_graph = pd.concat(
-            [loading_scale_input_outlier_dff, zero_scale_input_outlier_dff],
-            axis=0)
-        if outlier == 'No':
-            dat = dfff_scale_input
-            variance = Var_scale_input
-        elif outlier == 'Yes':
-            dat = dfff_scale_input_outlier
-            variance = Var_scale_input_outlier
-        trace2 = go.Scatter(x=dat['PC1'], y=dat['PC2'], mode='markers',
-                            marker_color=dat[color] if target == 'Yes' else None,
-                            marker_size=dat[size] if target2 == 'Yes' else 12,
-                            text=dat[dat.columns[0]],
-                            marker=dict(opacity=0.7, colorscale='Plasma',
-                                        sizeref=max(dat[size]) / (15 ** 2) if target2 == 'Yes' else None,
-                                        sizemode='area',
-                                        showscale=True if target == 'Yes' else False,
-                                        line=dict(width=0.5, color='DarkSlateGrey'),
-                                        colorbar=dict(title=dict(text=color if target == 'Yes' else None,
-                                                                 font=dict(family='Helvetica'),
-                                                                 side='right'), ypad=0),
-                                        ),
-                            )
-        ####################################################################################################
-        if outlier == 'No':
-            data = loading_scale_input_line_graph
-        elif outlier == 'Yes':
-            data = loading_scale_input_outlier_line_graph
-        counter = 0
-        lists = [[] for i in range(len(data['line_group'].unique()))]
-        for i in data['line_group'].unique():
-            dataf = data[data['line_group'] == i]
-            trace1 = go.Scatter(x=dataf['PC1'], y=dataf['PC2'],
-                                line=dict(color="#666666" if target == 'Yes' else '#4f4f4f'), name=i,
-                                # text=i,
-                                mode='lines+text', textposition='bottom right', textfont=dict(size=12),
-                                )
-            lists[counter] = trace1
-            counter = counter + 1
-        ####################################################################################################
-        if graph_update == 'Biplot':
-            lists.insert(0, trace2)
-            return {'data': lists,
-                    'layout': go.Layout(xaxis=dict(title='PC1 ({}%)'.format(round((variance[0] * 100), 2))),
-                                        yaxis=dict(title='PC2 ({}%)'.format(round((variance[1] * 100), 2))),
-                                        showlegend=False, margin={'r': 0},
-                                        # shapes=[dict(type="circle", xref="x", yref="y", x0=-1,
-                                        #              y0=-1, x1=1, y1=1,
-                                        #              line_color="DarkSlateGrey")]
-                                        ),
+                                        ], className='container', style={'backgroundColor': '#ffffff', 'padding': 40}
+                                        )
+                                    ]),
+                        ]),
 
-                    }
-        elif graph_update == 'Loadings':
-            return {'data': lists,
-                    'layout': go.Layout(xaxis=dict(title='PC1 ({}%)'.format(round((variance[0] * 100), 2))),
-                                        yaxis=dict(title='PC2 ({}%)'.format(round((variance[1] * 100), 2))),
-                                        showlegend=False, margin={'r': 0},
-                                        # shapes=[dict(type="circle", xref="x", yref="y", x0=-1,
-                                        #              y0=-1, x1=1, y1=1,
-                                        #              line_color="DarkSlateGrey")]
-                                        ),
+                    ])
+        ], style=tabs_styles)
+    ], style={'padding': 15})
+], style={'backgroundColor': '#f6f6f6'})
 
-                    }
+
+# DOWNLOAD UPLOADED FILE
+def file_download_link(filename):
+    """Create a Plotly Dash 'A' element that downloads a file from the app."""
+    location = "/download/{}".format(urlquote(filename))
+    return html.A(filename, href=location)
+
+
+# READ FILE
+def parse_contents(contents, filename):
+    content_type, content_string = contents.split(',')
+    decoded = base64.b64decode(content_string)
+    try:
+        if 'csv' in filename:
+            # Assume that the user uploaded a CSV file
+            df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
+        elif 'xls' in filename:
+            # Assume that the user uploaded an excel file
+            df = pd.read_excel(io.BytesIO(decoded))
+        elif 'txt' or 'tsv' in filename:
+            df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), delimiter=r'\s+'
+                             )
+    except Exception as e:
+        print(e)
+        return html.Div([
+            'There was an error processing this file.'
+        ])
+    return df
+
+
+# SIZE MODAL CALLBACK UPLOAD FILE
+@app.callback(
+    [Output('modal-upload', 'is_open'),
+     Output('output-data-upload', 'children')],
+    [
+        Input('data-table-upload', 'contents'),
+        Input('close-upload', 'n_clicks')],
+    [State('data-table-upload', 'filename')])
+def update_output(contents, modal_close, filename):
+    ctx = dash.callback_context
+    user_clicked = ctx.triggered[0]['prop_id'].split('.')[0]
+    df = parse_contents(contents, filename)
+    if not user_clicked or user_clicked == 'close':
+        return dash.no_update, False
+
+    if contents is None:
+        return [], False
+
+    if not filename.endswith(('.xls', '.csv', '.txt')):
+        return [], True
+    return df
+
+
+@app.callback(Output('csv-data', 'data'),
+              [Input('data-table-upload', 'contents')],
+              [State('data-table-upload', 'filename')])
+def parse_uploaded_file(contents, filename):
+    if not filename:
+        return dash.no_update
+    df = parse_contents(contents, filename)
+    return df.to_json(date_format='iso', orient='split')
+
+
+# POPULATE AXIS DROPDOWN 2VAR ENV ANIM
+@app.callback([Output('xaxis-anim-2D', 'options'),
+               Output('yaxis-anim-2D', 'options'), ],
+              [Input('csv-data', 'data')])
+def populate_dropdown_2var_anim(data):
+    if not data:
+        return dash.no_update, dash.no_update
+    df = pd.read_json(data, orient='split')
+    options = [{'label': i, 'value': i} for i in df.columns]
+    return options, options
+
+
+@app.callback(Output('anim-frame-2D', 'options'),
+              [Input('csv-data', 'data')])
+def populate_animation_frame_2D(data):
+    if not data:
+        return dash.no_update
+    df = pd.read_json(data, orient='split')
+    dff = df.select_dtypes(exclude=['float', 'object'])
+    options = [{'label': i, 'value': i} for i in dff.columns]
+    return options
+
+
+# POPULATE GRAPH 2VAR ENV ANIM
+@app.callback(Output('my-2D-graph', 'figure'),
+              [
+                  Input('xaxis-anim-2D', 'value'),
+                  Input('yaxis-anim-2D', 'value'),
+                  Input('anim-frame-2D', 'value')],
+              [State('csv-data', 'data')]
+              )
+def update_figure_2Var(x, y, frame, data):
+    if not data:
+        return dash.no_update
+    df = pd.read_json(data, orient='split')
+    return px.scatter(df, x=df[x], y=df[y], title="", animation_frame=df[frame],
+                      animation_group=df.columns[0],
+                      hover_name=df.columns[0],
+                      hover_data={}, template="none",
+                      ).update_xaxes(showgrid=False, title=x.translate(SUP), autorange=True, ticks='outside',
+                                     showline=True, showspikes=True, spikethickness=1, spikedash='solid',
+                                     mirror=True, tickformat=".1f", title_standoff=10).update_yaxes(spikedash='solid',
+                                                                                                    showgrid=False,
+                                                                                                    title_standoff=10,
+                                                                                                    title=dict(
+                                                                                                        text=y.translate(
+                                                                                                            SUP),
+                                                                                                        standoff=5),
+                                                                                                    autorange=True,
+                                                                                                    ticks='outside',
+                                                                                                    showspikes=True,
+                                                                                                    spikethickness=1,
+                                                                                                    showline=True,
+                                                                                                    mirror=True,
+                                                                                                    tickformat=".1f"
+                                                                                                    ).update_layout(
+        clickmode='event+select', hovermode='closest', margin={'l': 80}, autosize=True, font=dict(family='Helvetica')
+    ).update_traces(marker=dict(opacity=0.7, line=dict(width=0.5, color='DarkSlateGrey'),
+                                ))
+
+
+# POPULATE AXIS DROPDOWN 3VAR ENV ANIM
+@app.callback([Output('xaxis-anim-3D', 'options'),
+               Output('yaxis-anim-3D', 'options'),
+               Output('caxis-anim-3D', 'options')],
+              [Input('csv-data', 'data')])
+def populate_dropdown_3var_anim(data):
+    if not data:
+        return dash.no_update, dash.no_update, dash.no_update
+    df = pd.read_json(data, orient='split')
+    options = [{'label': i, 'value': i} for i in df.columns]
+    return options, options, options
+
+
+# POPULATE COLORBAR SLIDER SCATTER 3VAR ENV ANIM
+@app.callback([Output('colorbar-slider', 'min'),
+               Output('colorbar-slider', 'max'),
+               Output('colorbar-slider', 'step'),
+               Output('colorbar-slider', 'value')
+               ],
+              [Input('csv-data', 'data'),
+               Input('caxis-anim-3D', 'value')
+               ],
+              [State('csv-data', 'data')])
+def populate_pressure_slider_3Var(_, color, data):
+    if not data or not color:
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update
+
+    df = pd.read_json(data, orient='split')
+    min_v = round(float(df[color].min()), 1)
+    max_v = round(float(df[color].max()), 1)
+    step = 0.1
+    value = [round(float(df[color].min()), 1), round(float(df[color].max()), 1)]
+    return min_v, max_v, step, value
+
+
+# STATE VALUE COLORBAR SLIDER SCATTER 3VAR ENV ANIM
+@app.callback(
+    Output('slider-output-container', 'children'),
+    [Input('colorbar-slider', 'value')])
+def update_output_3Var(value):
+    return 'You have selected "{}"'.format(value)
+
+
+# POPULATE 3VAR ENV ANIM FRAME
+@app.callback(
+    Output('anim-frame-3Var', 'options'),
+    [Input('csv-data', 'data')]
+)
+def populate_animation_frame_3var(data):
+    if not data:
+        return dash.no_update
+    df = pd.read_json(data, orient='split')
+    dff = df.select_dtypes(exclude=['float', 'object'])
+    options = [{'label': i, 'value': i} for i in dff.columns]
+    return options
+
+
+# POPULATE GRAPH 3VAR ENV ANIM
+@app.callback(Output('my-3D-graph', 'figure'),
+              [Input('xaxis-anim-3D', 'value'),
+               Input('yaxis-anim-3D', 'value'),
+               Input('caxis-anim-3D', 'value'),
+               Input('colorbar-slider', 'value'),
+               Input('anim-frame-3Var', 'value')],
+              [State('csv-data', 'data')])
+def update_figure_3Var(x, y, color, color_value, frame, data):
+    if not data or not color_value:
+        return dash.no_update
+    df = pd.read_json(data, orient='split')
+    color_val_float = []
+    for i in range(0, len(color_value), 1):
+        color_val_float.append(float(color_value[i]))
+    color_val = color_val_float
+    return px.scatter(df,
+                      x=df[x],
+                      y=df[y],
+                      title="",
+                      animation_frame=df[frame],
+                      animation_group=df.columns[0],
+                      hover_name=df.columns[0],
+                      hover_data={},
+                      template="none",
+                      color=df[color],
+                      color_continuous_scale='Viridis',
+                      range_color=color_val
+                      ).update_xaxes(showgrid=False, title_standoff=10,
+                                     title=x.translate(SUP),
+                                     autorange=True,
+                                     ticks='outside',
+                                     showline=True,
+                                     showspikes=True,
+                                     spikethickness=1,
+                                     spikedash='solid',
+                                     mirror=True,
+                                     tickformat=".1f").update_yaxes(spikedash='solid', title_standoff=10,
+                                                                    showgrid=False,
+                                                                    title=dict(text=y.translate(SUP)
+                                                                               , standoff=5),
+                                                                    autorange=True,
+                                                                    ticks='outside',
+                                                                    showspikes=True,
+                                                                    spikethickness=1,
+                                                                    showline=True,
+                                                                    mirror=True,
+                                                                    tickformat=".1f").update_layout(
+        clickmode='event+select',
+        hovermode='closest',
+        margin={'l': 80},
+        autosize=True,
+        font=dict(family='Helvetica', ),
+        coloraxis_colorbar=dict(title=dict(text=color.translate(SUP), side='right'), ypad=0),
+    ).update_traces(marker=dict(size=10,
+                                opacity=0.7,
+                                showscale=False,
+                                line=dict(width=0.7, color='DarkSlateGrey'),
+                                colorscale="Viridis"))
+
+
+# POPULATE AXIS DROPDOWN 4VAR ENV ANIM
+@app.callback([Output('xaxis-anim', 'options'),
+               Output('yaxis-anim', 'options'),
+               Output('caxis-anim', 'options'),
+               Output('saxis-anim', 'options')
+               ],
+              [Input('csv-data', 'data')])
+def populate_dropdown_4var_anim(data):
+    if not data:
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update
+    df = pd.read_json(data, orient='split')
+    options = [{'label': i, 'value': i} for i in df.columns]
+    return options, options, options, options
+
+
+# SIZE MODAL CALLBACK 4VAR ENV ANIM
+@app.callback(
+    Output('modal-4Var', 'is_open'),
+    [Input('saxis-anim', 'value'),
+     Input('data-table-upload', 'contents'),
+     Input('close', 'n_clicks')],
+    [State('data-table-upload', 'filename')])
+def update_output_4Var(size_value, contents, modal_close, filename):
+    ctx = dash.callback_context
+    user_clicked = ctx.triggered[0]['prop_id'].split('.')[0]
+    df = parse_contents(contents, filename)
+    size_list = df[size_value].to_list()
+    if not user_clicked or user_clicked == 'close':
+        return dash.no_update, False
+
+    if contents is None:
+        return [], False
+
+    if filename is None:
+        return [], False
+
+    if size_value is None:
+        return [], False
+
+    for item in size_list:
+        if any(c.isalpha() for c in item):
+            return [], True
+
+
+# POPULATE COLORBAR SLIDER SCATTER 4VAR ENV ANIM
+@app.callback([Output('colorbar-slider-4D', 'min'),
+               Output('colorbar-slider-4D', 'max'),
+               Output('colorbar-slider-4D', 'step'),
+               Output('colorbar-slider-4D', 'value')
+               ],
+              [Input('csv-data', 'data'),
+               Input('caxis-anim', 'value')
+               ],
+              [State('csv-data', 'data')])
+def populate_pressure_slider_4Var(_, color, data):
+    if not data or not color:
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update
+    df = pd.read_json(data, orient='split')
+    min_v = round(float(df[color].min()), 1)
+    max_v = round(float(df[color].max()), 1)
+    step = 0.1
+    value = [round(float(df[color].min()), 1), round(float(df[color].max()), 1)]
+    return min_v, max_v, step, value
 
 
 @app.callback(
-    Output('size-second-target-container', 'children'),
-    [Input('size-scale-scores', 'value'),
-     Input('outlier-value-biplot', 'value')
-     ]
+    Output('slider-output-container-4D', 'children'),
+    [Input('colorbar-slider-4D', 'value')])
+def update_output_4Var(value):
+    return 'You have selected "{}"'.format(value)
+
+
+# SIZE RANGE
+@app.callback(
+    Output('size-container-4D', 'children'),
+    [Input('saxis-anim', 'value'),
+     Input('csv-data', 'data')],
+    [State('csv-data', 'data')]
 )
-def update_output(size, outlier):
-    z_scores_dff_size = scipy.stats.zscore(dff)
-    abs_z_scores_dff_size = np.abs(z_scores_dff_size)
-    filtered_entries_dff_size = (abs_z_scores_dff_size < 3).all(axis=1)
-    dff_target_outlier_size = dff[filtered_entries_dff_size]
-    if outlier == 'Yes':
-        size_range = [round(dff_target_outlier_size[size].min(), 2), round(dff_target_outlier_size[size].max(), 2)]
-    elif outlier == 'No':
-        size_range = [round(dff[size].min(), 2), round(dff[size].max(), 2)]
+def update_output_size_range_4Var(size, __, data):
+    if not data or not size:
+        return dash.no_update
+    df = pd.read_json(data, orient='split')
+    size_range = [round(df[size].min(), 2), round(df[size].max(), 2)]
+    return 'Size range: {}'.format(size_range)
+
+
+# POPULATE GRAPH 4VAR ENV ANIM FRAME
+@app.callback(
+    Output('anim-frame-4Var', 'options'),
+    [Input('csv-data', 'data')]
+)
+def populate_animation_frame_4var(data):
+    if not data:
+        return dash.no_update
+    df = pd.read_json(data, orient='split')
+    dff = df.select_dtypes(exclude=['float', 'object'])
+    options = [{'label': i, 'value': i} for i in dff.columns]
+    return options
+
+
+# POPULATE GRAPH 4VAR ENV ANIM
+@app.callback(Output('my-graph', 'figure'),
+              [
+                  Input('xaxis-anim', 'value'),
+                  Input('yaxis-anim', 'value'),
+                  Input('caxis-anim', 'value'),
+                  Input('saxis-anim', 'value'),
+                  Input('colorbar-slider-4D', 'value'),
+                  Input('anim-frame-4Var', 'value')],
+              [State('csv-data', 'data')]
+              )
+def update_figure_4Var(x, y, color, size, color_value, frame, data):
+    if not data or not color_value:
+        return dash.no_update
+    df = pd.read_json(data, orient='split')
+    # size_range = [df[size].min(), df[size].max()]
+    color_val_float = []
+    for i in range(0, len(color_value), 1):
+        color_val_float.append(float(color_value[i]))
+    color_val = color_val_float
+    return px.scatter(df, x=df[x], y=df[y], title="", animation_frame=frame,
+                      animation_group=df.columns[0], size=df[size], color=df[color],
+                      hover_name=df.columns[0],
+                      color_continuous_scale='Viridis',
+                      hover_data={}, template="none", range_color=color_val
+                      ).update_xaxes(showgrid=False, title=x.translate(SUP), autorange=True, ticks='outside',
+                                     showline=True, showspikes=True, spikethickness=1, spikedash='solid',
+                                     title_standoff=10,
+                                     mirror=True, tickformat=".1f").update_yaxes(spikedash='solid',
+                                                                                 showgrid=False, title_standoff=10,
+                                                                                 title=dict(text=y.translate(SUP),
+                                                                                            standoff=5),
+                                                                                 autorange=True, ticks='outside',
+                                                                                 showspikes=True, spikethickness=1,
+                                                                                 showline=True, mirror=True,
+                                                                                 tickformat=".1f").update_layout(
+        clickmode='event+select', hovermode='closest', margin={'l': 80}, autosize=True, font=dict(family='Helvetica'),
+        coloraxis_colorbar=dict(title=dict(text=color.translate(SUP), side='right', font=dict(size=14)), ypad=0),
+        # annotations=[
+        #     dict(x=1.5, y=-0.15, showarrow=False, align='left',
+        #          text='Size range: {}'.format(size_range), xref='paper', yref='paper', font=dict(size=14))
+        # ]
+    ).update_traces(marker=dict(opacity=0.7, showscale=False, line=dict(width=0.5, color='DarkSlateGrey'),
+                                ))
+
+
+# POPULATE AXIS DROPDOWN 5VAR (3D) ENV ANIM
+@app.callback([Output('xaxis-3D', 'options'),
+               Output('yaxis-3D', 'options'),
+               Output('zaxis-3D', 'options'),
+               Output('saxis-3D', 'options'),
+               Output('caxis-3D', 'options')
+               ],
+              [Input('csv-data', 'data')], )
+def populate_dropdown_5D_anim(data):
+    if not data:
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update
+    df = pd.read_json(data, orient='split')
+    options = [{'label': i, 'value': i} for i in df.columns]
+    return options, options, options, options, options
+
+
+# SIZE MODAL CALLBACK 5VAR (3D) ENV ANIM
+@app.callback(
+    Output('modal-5Var', 'is_open'),
+    [Input('saxis-3D', 'value'),
+     Input('data-table-upload', 'contents'),
+     Input('close-5D', 'n_clicks')],
+    [State('data-table-upload', 'filename')])
+def update_output_modal5(size_value, contents, modal_close, filename):
+    ctx = dash.callback_context
+    user_clicked = ctx.triggered[0]['prop_id'].split('.')[0]
+    df = parse_contents(contents, filename)
+    size_list = df[size_value].to_list()
+    if not user_clicked or user_clicked == 'close':
+        return dash.no_update, False
+
+    if contents is None:
+        return [], False
+
+    if filename is None:
+        return [], False
+
+    if size_value is None:
+        return [], False
+
+    for item in size_list:
+        if any(c.isalpha() for c in item):
+            return [], True
+
+
+# POPULATE COLORBAR SLIDER SCATTER 5VAR (3D) ENV ANIM
+@app.callback([Output('colorbar-slider-5D', 'min'),
+               Output('colorbar-slider-5D', 'max'),
+               Output('colorbar-slider-5D', 'step'),
+               Output('colorbar-slider-5D', 'value')
+               ],
+              [Input('csv-data', 'data'),
+               Input('caxis-3D', 'value')
+               ],
+              [State('csv-data', 'data')])
+def populate_pressure_slider_5D(_, color, data):
+    if not data or not color:
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update
+    df = pd.read_json(data, orient='split')
+    min_v = round(float(df[color].min()), 1)
+    max_v = round(float(df[color].max()), 1)
+    step = 0.1
+    value = [round(float(df[color].min()), 1), round(float(df[color].max()), 1)]
+    return min_v, max_v, step, value
+
+
+@app.callback(
+    Output('slider-output-container-5D', 'children'),
+    [Input('colorbar-slider-5D', 'value')])
+def update_output_colorbar_5D(value):
+    return 'You have selected "{}"'.format(value)
+
+
+# SIZE RANGE
+@app.callback(
+    Output('size-slider-container-5D', 'children'),
+    [Input('saxis-3D', 'value'),
+     Input('csv-data', 'data')],
+    [State('csv-data', 'data')]
+)
+def update_output_size_range_5D(size, __, data):
+    if not data or not size:
+        return dash.no_update
+    df = pd.read_json(data, orient='split')
+    size_range = [round(df[size].min(), 2), round(df[size].max(), 2)]
+    return 'Size range: {}'.format(size_range)
+
+
+@app.callback(
+    Output('anim-frame-5D', 'options'),
+    [Input('csv-data', 'data')]
+)
+def populate_animation_frame_5D(data):
+    if not data:
+        return dash.no_update
+    df = pd.read_json(data, orient='split')
+    dff = df.select_dtypes(exclude=['float', 'object'])
+    options = [{'label': i, 'value': i} for i in dff.columns]
+    return options
+
+
+# POPULATE GRAPH 5VAR (3D) ENV ANIM
+@app.callback(Output("graph", "figure"),
+              [Input('xaxis-3D', "value"),
+               Input('yaxis-3D', 'value'),
+               Input('zaxis-3D', 'value'),
+               Input('caxis-3D', 'value'),
+               Input('saxis-3D', 'value'),
+               Input('colorbar-slider-5D', 'value'),
+               Input('anim-frame-5D', 'value')],
+              [State('csv-data', 'data')]
+              )
+def make_figure(x, y, z, color, size, color_value, frame, data):
+    if not data or not color_value:
+        return dash.no_update
+    if x and y and z and color and size is None:
+        return dash.no_update
+    df = pd.read_json(data, orient='split')
+    color_val_float = []
+    for i in range(0, len(color_value), 1):
+        color_val_float.append(float(color_value[i]))
+    color_val = color_val_float
+    return px.scatter_3d(df, x=df[x], y=df[y], z=df[z], title="", animation_frame=frame,
+                         animation_group=df.columns[0], size=df[size], color=df[color],
+                         hover_name=df.columns[0],
+                         color_continuous_scale='Viridis',
+                         hover_data={}, template="none", range_color=color_val
+                         ).update_xaxes(showgrid=False, title=x.translate(SUP), autorange=True, tickformat=".1f"
+                                        ).update_yaxes(
+        showgrid=False, title=y.translate(SUP), autorange=True, tickformat=".1f").update_layout(
+        coloraxis_colorbar=dict(title=dict(text=color.translate(SUP), side='right', font=dict(size=14)), ypad=0),
+        font=dict(family='Helvetica'),
+        clickmode='event+select', hovermode='closest', margin={'l': 50, 'b': 80, 't': 50, 'r': 10}, autosize=True,
+    ).update_traces(
+        marker=dict(opacity=0.7, showscale=False, line=dict(width=0.5, color='#3d3d3d'),
+                    ))
+
+
+# POPULATE AXIS DROPDOWN SCATTER DATA TABLE FIGURE
+@app.callback([Output('xaxis', 'options'),
+               Output('yaxis', 'options'),
+               Output('caxis', 'options'),
+               Output('saxis', 'options')
+               ],
+              [Input('csv-data', 'data')], )
+def populate_scatter_dropdown(data):
+    if not data:
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update
+    df = pd.read_json(data, orient='split')
+    options = [{'label': i, 'value': i} for i in df.columns]
+    return options, options, options, options
+
+
+# SIZE MODAL CALLBACK SCATTER DATA TABLE
+@app.callback(
+    Output('modal-data', 'is_open'),
+    [Input('saxis', 'value'),
+     Input('data-table-upload', 'contents'),
+     Input('close-data', 'n_clicks')],
+    [State('data-table-upload', 'filename')])
+def update_output(size_value, contents, modal_close, filename):
+    ctx = dash.callback_context
+    user_clicked = ctx.triggered[0]['prop_id'].split('.')[0]
+    df = parse_contents(contents, filename)
+    size_list = df[size_value].to_list()
+    if not user_clicked or user_clicked == 'close':
+        return dash.no_update, False
+
+    if contents is None:
+        return [], False
+
+    if filename is None:
+        return [], False
+
+    if size_value is None:
+        return [], False
+
+    for item in size_list:
+        if any(c.isalpha() for c in item):
+            return [], True
+
+
+# COLOR MODAL CALLBACK SCATTER DATA TABLE
+@app.callback(
+    Output('modal-datac', 'is_open'),
+    [Input('caxis', 'value'),
+     Input('data-table-upload', 'contents'),
+     Input('close-datac', 'n_clicks')],
+    [State('data-table-upload', 'filename')])
+def update_output(color_value, contents, modal_close, filename):
+    ctx = dash.callback_context
+    user_clicked = ctx.triggered[0]['prop_id'].split('.')[0]
+    df = parse_contents(contents, filename)
+    color_list = df[color_value].to_list()
+    if not user_clicked or user_clicked == 'close':
+        return dash.no_update, False
+
+    if contents is None:
+        return [], False
+
+    if filename is None:
+        return [], False
+
+    if color_value is None:
+        return [], False
+
+    for item in color_list:
+        if any(c.isalpha() for c in item):
+            return [], True
+
+
+# POPULATE DATA TABLE SCATTER
+@app.callback([Output('data-table-interact', 'data'),
+               Output('data-table-interact', 'columns')],
+              [Input('data-table-upload', 'contents')],
+              [State('data-table-upload', 'filename')])
+def update_output(contents, filename):
+    if contents is None:
+        return [{}], []
+    df = parse_contents(contents, filename)
+    data = df.to_dict('records')
+    columns = [{"name": i, "id": i, "deletable": True, "selectable": True, 'type': 'numeric',
+                'format': Format(precision=3, scheme=Scheme.fixed)} for i in df.columns]
+    return data, columns
+
+
+# SIZE RANGE
+@app.callback(
+    Output('size-output-container-filter', 'children'),
+    [Input('saxis', 'value'),
+     Input('csv-data', 'data')],
+    [State('csv-data', 'data')]
+)
+def update_output(size, __, data):
+    if not data or not size:
+        return dash.no_update
+    df = pd.read_json(data, orient='split')
+    size_range = [round(df[size].min(), 2), round(df[size].max(), 2)]
     return '{}'.format(size_range)
 
 
-@app.callback(Output('cos2-plot', 'figure'),
+# INTERACT FIGURE WITH POPULATED FIELDS SCATTER
+@app.callback(Output('data-table-container', 'children'),
+              [Input('data-table-interact', 'data'),
+               Input('data-table-interact', 'derived_virtual_data'),
+               Input('data-table-interact', 'derived_virtual_selected_rows'),
+               Input('xaxis', 'value'),
+               Input('yaxis', 'value'),
+               Input('caxis', 'value'),
+               Input('saxis', 'value'),
+               Input('xaxis-type', 'value'),
+               Input('yaxis-type', 'value'),
+               Input('colorscale', 'value')
+               ])
+def update_figure(rows, derived_virtual_data, derived_virtual_selected_rows, xaxis_name, yaxis_name,
+                  marker_color, marker_size, xaxis_type, yaxis_type, colorscale):
+    df = pd.DataFrame(rows)
+    if derived_virtual_selected_rows is None:
+        return []
+    dff = df if derived_virtual_data is None else pd.DataFrame(derived_virtual_data)
+    print(dff[marker_color])
+    return [
+        html.Div([dcc.Graph(id='HTS-graph',
+                            figure={'data': [
+                                go.Scatter(x=dff[xaxis_name], y=dff[yaxis_name],
+                                           mode='markers',
+                                           marker_color=dff[marker_color],
+                                           marker_size=dff[marker_size],
+                                           marker=dict(sizemode='area', sizeref=max(dff[marker_size]) / (15 ** 2),
+                                                       sizemin=4,
+                                                       opacity=0.7, showscale=True,
+                                                       line=dict(width=0.7, color='DarkSlateGrey'),
+                                                       colorbar=dict(title=dict(text=marker_color.translate(SUP),
+                                                                                font=dict(family='Helvetica'),
+                                                                                side='right'), ypad=0),
+                                                       colorscale="Viridis" if colorscale == 'Viridis' else "Plasma"),
+                                           text=dff[df.columns[0]],
+                                           hoverinfo=['x', 'y', 'text', 'name'],
+                                           )],
+                                'layout': go.Layout(
+                                    font={'family': 'Helvetica', 'size': 14},
+                                    xaxis={'title': xaxis_name.translate(SUP), 'autorange': True,
+                                           'mirror': True,
+                                           'ticks': 'outside',
+                                           'showline': True,
+                                           'showspikes': True,
+                                           'type': 'linear' if xaxis_type == 'Linear' else 'log',
+                                           'tickformat': ".1f"
+                                           },
+                                    yaxis={'title': yaxis_name.translate(SUP), 'autorange': True,
+                                           'mirror': True,
+                                           'ticks': 'outside',
+                                           'showline': True,
+                                           'showspikes': True,
+                                           'type': 'linear' if yaxis_type == 'Linear' else 'log',
+                                           'tickformat': ".1f"
+                                           },
+                                    title="",
+                                    template="simple_white",
+                                    margin={'l': 50, 'b': 60, 't': 70, 'r': 50},
+                                    hovermode='closest',
+                                    width=550,
+                                ),
+                            },
+                            )
+                  ], style={'textAlign': 'center', 'padding': 25,
+                            'horizontal-align': 'middle',
+                            'padding-left': '25%', 'padding-right': '25%'
+                            })
+        for column in [xaxis_name] if column in dff
+        for column in [yaxis_name] if column in dff
+        for column in [marker_color] if column in dff
+        for column in [marker_size] if column in dff
+    ]
+
+
+# POPULATE DROPDOWN DATASET VIOLIN
+@app.callback(Output('data-set', 'options'),
+              [Input('data-table-upload', 'contents')],
+              [State('data-table-upload', 'filename')])
+def populate_df_dropdown(contents, filename):
+    df = parse_contents(contents, filename)
+    return [{'label': i, 'value': i} for i in df.columns]
+
+
+# POPULATE DROPDOWN Y AXIS VIOLIN
+@app.callback(Output('yaxis-stat', 'options'),
+              [Input('data-table-upload', 'contents')],
+              [State('data-table-upload', 'filename')])
+def populate_yaxis_stat(contents, filename):
+    df = parse_contents(contents, filename)
+    return [{'label': i, 'value': i} for i in df.columns]
+
+
+# VIRIDIS AND PLASMA COLOR PALETTE
+colors = ('rgb(240, 249, 33)', 'rgb(253, 202, 38)', 'rgb(251, 159, 58)', 'rgb(237, 121, 83)', 'rgb(216, 87, 107)',
+          'rgb(189, 55, 134)', 'rgb(156, 23, 158)', 'rgb(114, 1, 168)', 'rgb(70, 3, 159)', 'rgb(13, 8, 135)',
+
+          )
+colors2 = ('rgb(68, 1, 84)', 'rgb(72, 40, 120)', 'rgb(62, 73, 137)', 'rgb(49, 104, 142)', 'rgb(38, 130, 142)',
+           'rgb(31, 158, 137)', 'rgb(53, 183, 121)', 'rgb(110, 206, 88)', 'rgb(181, 222, 43)', 'rgb(253, 231, 37)')
+
+
+# SIZE MODAL CALLBACK VIOLIN PLOT
+@app.callback(
+    Output('modal-violin', 'is_open'),
+    [Input('data-set', 'value'),
+     Input('data-table-upload', 'contents'),
+     Input('close-violin', 'n_clicks')],
+    [State('data-table-upload', 'filename')])
+def update_output(size_value, contents, modal_close, filename):
+    ctx = dash.callback_context
+    user_clicked = ctx.triggered[0]['prop_id'].split('.')[0]
+    df = parse_contents(contents, filename)
+    size_list = df[size_value].to_list()
+    if not user_clicked or user_clicked == 'close':
+        return dash.no_update, False
+
+    if contents is None:
+        return [], False
+
+    if filename is None:
+        return [], False
+
+    if size_value is None:
+        return [], False
+
+    for item in size_list:
+        if any(c.isalpha() for c in item):
+            return [], True
+
+
+# POPULATE VIOLIN PLOT X AXIS GROUPING
+@app.callback(Output('anim-frame-violin', 'options'),
+              [Input('data-table-upload', 'contents')],
+              [State('data-table-upload', 'filename')])
+def populate_animation_frame_dist(contents, filename):
+    df = parse_contents(contents, filename)
+    dff = df.select_dtypes(exclude=['float'])
+    return [{'label': i, 'value': i} for i in dff.columns]
+
+
+# POPULATE VIOLIN PLOT CHANGED
+@app.callback(Output('violin-plot', 'figure'),
               [
-                  Input('outlier-value-cos2', 'value'),
-                  Input('feature-input', 'value'),
-                  Input('all-custom-choice', 'value')
-              ])
-def update_cos2_plot(outlier, input, all_custom):
-    if all_custom == 'All':
-        # x_scale = MinMaxScaler(feature_range=(0, 1), copy=True).fit_transform(x_scale)
-        features1 = dff.columns
-        features = list(features1)
-        # OUTLIER DATA
-        z_scores = scipy.stats.zscore(dff)
-        abs_z_scores = np.abs(z_scores)
-        filtered_entries = (abs_z_scores < 3).all(axis=1)
-        outlier_dff = dff[filtered_entries]
-        features1_outlier = outlier_dff.columns
-        features_outlier = list(features1_outlier)
-        outlier_names1 = df[filtered_entries]
-        outlier_names = outlier_names1.iloc[:, 0]
-
-        # def rescale(data, new_min=0, new_max=1):
-        #     """Rescale the data to be within the range [new_min, new_max]"""
-        #     return (data - data.min()) / (data.max() - data.min()) * (new_max - new_min) + new_min
-
-        # ORIGINAL DATA WITH OUTLIERS
-        x_scale = dff.loc[:, features].values
-        y_scale = dff.loc[:, ].values
-        x_scale = StandardScaler().fit_transform(x_scale)
-        pca_scale = PCA(n_components=len(features))
-        principalComponents_scale = pca_scale.fit_transform(x_scale)
-        principalDf_scale = pd.DataFrame(data=principalComponents_scale
-                                         , columns=['PC' + str(i + 1) for i in range(len(features))])
-        # combining principle components and target
-        finalDf_scale = pd.concat([df[[df.columns[0]]], principalDf_scale], axis=1)
-        Var_scale = pca_scale.explained_variance_ratio_
-        # calculating loading vector plot
-        loading_scale = pca_scale.components_.T * np.sqrt(pca_scale.explained_variance_)
-        loading_scale_df = pd.DataFrame(data=loading_scale[:, 0:2],
-                                        columns=["PC1", "PC2"])
-        loading_scale_df['cos2'] = (loading_scale_df["PC1"] ** 2) + (loading_scale_df["PC2"] ** 2)
-        line_group_scale_df = pd.DataFrame(data=features, columns=['line_group'])
-        loading_scale_dff = pd.concat([loading_scale_df, line_group_scale_df], axis=1)
-        a = (len(features), 2)
-        zero_scale = np.zeros(a)
-        zero_scale_df = pd.DataFrame(data=zero_scale, columns=["PC1", "PC2"])
-        zero_scale_df_color = pd.DataFrame(data=loading_scale_df.iloc[:, 2], columns=['cos2'])
-        zero_scale_dff = pd.concat([zero_scale_df, zero_scale_df_color, line_group_scale_df], axis=1)
-        loading_scale_line_graph = pd.concat([loading_scale_dff, zero_scale_dff], axis=0)
-
-        # ORIGINAL DATA WITH REMOVING OUTLIERS
-        x_outlier_scale = outlier_dff.loc[:, features_outlier].values
-        y_outlier_scale = outlier_dff.loc[:, ].values
-        x_outlier_scale = StandardScaler().fit_transform(x_outlier_scale)
-
-        # x_outlier_scale = MinMaxScaler().fit_transform(x_outlier_scale)
-
-        # def rescale(data, new_min=0, new_max=1):
-        #     """Rescale the data to be within the range [new_min, new_max]"""
-        #     return (data - data.min()) / (data.max() - data.min()) * (new_max - new_min) + new_min
-        #
-        # x_outlier_scale = rescale(x_outlier_scale, new_min=0, new_max=1)
-        # uses covariance matrix
-        pca_outlier_scale = PCA(n_components=len(features_outlier))
-        principalComponents_outlier_scale = pca_outlier_scale.fit_transform(x_outlier_scale)
-        principalDf_outlier_scale = pd.DataFrame(data=principalComponents_outlier_scale
-                                                 , columns=['PC' + str(i + 1) for i in range(len(features_outlier))])
-        # combining principle components and target
-        finalDf_outlier_scale = pd.concat([outlier_names, principalDf_outlier_scale], axis=1)
-        Var_outlier_scale = pca_outlier_scale.explained_variance_ratio_
-        # calculating loading
-        # calculating loading vector plot
-        loading_outlier_scale = pca_outlier_scale.components_.T * np.sqrt(pca_outlier_scale.explained_variance_)
-        loading_outlier_scale_df = pd.DataFrame(data=loading_outlier_scale[:, 0:2],
-                                                columns=["PC1", "PC2"])
-        loading_outlier_scale_df["cos2"] = (loading_outlier_scale_df["PC1"] ** 2) + (
-                loading_outlier_scale_df["PC2"] ** 2)
-        line_group_df = pd.DataFrame(data=features_outlier, columns=['line_group'])
-        loading_outlier_scale_dff = pd.concat([loading_outlier_scale_df, line_group_df], axis=1)
-        a = (len(features_outlier), 2)
-        zero_outlier_scale = np.zeros(a)
-        zero_outlier_scale_df = pd.DataFrame(data=zero_outlier_scale, columns=["PC1", "PC2"])
-        zero_outlier_scale_df_color = pd.DataFrame(data=loading_outlier_scale_df.iloc[:, 2], columns=['cos2'])
-        zero_outlier_scale_dff = pd.concat([zero_outlier_scale_df, zero_outlier_scale_df_color, line_group_df], axis=1)
-        loading_outlier_scale_line_graph = pd.concat([loading_outlier_scale_dff, zero_outlier_scale_dff], axis=0)
-
-        loading_scale_line_graph_sort = loading_scale_line_graph.sort_values(by='cos2')
-        loading_outlier_scale_line_graph_sort = loading_outlier_scale_line_graph.sort_values(by='cos2')
-        # scaling data
-        if outlier == 'No':
-            data = loading_scale_line_graph_sort
-            variance = Var_scale
-        elif outlier == 'Yes':
-            data = loading_outlier_scale_line_graph_sort
-            variance = Var_outlier_scale
-        N = len(data['cos2'].unique())
-        end_color = "#00264c"  # dark blue
-        start_color = "#c6def5"  # light blue
-        colorscale = [x.hex for x in list(Color(start_color).range_to(Color(end_color), N))]
-        counter = 0
-        counter_color = 0
-        lists = [[] for i in range(len(data['line_group'].unique()))]
-        for i in data['line_group'].unique():
-            dataf_all = data[data['line_group'] == i]
-            trace1_all = go.Scatter(x=dataf_all['PC1'], y=dataf_all['PC2'], mode='lines+text',
-                                    name=i, line=dict(color=colorscale[counter_color]),
-                                    # text=i,
-                                    textposition='bottom right', textfont=dict(size=12)
-                                    )
-            trace2_all = go.Scatter(x=[1, -1], y=[1, -1], mode='markers',
-                                    marker=dict(showscale=True, opacity=0,
-                                                color=[data["cos2"].min(), data["cos2"].max()],
-                                                colorscale=colorscale,
-                                                colorbar=dict(title=dict(text="Cos2",
-                                                                         side='right'), ypad=0)
-                                                ), )
-            lists[counter] = trace1_all
-            counter = counter + 1
-            counter_color = counter_color + 1
-            lists.append(trace2_all)
-        ####################################################################################################
-        return {'data': lists,
-                'layout': go.Layout(xaxis=dict(title='PC1 ({}%)'.format(round((variance[0] * 100), 2)), mirror=True,
-                                               ticks='outside', showline=True),
-                                    yaxis=dict(title='PC2 ({}%)'.format(round((variance[1] * 100), 2)), mirror=True,
-                                               ticks='outside', showline=True),
-                                    showlegend=False, margin={'r': 0},
-                                    # shapes=[dict(type="circle", xref="x", yref="y", x0=-1,
-                                    #              y0=-1, x1=1, y1=1,
-                                    #              line_color="DarkSlateGrey")]
-                                    ),
-
-                }
-    elif all_custom == "Custom":
-        # Dropping Data variables
-        dff_input = dff.drop(columns=dff[input])
-        features1_input = dff_input.columns
-        features_input = list(features1_input)
-        dff_target = dff[input]
-        # OUTLIER DATA INPUT
-        z_scores_input = scipy.stats.zscore(dff_input)
-        abs_z_scores_input = np.abs(z_scores_input)
-        filtered_entries_input = (abs_z_scores_input < 3).all(axis=1)
-        dff_input_outlier = dff_input[filtered_entries_input]
-        features1_input_outlier = dff_input_outlier.columns
-        features_input_outlier = list(features1_input_outlier)
-        outlier_names_input1 = df[filtered_entries_input]
-        outlier_names_input = outlier_names_input1.iloc[:, 0]
-        # OUTLIER DATA TARGET
-        z_scores_target = scipy.stats.zscore(dff_target)
-        abs_z_scores_target = np.abs(z_scores_target)
-        filtered_entries_target = (abs_z_scores_target < 3).all(axis=1)
-        dff_target_outlier = dff_target[filtered_entries_target]
-        # INPUT DATA WITH OUTLIERS
-        x_scale_input = dff_input.loc[:, features_input].values
-        y_scale_input = dff_input.loc[:, ].values
-        x_scale_input = StandardScaler().fit_transform(x_scale_input)
-
-        # # x_scale_input = MinMaxScaler(feature_range=(0, 1), copy=True).fit_transform(x_scale_input)
-        # def rescale(data, new_min=0, new_max=1):
-        #     """Rescale the data to be within the range [new_min, new_max]"""
-        #     return (data - data.min()) / (data.max() - data.min()) * (new_max - new_min) + new_min
-        #
-        # x_scale_input = rescale(x_scale_input, new_min=0, new_max=1)
-
-        pca_scale_input = PCA(n_components=len(features_input))
-        principalComponents_scale_input = pca_scale_input.fit_transform(x_scale_input)
-        principalDf_scale_input = pd.DataFrame(data=principalComponents_scale_input
-                                               , columns=['PC' + str(i + 1) for i in range(len(features_input))])
-        finalDf_scale_input = pd.concat([df[[df.columns[0]]], principalDf_scale_input, dff_target], axis=1)
-        dfff_scale_input = finalDf_scale_input.fillna(0)
-        Var_scale_input = pca_scale_input.explained_variance_ratio_
-        # calculating loading vector plot
-        loading_scale_input = pca_scale_input.components_.T * np.sqrt(pca_scale_input.explained_variance_)
-        loading_scale_input_df = pd.DataFrame(data=loading_scale_input[:, 0:2],
-                                              columns=["PC1", "PC2"])
-        loading_scale_input_df["cos2"] = (loading_scale_input_df["PC1"] ** 2) + (loading_scale_input_df["PC2"] ** 2)
-        line_group_scale_input_df = pd.DataFrame(data=features_input, columns=['line_group'])
-        loading_scale_input_dff = pd.concat([loading_scale_input_df, line_group_scale_input_df],
-                                            axis=1)
-        a = (len(features_input), 2)
-        zero_scale_input = np.zeros(a)
-        zero_scale_input_df = pd.DataFrame(data=zero_scale_input, columns=["PC1", "PC2"])
-        zero_scale_input_df_color = pd.DataFrame(data=loading_scale_input_df.iloc[:, 2], columns=['cos2'])
-        zero_scale_input_dff = pd.concat([zero_scale_input_df, zero_scale_input_df_color, line_group_scale_input_df],
-                                         axis=1)
-        loading_scale_input_line_graph = pd.concat([loading_scale_input_dff, zero_scale_input_dff],
-                                                   axis=0)
-        # INPUT DATA WITH REMOVING OUTLIERS
-        x_scale_input_outlier = dff_input_outlier.loc[:, features_input_outlier].values
-        y_scale_input_outlier = dff_input_outlier.loc[:, ].values
-        x_scale_input_outlier = StandardScaler().fit_transform(x_scale_input_outlier)
-
-        # # x_scale_input_outlier = MinMaxScaler(feature_range=(0, 1), copy=True).fit_transform(x_scale_input_outlier)
-        # def rescale(data, new_min=0, new_max=1):
-        #     """Rescale the data to be within the range [new_min, new_max]"""
-        #     return (data - data.min()) / (data.max() - data.min()) * (new_max - new_min) + new_min
-
-        # x_scale_input_outlier = rescale(x_scale_input_outlier, new_min=0, new_max=1)
-        pca_scale_input_outlier = PCA(n_components=len(features_input_outlier))
-        principalComponents_scale_input_outlier = pca_scale_input_outlier.fit_transform(x_scale_input_outlier)
-        principalDf_scale_input_outlier = pd.DataFrame(data=principalComponents_scale_input_outlier
-                                                       , columns=['PC' + str(i + 1) for i in
-                                                                  range(len(features_input_outlier))])
-        finalDf_scale_input_outlier = pd.concat(
-            [outlier_names_input, principalDf_scale_input_outlier, dff_target_outlier],
-            axis=1)
-        dfff_scale_input_outlier = finalDf_scale_input_outlier.fillna(0)
-        Var_scale_input_outlier = pca_scale_input_outlier.explained_variance_ratio_
-        # calculating loading vector plot
-        loading_scale_input_outlier = pca_scale_input_outlier.components_.T * np.sqrt(
-            pca_scale_input_outlier.explained_variance_)
-        loading_scale_input_outlier_df = pd.DataFrame(data=loading_scale_input_outlier[:, 0:2],
-                                                      columns=["PC1", "PC2"])
-        loading_scale_input_outlier_df["cos2"] = (loading_scale_input_outlier_df["PC1"] ** 2) + \
-                                                 (loading_scale_input_outlier_df["PC2"] ** 2)
-        line_group_scale_input_outlier_df = pd.DataFrame(data=features_input_outlier, columns=['line_group'])
-        loading_scale_input_outlier_dff = pd.concat([loading_scale_input_outlier_df, line_group_scale_input_outlier_df],
-                                                    axis=1)
-        a = (len(features_input_outlier), 2)
-        zero_scale_input_outlier = np.zeros(a)
-        zero_scale_input_outlier_df = pd.DataFrame(data=zero_scale_input_outlier, columns=["PC1", "PC2"])
-        zero_scale_input_outlier_df_color = pd.DataFrame(data=loading_scale_input_outlier_df.iloc[:, 2],
-                                                         columns=['cos2'])
-        zero_scale_input_outlier_dff = pd.concat([zero_scale_input_outlier_df, zero_scale_input_outlier_df_color,
-                                                  line_group_scale_input_outlier_df],
-                                                 axis=1)
-        loading_scale_input_outlier_line_graph = pd.concat(
-            [loading_scale_input_outlier_dff, zero_scale_input_outlier_dff],
-            axis=0)
-        loading_scale_input_line_graph_sort = loading_scale_input_line_graph.sort_values(by='cos2')
-        loading_scale_input_outlier_line_graph_sort = loading_scale_input_outlier_line_graph.sort_values(by='cos2')
-        ####################################################################################################
-        if outlier == 'No':
-            data = loading_scale_input_line_graph_sort
-            variance = Var_scale_input
-        elif outlier == 'Yes':
-            variance = Var_scale_input_outlier
-            data = loading_scale_input_outlier_line_graph_sort
-        N = len(data['cos2'].unique())
-        end_color = "#00264c"  # dark blue
-        start_color = "#c6def5"  # light blue
-        colorscale = [x.hex for x in list(Color(start_color).range_to(Color(end_color), N))]
-        counter_color = 0
-        counter = 0
-        lists = [[] for i in range(len(data['line_group'].unique()))]
-        for i in data['line_group'].unique():
-            dataf = data[data['line_group'] == i]
-            trace1 = go.Scatter(x=dataf['PC1'], y=dataf['PC2'], name=i, line=dict(color=colorscale[counter_color]),
-                                mode='lines+text', textposition='bottom right', textfont=dict(size=12),
-                                )
-            trace2_all = go.Scatter(x=[1, -1], y=[1, -1], mode='markers',
-                                    marker=dict(showscale=True, color=[data["cos2"].min(), data["cos2"].max()],
-                                                colorscale=colorscale, opacity=0,
-                                                colorbar=dict(title=dict(text="Cos2",
-                                                                         side='right'), ypad=0)
-                                                ), )
-            lists[counter] = trace1
-            counter_color = counter_color + 1
-            counter = counter + 1
-            lists.append(trace2_all)
-        ####################################################################################################
-        return {'data': lists,
-                'layout': go.Layout(xaxis=dict(title='PC1 ({}%)'.format(round((variance[0] * 100), 2)),
-                                               mirror=True, ticks='outside', showline=True),
-                                    yaxis=dict(title='PC2 ({}%)'.format(round((variance[1] * 100), 2)),
-                                               mirror=True, ticks='outside', showline=True),
-                                    showlegend=False, margin={'r': 0},
-                                    # shapes=[dict(type="circle", xref="x", yref="y", x0=-1,
-                                    #              y0=-1, x1=1, y1=1,
-                                    #              line_color="DarkSlateGrey")]
-                                    ),
-
-                }
-
-
-@app.callback(Output('contrib-plot', 'figure'),
-              [
-                  Input('outlier-value-contrib', 'value'),
-                  Input('feature-input', 'value'),
-                  Input('all-custom-choice', 'value')
-              ])
-def update_cos2_plot(outlier, input, all_custom):
-    if all_custom == 'All':
-        features1 = dff.columns
-        features = list(features1)
-        # OUTLIER DATA
-        z_scores = scipy.stats.zscore(dff)
-        abs_z_scores = np.abs(z_scores)
-        filtered_entries = (abs_z_scores < 3).all(axis=1)
-        outlier_dff = dff[filtered_entries]
-        features1_outlier = outlier_dff.columns
-        features_outlier = list(features1_outlier)
-        outlier_names1 = df[filtered_entries]
-        outlier_names = outlier_names1.iloc[:, 0]
-
-        x_scale = dff.loc[:, features].values
-        y_scale = dff.loc[:, ].values
-        x_scale = StandardScaler().fit_transform(x_scale)
-        pca_scale = PCA(n_components=len(features))
-        principalComponents_scale = pca_scale.fit_transform(x_scale)
-        principalDf_scale = pd.DataFrame(data=principalComponents_scale
-                                         , columns=['PC' + str(i + 1) for i in range(len(features))])
-        # combining principle components and target
-        finalDf_scale = pd.concat([df[[df.columns[0]]], principalDf_scale], axis=1)
-        Var_scale = pca_scale.explained_variance_ratio_
-        # calculating loading vector plot
-        loading_scale = pca_scale.components_.T * np.sqrt(pca_scale.explained_variance_)
-        loading_scale_df = pd.DataFrame(data=loading_scale[:, 0:2],
-                                        columns=["PC1", "PC2"])
-        loading_scale_df["PC1_cos2"] = loading_scale_df["PC1"] ** 2
-        loading_scale_df["PC2_cos2"] = loading_scale_df["PC2"] ** 2
-        loading_scale_df["PC1_contrib"] = \
-            (loading_scale_df["PC1_cos2"] * 100) / (loading_scale_df["PC1_cos2"].sum(axis=0))
-        loading_scale_df["PC2_contrib"] = \
-            (loading_scale_df["PC2_cos2"] * 100) / (loading_scale_df["PC2_cos2"].sum(axis=0))
-        loading_scale_df["contrib"] = loading_scale_df["PC1_contrib"] + loading_scale_df["PC2_contrib"]
-        # after youve got sum of contrib (colorscale) get that and PC1 and PC2 into a sep df
-        loading_scale_dataf = pd.concat([loading_scale_df.iloc[:, 0:2], loading_scale_df.iloc[:, 6]], axis=1)
-        line_group_scale_df = pd.DataFrame(data=features, columns=['line_group'])
-        loading_scale_dff = pd.concat([loading_scale_dataf, line_group_scale_df], axis=1)
-        a = (len(features), 2)
-        zero_scale = np.zeros(a)
-        zero_scale_df = pd.DataFrame(data=zero_scale, columns=["PC1", "PC2"])
-        zero_scale_df_color = pd.DataFrame(data=loading_scale_dataf.iloc[:, 2], columns=['contrib'])
-        zero_scale_dff = pd.concat([zero_scale_df, zero_scale_df_color, line_group_scale_df], axis=1)
-        loading_scale_line_graph = pd.concat([loading_scale_dff, zero_scale_dff], axis=0)
-
-        # ORIGINAL DATA WITH REMOVING OUTLIERS
-        x_outlier_scale = outlier_dff.loc[:, features_outlier].values
-        y_outlier_scale = outlier_dff.loc[:, ].values
-        x_outlier_scale = StandardScaler().fit_transform(x_outlier_scale)
-
-        pca_outlier_scale = PCA(n_components=len(features_outlier))
-        principalComponents_outlier_scale = pca_outlier_scale.fit_transform(x_outlier_scale)
-        principalDf_outlier_scale = pd.DataFrame(data=principalComponents_outlier_scale
-                                                 , columns=['PC' + str(i + 1) for i in range(len(features_outlier))])
-        finalDf_outlier_scale = pd.concat([outlier_names, principalDf_outlier_scale], axis=1)
-        Var_outlier_scale = pca_outlier_scale.explained_variance_ratio_
-
-        loading_outlier_scale = pca_outlier_scale.components_.T * np.sqrt(pca_outlier_scale.explained_variance_)
-        loading_outlier_scale_df = pd.DataFrame(data=loading_outlier_scale[:, 0:2],
-                                                columns=["PC1", "PC2"])
-        loading_outlier_scale_df["PC1_cos2"] = loading_outlier_scale_df["PC1"] ** 2
-        loading_outlier_scale_df["PC2_cos2"] = loading_outlier_scale_df["PC2"] ** 2
-        loading_outlier_scale_df["PC1_contrib"] = \
-            (loading_outlier_scale_df["PC1_cos2"] * 100) / (loading_outlier_scale_df["PC1_cos2"].sum(axis=0))
-        loading_outlier_scale_df["PC2_contrib"] = \
-            (loading_outlier_scale_df["PC2_cos2"] * 100) / (loading_outlier_scale_df["PC2_cos2"].sum(axis=0))
-        loading_outlier_scale_df["contrib"] = loading_outlier_scale_df["PC1_contrib"] + loading_outlier_scale_df[
-            "PC2_contrib"]
-        # after youve got sum of contrib (colorscale) get that and PC1 and PC2 into a sep df
-        loading_outlier_scale_dataf = pd.concat(
-            [loading_outlier_scale_df.iloc[:, 0:2], loading_outlier_scale_df.iloc[:, 6]], axis=1)
-
-        line_group_df = pd.DataFrame(data=features_outlier, columns=['line_group'])
-        loading_outlier_scale_dff = pd.concat([loading_outlier_scale_dataf, line_group_df], axis=1)
-        a = (len(features_outlier), 2)
-        zero_outlier_scale = np.zeros(a)
-        zero_outlier_scale_df = pd.DataFrame(data=zero_outlier_scale, columns=["PC1", "PC2"])
-        zero_outlier_scale_df_color = pd.DataFrame(data=loading_outlier_scale_dataf.iloc[:, 2], columns=['contrib'])
-        zero_outlier_scale_dff = pd.concat([zero_outlier_scale_df, zero_outlier_scale_df_color, line_group_df], axis=1)
-        loading_outlier_scale_line_graph = pd.concat([loading_outlier_scale_dff, zero_outlier_scale_dff], axis=0)
-
-        loading_scale_line_graph_sort = loading_scale_line_graph.sort_values(by='contrib')
-        loading_outlier_scale_line_graph_sort = loading_outlier_scale_line_graph.sort_values(by='contrib')
-        # scaling data
-        if outlier == 'No':
-            data = loading_scale_line_graph_sort
-            variance = Var_scale
-        elif outlier == 'Yes':
-            data = loading_outlier_scale_line_graph_sort
-            variance = Var_outlier_scale
-        N = len(data['contrib'].unique())
-        end_color = "#00264c"  # dark blue
-        start_color = "#c6def5"  # light blue
-        colorscale = [x.hex for x in list(Color(start_color).range_to(Color(end_color), N))]
-        counter = 0
-        counter_color = 0
-        lists = [[] for i in range(len(data['line_group'].unique()))]
-        for i in data['line_group'].unique():
-            dataf_all = data[data['line_group'] == i]
-            trace1_all = go.Scatter(x=dataf_all['PC1'], y=dataf_all['PC2'], mode='lines+text',
-                                    name=i, line=dict(color=colorscale[counter_color]),
-                                    textposition='bottom right', textfont=dict(size=12)
-                                    )
-            trace2_all = go.Scatter(x=[1, -1], y=[1, -1], mode='markers',
-                                    marker=dict(showscale=True, opacity=0,
-                                                color=[data["contrib"].min(), data["contrib"].max()],
-                                                colorscale=colorscale,
-                                                colorbar=dict(title=dict(text="Contribution",
-                                                                         side='right'), ypad=0),
-                                                ), )
-            lists[counter] = trace1_all
-            counter = counter + 1
-            counter_color = counter_color + 1
-            lists.append(trace2_all)
-        ####################################################################################################
-        return {'data': lists,
-                'layout': go.Layout(xaxis=dict(title='PC1 ({}%)'.format(round((variance[0] * 100), 2)),
-                                               mirror=True, ticks='outside', showline=True),
-                                    yaxis=dict(title='PC2 ({}%)'.format(round((variance[1] * 100), 2)),
-                                               mirror=True, ticks='outside', showline=True),
-                                    showlegend=False, margin={'r': 0},
-                                    # shapes=[dict(type="circle", xref="x", yref="y", x0=-1,
-                                    #              y0=-1, x1=1, y1=1,
-                                    #              line_color="DarkSlateGrey")]
-                                    ),
-
-                }
-    elif all_custom == "Custom":
-        # Dropping Data variables
-        dff_input = dff.drop(columns=dff[input])
-        features1_input = dff_input.columns
-        features_input = list(features1_input)
-        dff_target = dff[input]
-        # OUTLIER DATA INPUT
-        z_scores_input = scipy.stats.zscore(dff_input)
-        abs_z_scores_input = np.abs(z_scores_input)
-        filtered_entries_input = (abs_z_scores_input < 3).all(axis=1)
-        dff_input_outlier = dff_input[filtered_entries_input]
-        features1_input_outlier = dff_input_outlier.columns
-        features_input_outlier = list(features1_input_outlier)
-        outlier_names_input1 = df[filtered_entries_input]
-        outlier_names_input = outlier_names_input1.iloc[:, 0]
-        # OUTLIER DATA TARGET
-        z_scores_target = scipy.stats.zscore(dff_target)
-        abs_z_scores_target = np.abs(z_scores_target)
-        filtered_entries_target = (abs_z_scores_target < 3).all(axis=1)
-        dff_target_outlier = dff_target[filtered_entries_target]
-        # INPUT DATA WITH OUTLIERS
-        x_scale_input = dff_input.loc[:, features_input].values
-        y_scale_input = dff_input.loc[:, ].values
-        x_scale_input = StandardScaler().fit_transform(x_scale_input)
-
-        pca_scale_input = PCA(n_components=len(features_input))
-        principalComponents_scale_input = pca_scale_input.fit_transform(x_scale_input)
-        principalDf_scale_input = pd.DataFrame(data=principalComponents_scale_input
-                                               , columns=['PC' + str(i + 1) for i in range(len(features_input))])
-        finalDf_scale_input = pd.concat([df[[df.columns[0]]], principalDf_scale_input, dff_target], axis=1)
-        dfff_scale_input = finalDf_scale_input.fillna(0)
-        Var_scale_input = pca_scale_input.explained_variance_ratio_
-        # calculating loading vector plot
-        loading_scale_input = pca_scale_input.components_.T * np.sqrt(pca_scale_input.explained_variance_)
-        loading_scale_input_df = pd.DataFrame(data=loading_scale_input[:, 0:2],
-                                              columns=["PC1", "PC2"])
-        loading_scale_input_df["PC1_cos2"] = loading_scale_input_df["PC1"] ** 2
-        loading_scale_input_df["PC2_cos2"] = loading_scale_input_df["PC2"] ** 2
-        loading_scale_input_df["PC1_contrib"] = \
-            (loading_scale_input_df["PC1_cos2"] * 100) / (loading_scale_input_df["PC1_cos2"].sum(axis=0))
-        loading_scale_input_df["PC2_contrib"] = \
-            (loading_scale_input_df["PC2_cos2"] * 100) / (loading_scale_input_df["PC2_cos2"].sum(axis=0))
-        loading_scale_input_df["contrib"] = loading_scale_input_df["PC1_contrib"] + loading_scale_input_df[
-            "PC2_contrib"]
-        loading_scale_input_dataf = pd.concat(
-            [loading_scale_input_df.iloc[:, 0:2], loading_scale_input_df.iloc[:, 6]], axis=1)
-
-        line_group_scale_input_df = pd.DataFrame(data=features_input, columns=['line_group'])
-        loading_scale_input_dff = pd.concat([loading_scale_input_dataf, line_group_scale_input_df],
-                                            axis=1)
-        a = (len(features_input), 2)
-        zero_scale_input = np.zeros(a)
-        zero_scale_input_df = pd.DataFrame(data=zero_scale_input, columns=["PC1", "PC2"])
-        zero_scale_input_df_color = pd.DataFrame(data=loading_scale_input_dataf.iloc[:, 2], columns=['contrib'])
-        zero_scale_input_dff = pd.concat([zero_scale_input_df, zero_scale_input_df_color, line_group_scale_input_df],
-                                         axis=1)
-        loading_scale_input_line_graph = pd.concat([loading_scale_input_dff, zero_scale_input_dff],
-                                                   axis=0)
-        # INPUT DATA WITH REMOVING OUTLIERS
-        x_scale_input_outlier = dff_input_outlier.loc[:, features_input_outlier].values
-        y_scale_input_outlier = dff_input_outlier.loc[:, ].values
-        x_scale_input_outlier = StandardScaler().fit_transform(x_scale_input_outlier)
-
-        pca_scale_input_outlier = PCA(n_components=len(features_input_outlier))
-        principalComponents_scale_input_outlier = pca_scale_input_outlier.fit_transform(x_scale_input_outlier)
-        principalDf_scale_input_outlier = pd.DataFrame(data=principalComponents_scale_input_outlier
-                                                       , columns=['PC' + str(i + 1) for i in
-                                                                  range(len(features_input_outlier))])
-        finalDf_scale_input_outlier = pd.concat(
-            [outlier_names_input, principalDf_scale_input_outlier, dff_target_outlier],
-            axis=1)
-        dfff_scale_input_outlier = finalDf_scale_input_outlier.fillna(0)
-        Var_scale_input_outlier = pca_scale_input_outlier.explained_variance_ratio_
-        # calculating loading vector plot
-        loading_scale_input_outlier = pca_scale_input_outlier.components_.T * np.sqrt(
-            pca_scale_input_outlier.explained_variance_)
-        loading_scale_input_outlier_df = pd.DataFrame(data=loading_scale_input_outlier[:, 0:2],
-                                                      columns=["PC1", "PC2"])
-        loading_scale_input_outlier_df["PC1_cos2"] = loading_scale_input_outlier_df["PC1"] ** 2
-        loading_scale_input_outlier_df["PC2_cos2"] = loading_scale_input_outlier_df["PC2"] ** 2
-        loading_scale_input_outlier_df["PC1_contrib"] = \
-            (loading_scale_input_outlier_df["PC1_cos2"] * 100) / (
-                loading_scale_input_outlier_df["PC1_cos2"].sum(axis=0))
-        loading_scale_input_outlier_df["PC2_contrib"] = \
-            (loading_scale_input_outlier_df["PC2_cos2"] * 100) / (
-                loading_scale_input_outlier_df["PC2_cos2"].sum(axis=0))
-        loading_scale_input_outlier_df["contrib"] = loading_scale_input_outlier_df["PC1_contrib"] + \
-                                                    loading_scale_input_outlier_df[
-                                                        "PC2_contrib"]
-        loading_scale_input_outlier_dataf = pd.concat(
-            [loading_scale_input_outlier_df.iloc[:, 0:2], loading_scale_input_outlier_df.iloc[:, 6]], axis=1)
-        line_group_scale_input_outlier_df = pd.DataFrame(data=features_input_outlier, columns=['line_group'])
-        loading_scale_input_outlier_dff = pd.concat(
-            [loading_scale_input_outlier_dataf, line_group_scale_input_outlier_df],
-            axis=1)
-        a = (len(features_input_outlier), 2)
-        zero_scale_input_outlier = np.zeros(a)
-        zero_scale_input_outlier_df = pd.DataFrame(data=zero_scale_input_outlier, columns=["PC1", "PC2"])
-        zero_scale_input_outlier_df_color = pd.DataFrame(data=loading_scale_input_outlier_dataf.iloc[:, 2],
-                                                         columns=['contrib'])
-        zero_scale_input_outlier_dff = pd.concat([zero_scale_input_outlier_df, zero_scale_input_outlier_df_color,
-                                                  line_group_scale_input_outlier_df],
-                                                 axis=1)
-        loading_scale_input_outlier_line_graph = pd.concat(
-            [loading_scale_input_outlier_dff, zero_scale_input_outlier_dff],
-            axis=0)
-        loading_scale_input_line_graph_sort = loading_scale_input_line_graph.sort_values(by='contrib')
-        loading_scale_input_outlier_line_graph_sort = loading_scale_input_outlier_line_graph.sort_values(by='contrib')
-        ####################################################################################################
-        if outlier == 'No':
-            data = loading_scale_input_line_graph_sort
-            variance = Var_scale_input
-        elif outlier == 'Yes':
-            variance = Var_scale_input_outlier
-            data = loading_scale_input_outlier_line_graph_sort
-        N = len(data['contrib'].unique())
-        end_color = "#00264c"  # dark blue
-        start_color = "#c6def5"  # light blue
-        colorscale = [x.hex for x in list(Color(start_color).range_to(Color(end_color), N))]
-        counter_color = 0
-        counter = 0
-        lists = [[] for i in range(len(data['line_group'].unique()))]
-        for i in data['line_group'].unique():
-            dataf = data[data['line_group'] == i]
-            trace1 = go.Scatter(x=dataf['PC1'], y=dataf['PC2'], name=i, line=dict(color=colorscale[counter_color]),
-                                mode='lines+text', textposition='bottom right', textfont=dict(size=12),
-                                )
-            trace2_all = go.Scatter(x=[1, -1], y=[1, -1], mode='markers',
-                                    marker=dict(showscale=True, color=[data["contrib"].min(), data["contrib"].max()],
-                                                colorscale=colorscale, opacity=0,
-                                                colorbar=dict(title=dict(text="Contribution",
-                                                                         side='right'), ypad=0)
-                                                ))
-            lists[counter] = trace1
-            counter_color = counter_color + 1
-            counter = counter + 1
-            lists.append(trace2_all)
-        ####################################################################################################
-        return {'data': lists,
-                'layout': go.Layout(xaxis=dict(title='PC1 ({}%)'.format(round((variance[0] * 100), 2)),
-                                               mirror=True, ticks='outside', showline=True),
-                                    yaxis=dict(title='PC2 ({}%)'.format(round((variance[1] * 100), 2)),
-                                               mirror=True, ticks='outside', showline=True),
-                                    showlegend=False, margin={'r': 0},
-                                    # shapes=[dict(type="circle", xref="x", yref="y", x0=-1,
-                                    #              y0=-1, x1=1, y1=1,
-                                    #              line_color="DarkSlateGrey")]
-                                    ),
-
-                }
-
-
-@app.callback(Output('download-link', 'download'),
-              [Input('all-custom-choice', 'value'),
-               Input('eigenA-outlier', 'value')])
-def update_filename(all_custom, outlier):
-    if all_custom == 'All' and outlier == 'Yes':
-        download = 'all_variables_outliers_removed_data.csv'
-    elif all_custom == 'All' and outlier == 'No':
-        download = 'all_variables_data.csv'
-    elif all_custom == 'Custom' and outlier == 'Yes':
-        download = 'custom_variables_outliers_removed_data.csv'
-    elif all_custom == 'Custom' and outlier == 'No':
-        download = 'custom_variables.csv'
-    return download
-
-
-@app.callback(Output('download-link', 'href'),
-              [Input('all-custom-choice', 'value'),
-               Input('feature-input', 'value'),
-               Input('eigenA-outlier', 'value')])
-def update_link(all_custom, input, outlier):
-    features1 = dff.columns
-    features = list(features1)
-    if all_custom == 'All':
-        # OUTLIER DATA
-        z_scores = scipy.stats.zscore(dff)
-        abs_z_scores = np.abs(z_scores)
-        filtered_entries = (abs_z_scores < 3).all(axis=1)
-        outlier_dff = dff[filtered_entries]
-        features1_outlier = outlier_dff.columns
-        features_outlier = list(features1_outlier)
-        outlier_names1 = df[filtered_entries]
-        outlier_names = outlier_names1.iloc[:, 0]
-
-        # ORIGINAL DATA WITH OUTLIERS
-        x_scale = dff.loc[:, features].values
-        y_scale = dff.loc[:, ].values
-        x_scale = StandardScaler().fit_transform(x_scale)
-        # x_scale = rescale(x_scale, new_min=0, new_max=1)
-        pca_scale = PCA(n_components=len(features))
-        principalComponents_scale = pca_scale.fit_transform(x_scale)
-        principalDf_scale = pd.DataFrame(data=principalComponents_scale
-                                         , columns=['PC' + str(i + 1) for i in range(len(features))])
-        # combining principle components and target
-        finalDf_scale = pd.concat([df[[df.columns[0]]], principalDf_scale], axis=1)
-        dfff_scale = finalDf_scale.fillna(0)
-
-        # ORIGINAL DATA WITH REMOVING OUTLIERS
-        x_outlier_scale = outlier_dff.loc[:, features_outlier].values
-        y_outlier_scale = outlier_dff.loc[:, ].values
-        x_outlier_scale = StandardScaler().fit_transform(x_outlier_scale)
-        pca_outlier_scale = PCA(n_components=len(features_outlier))
-        principalComponents_outlier_scale = pca_outlier_scale.fit_transform(x_outlier_scale)
-        principalDf_outlier_scale = pd.DataFrame(data=principalComponents_outlier_scale
-                                                 , columns=['PC' + str(i + 1) for i in range(len(features_outlier))])
-        # combining principle components and target
-        finalDf_outlier_scale = pd.concat([outlier_names, principalDf_outlier_scale], axis=1)
-        dfff_outlier_scale = finalDf_outlier_scale.fillna(0)
-        if outlier == 'No':
-            dat = dfff_scale
-        elif outlier == 'Yes':
-            dat = dfff_outlier_scale
-    elif all_custom == 'Custom':
-        # Dropping Data variables
-        dff_input = dff.drop(columns=dff[input])
-        features1_input = dff_input.columns
-        features_input = list(features1_input)
-        dff_target = dff[input]
-        # OUTLIER DATA INPUT
-        z_scores_input = scipy.stats.zscore(dff_input)
-        abs_z_scores_input = np.abs(z_scores_input)
-        filtered_entries_input = (abs_z_scores_input < 3).all(axis=1)
-        dff_input_outlier = dff_input[filtered_entries_input]
-        features1_input_outlier = dff_input_outlier.columns
-        features_input_outlier = list(features1_input_outlier)
-        outlier_names_input1 = df[filtered_entries_input]
-        outlier_names_input = outlier_names_input1.iloc[:, 0]
-        # OUTLIER DATA TARGET
-        z_scores_target = scipy.stats.zscore(dff_target)
-        abs_z_scores_target = np.abs(z_scores_target)
-        filtered_entries_target = (abs_z_scores_target < 3).all(axis=1)
-        dff_target_outlier = dff_target[filtered_entries_target]
-        # INPUT DATA WITH OUTLIERS
-        x_scale_input = dff_input.loc[:, features_input].values
-        y_scale_input = dff_input.loc[:, ].values
-        x_scale_input = StandardScaler().fit_transform(x_scale_input)
-        pca_scale_input = PCA(n_components=len(features_input))
-        principalComponents_scale_input = pca_scale_input.fit_transform(x_scale_input)
-        principalDf_scale_input = pd.DataFrame(data=principalComponents_scale_input
-                                               , columns=['PC' + str(i + 1) for i in range(len(features_input))])
-        finalDf_scale_input = pd.concat([df[[df.columns[0]]], principalDf_scale_input, dff_target], axis=1)
-        dfff_scale_input = finalDf_scale_input.fillna(0)
-
-        # INPUT DATA WITH REMOVING OUTLIERS
-        x_scale_input_outlier = dff_input_outlier.loc[:, features_input_outlier].values
-        y_scale_input_outlier = dff_input_outlier.loc[:, ].values
-        x_scale_input_outlier = StandardScaler().fit_transform(x_scale_input_outlier)
-        pca_scale_input_outlier = PCA(n_components=len(features_input_outlier))
-        principalComponents_scale_input_outlier = pca_scale_input_outlier.fit_transform(x_scale_input_outlier)
-        principalDf_scale_input_outlier = pd.DataFrame(data=principalComponents_scale_input_outlier
-                                                       , columns=['PC' + str(i + 1) for i in
-                                                                  range(len(features_input_outlier))])
-        finalDf_scale_input_outlier = pd.concat(
-            [outlier_names_input, principalDf_scale_input_outlier, dff_target_outlier],
-            axis=1)
-        dfff_scale_input_outlier = finalDf_scale_input_outlier.fillna(0)
-        if outlier == 'No':
-            dat = dfff_scale_input
-        elif outlier == 'Yes':
-            dat = dfff_scale_input_outlier
-    csv_string = dat.to_csv(index=False, encoding='utf-8')
-    csv_string = "data:text/csv;charset=utf-8,%EF%BB%BF" + urllib.parse.quote(csv_string)
-    return csv_string
-
-
-@app.callback(Output('download-link-correlation', 'download'),
-              [Input('eigenA-outlier', 'value')])
-def update_filename(outlier):
-    if outlier == 'Yes':
-        download = 'feature_correlation_data_removed_outliers.csv'
-    elif outlier == 'No':
-        download = 'feature_correlation_data.csv'
-    return download
-
-
-@app.callback([Output('data-table-correlation', 'data'),
-               Output('data-table-correlation', 'columns'),
-               Output('download-link-correlation', 'href')],
-              [Input("eigenA-outlier", 'value')], )
-def update_output(outlier):
-    if outlier == 'No':
-        features1 = dff.columns
-        features = list(features1)
-        r2_dff_table = correlation_dff * correlation_dff
-        r2_dff_table.insert(0, 'Features', features)
-        data_frame = r2_dff_table
-    if outlier == 'Yes':
-        features1_outlier = outlier_dff.columns
-        features_outlier = list(features1_outlier)
-        r2_dff_outlier_table = correlation_dff_outlier * correlation_dff_outlier
-        r2_dff_outlier_table.insert(0, 'Features', features_outlier)
-        data_frame = r2_dff_outlier_table
-
-    data = data_frame.to_dict('records')
-    columns = [{"name": i, "id": i, "deletable": True, "selectable": True, 'type': 'numeric',
-                'format': Format(precision=3, scheme=Scheme.fixed)} for i in data_frame.columns]
-    csv_string = data_frame.to_csv(index=False, encoding='utf-8')
-    csv_string = "data:text/csv;charset=utf-8,%EF%BB%BF" + urllib.parse.quote(csv_string)
-    return data, columns, csv_string
-
-
-@app.callback(Output('download-link-eigenA', 'download'),
-              [
-                  Input('eigenA-outlier', 'value')])
-def update_filename(outlier):
-    if outlier == 'Yes':
-        download = 'Eigen_Analysis_data_removed_outliers.csv'
-    elif outlier == 'No':
-        download = 'Eigen_Analysis_data.csv'
-    return download
-
-
-@app.callback([Output('data-table-eigenA', 'data'),
-               Output('data-table-eigenA', 'columns'),
-               Output('download-link-eigenA', 'href')],
-              [Input('all-custom-choice', 'value'),
-               Input("eigenA-outlier", 'value'),
-               Input('feature-input', 'value')], )
-def update_output(all_custom, outlier, input):
-    if all_custom == 'All':
-        if outlier == 'No':
-            Var_dfff = pd.concat([(Var_cumsum * 100)], axis=1)
-            Eigen_Analysis = pd.concat([PC_df.T, Eigen_df.T, Var_df.T, Var_dfff.T], axis=0)
-            Eigen_Analysis = Eigen_Analysis.rename(columns=Eigen_Analysis.iloc[0])
-            Eigen_Analysis = Eigen_Analysis.drop(Eigen_Analysis.index[0])
-            Eigen_Analysis.insert(loc=0, column="Principal Components",
-                                  value=["Eigenvalues", "Proportion of Explained Variance",
-                                         "Cumulative Proportion of Explained Variance (%)"])
-            data_frame_EigenA = Eigen_Analysis
-        if outlier == 'Yes':
-            Var_dfff_outlier = pd.concat([Var_cumsum_outlier * 100], axis=1)
-            Eigen_Analysis_Outlier = pd.concat(
-                [PC_df_outlier.T, Eigen_df_outlier.T, Var_df_outlier.T, Var_dfff_outlier.T],
-                axis=0)
-            Eigen_Analysis_Outlier = Eigen_Analysis_Outlier.rename(columns=Eigen_Analysis_Outlier.iloc[0])
-            Eigen_Analysis_Outlier = Eigen_Analysis_Outlier.drop(Eigen_Analysis_Outlier.index[0])
-            Eigen_Analysis_Outlier.insert(loc=0, column="Principal Components",
-                                          value=["Eigenvalues", "Proportion of Explained Variance",
-                                                 "Cumulative Proportion of Explained Variance (%)"])
-            data_frame_EigenA = Eigen_Analysis_Outlier
-
-    elif all_custom == "Custom":
-        if outlier == 'No':
-            # Dropping Data variables
-            dff_input = dff.drop(columns=dff[input])
-            features1_input = dff_input.columns
-            features_input = list(features1_input)
-            dff_target = dff[input]
-            x_scale_input = dff_input.loc[:, features_input].values
-            y_scale_input = dff_input.loc[:, ].values
-            x_scale_input = StandardScaler().fit_transform(x_scale_input)
-            # INPUT DATA WITH OUTLIERS
-            pca_scale_input = PCA(n_components=len(features_input))
-            principalComponents_scale_input = pca_scale_input.fit_transform(x_scale_input)
-            principalDf_scale_input = pd.DataFrame(data=principalComponents_scale_input
-                                                   , columns=['PC' + str(i + 1) for i in range(len(features_input))])
-            finalDf_scale_input = pd.concat([df[[df.columns[0]]], principalDf_scale_input, dff_target], axis=1)
-            dfff_scale_input = finalDf_scale_input.fillna(0)
-            Var_scale_input = pca_scale_input.explained_variance_ratio_
-            eigenvalues_scale_input = pca_scale_input.explained_variance_
-            Eigen_df_scale_input = pd.DataFrame(data=eigenvalues_scale_input, columns=["Eigenvaues"])
-            PC_df_scale_input = pd.DataFrame(data=['PC' + str(i + 1) for i in range(len(features_input))],
-                                             columns=['Principal Component'])
-            Var_df_scale_input = pd.DataFrame(data=Var_scale_input,
-                                              columns=['Cumulative Proportion of Explained Ratio'])
-            Var_cumsum_scale_input = Var_df_scale_input.cumsum()
-            Var_dfff_scale_input = pd.concat([Var_cumsum_scale_input * 100], axis=1)
-            Eigen_Analysis_scale_input = pd.concat([PC_df_scale_input.T, Eigen_df_scale_input.T,
-                                                    Var_df_scale_input.T, Var_dfff_scale_input.T], axis=0)
-            Eigen_Analysis_scale_input = Eigen_Analysis_scale_input.rename(columns=Eigen_Analysis_scale_input.iloc[0])
-            Eigen_Analysis_scale_input = Eigen_Analysis_scale_input.drop(Eigen_Analysis_scale_input.index[0])
-            Eigen_Analysis_scale_input.insert(loc=0, column="Principal Components",
-                                              value=["Eigenvalues", "Proportion of Explained Variance",
-                                                     "Cumulative Proportion of Explained Variance (%)"])
-            data_frame_EigenA = Eigen_Analysis_scale_input
-        if outlier == "Yes":
-            dff_input = dff.drop(columns=dff[input])
-            z_scores_input = scipy.stats.zscore(dff_input)
-            abs_z_scores_input = np.abs(z_scores_input)
-            filtered_entries_input = (abs_z_scores_input < 3).all(axis=1)
-            dff_input_outlier = dff_input[filtered_entries_input]
-            features1_input_outlier = dff_input_outlier.columns
-            features_input_outlier = list(features1_input_outlier)
-            outlier_names_input1 = df[filtered_entries_input]
-            outlier_names_input = outlier_names_input1.iloc[:, 0]
-            dff_target = dff[input]
-            # OUTLIER DATA TARGET
-            z_scores_target = scipy.stats.zscore(dff_target)
-            abs_z_scores_target = np.abs(z_scores_target)
-            filtered_entries_target = (abs_z_scores_target < 3).all(axis=1)
-            dff_target_outlier = dff_target[filtered_entries_target]
-            x_scale_input_outlier = dff_input_outlier.loc[:, features_input_outlier].values
-            y_scale_input_outlier = dff_input_outlier.loc[:, ].values
-            x_scale_input_outlier = StandardScaler().fit_transform(x_scale_input_outlier)
-            # INPUT DATA WITH REMOVING OUTLIERS
-            pca_scale_input_outlier = PCA(n_components=len(features_input_outlier))
-            principalComponents_scale_input_outlier = pca_scale_input_outlier.fit_transform(x_scale_input_outlier)
-            principalDf_scale_input_outlier = pd.DataFrame(data=principalComponents_scale_input_outlier
-                                                           , columns=['PC' + str(i + 1) for i in
-                                                                      range(len(features_input_outlier))])
-            finalDf_scale_input_outlier = pd.concat(
-                [outlier_names_input, principalDf_scale_input_outlier, dff_target_outlier],
-                axis=1)
-            dfff_scale_input_outlier = finalDf_scale_input_outlier.fillna(0)
-            Var_scale_input_outlier = pca_scale_input_outlier.explained_variance_ratio_
-            eigenvalues_scale_input_outlier = pca_scale_input_outlier.explained_variance_
-            Eigen_df_scale_input_outlier = pd.DataFrame(data=eigenvalues_scale_input_outlier, columns=["Eigenvaues"])
-            PC_df_scale_input_outlier = pd.DataFrame(
-                data=['PC' + str(i + 1) for i in range(len(features_input_outlier))],
-                columns=['Principal Component'])
-            Var_df_scale_input_outlier = pd.DataFrame(data=Var_scale_input_outlier,
-                                                      columns=['Cumulative Proportion of Explained '
-                                                               'Ratio'])
-            Var_cumsum_scale_input_outlier = Var_df_scale_input_outlier.cumsum()
-            Var_dfff_scale_input_outlier = pd.concat([Var_cumsum_scale_input_outlier * 100], axis=1)
-            Eigen_Analysis_scale_input_outlier = pd.concat([PC_df_scale_input_outlier.T, Eigen_df_scale_input_outlier.T,
-                                                            Var_df_scale_input_outlier.T,
-                                                            Var_dfff_scale_input_outlier.T], axis=0)
-            Eigen_Analysis_scale_input_outlier = Eigen_Analysis_scale_input_outlier.rename(
-                columns=Eigen_Analysis_scale_input_outlier.iloc[0])
-            Eigen_Analysis_scale_input_outlier = Eigen_Analysis_scale_input_outlier.drop(
-                Eigen_Analysis_scale_input_outlier.index[0])
-            Eigen_Analysis_scale_input_outlier.insert(loc=0, column="Principal Components",
-                                                      value=["Eigenvalues", "Proportion of Explained Variance",
-                                                             "Cumulative Proportion of Explained Variance (%)"])
-            data_frame_EigenA = Eigen_Analysis_scale_input_outlier
-
-    data = data_frame_EigenA.to_dict('records')
-    columns = [{"name": i, "id": i, "deletable": True, "selectable": True, 'type': 'numeric',
-                'format': Format(precision=3, scheme=Scheme.fixed)} for i in data_frame_EigenA.columns]
-    csv_string = data_frame_EigenA.to_csv(index=False, encoding='utf-8')
-    csv_string = "data:text/csv;charset=utf-8,%EF%BB%BF" + urllib.parse.quote(csv_string)
-    return data, columns, csv_string
-
-
-@app.callback(Output('download-link-loadings', 'download'),
-              [
-                  Input('eigenA-outlier', 'value')])
-def update_filename(outlier):
-    if outlier == 'Yes':
-        download = 'Loadings_data_removed_outliers.csv'
-    elif outlier == 'No':
-        download = 'Loadings_data.csv'
-    return download
-
-
-@app.callback([Output('data-table-loadings', 'data'),
-               Output('data-table-loadings', 'columns'),
-               Output('download-link-loadings', 'href')],
-              [Input('all-custom-choice', 'value'),
-               Input("eigenA-outlier", 'value'),
-               Input('feature-input', 'value')], )
-def update_output(all_custom, outlier, input):
-    if all_custom == 'All':
-        if outlier == 'No':
-            # ORIGINAL DATA WITH OUTLIERS
-            x_scale = dff.loc[:, features].values
-            y_scale = dff.loc[:, ].values
-            x_scale = StandardScaler().fit_transform(x_scale)
-            pca_scale = PCA(n_components=len(features))
-            principalComponents_scale = pca_scale.fit_transform(x_scale)
-            principalDf_scale = pd.DataFrame(data=principalComponents_scale
-                                             , columns=['PC' + str(i + 1) for i in range(len(features))])
-            # combining principle components and target
-            # calculating loading vector plot
-            loading_scale = pca_scale.components_.T * np.sqrt(pca_scale.explained_variance_)
-            loading_scale_df = pd.DataFrame(data=loading_scale,
-                                            columns=["PC" + str(i + 1) for i in range(len(features))])
-            line_group_scale_df = pd.DataFrame(data=features, columns=['Features'])
-            loading_scale_dataf = pd.concat([line_group_scale_df, loading_scale_df], axis=1)
-            data_frame = loading_scale_dataf
-        if outlier == 'Yes':
-            # OUTLIER DATA
-            z_scores = scipy.stats.zscore(dff)
-            abs_z_scores = np.abs(z_scores)
-            filtered_entries = (abs_z_scores < 3).all(axis=1)
-            outlier_dff = dff[filtered_entries]
-            features1_outlier = outlier_dff.columns
-            features_outlier = list(features1_outlier)
-            outlier_names1 = df[filtered_entries]
-            outlier_names = outlier_names1.iloc[:, 0]
-            # ORIGINAL DATA WITH REMOVING OUTLIERS
-            x_outlier_scale = outlier_dff.loc[:, features_outlier].values
-            y_outlier_scale = outlier_dff.loc[:, ].values
-            x_outlier_scale = StandardScaler().fit_transform(x_outlier_scale)
-            # uses covariance matrix
-            pca_outlier_scale = PCA(n_components=len(features_outlier))
-            principalComponents_outlier_scale = pca_outlier_scale.fit_transform(x_outlier_scale)
-            principalDf_outlier_scale = pd.DataFrame(data=principalComponents_outlier_scale
-                                                     ,
-                                                     columns=['PC' + str(i + 1) for i in range(len(features_outlier))])
-            # combining principle components and target
-            loading_outlier_scale = pca_outlier_scale.components_.T * np.sqrt(pca_outlier_scale.explained_variance_)
-            loading_outlier_scale_df = pd.DataFrame(data=loading_outlier_scale,
-                                                    columns=["PC" + str(i + 1) for i in range(len(features_outlier))])
-            line_group_outlier_scale_df = pd.DataFrame(data=features_outlier, columns=['Features'])
-            loading_outlier_scale_dataf = pd.concat([line_group_outlier_scale_df, loading_outlier_scale_df], axis=1)
-            data_frame = loading_outlier_scale_dataf
-    if all_custom == 'Custom':
-        if outlier == 'No':
-            # Dropping Data variables
-            dff_input = dff.drop(columns=dff[input])
-            features1_input = dff_input.columns
-            features_input = list(features1_input)
-            dff_target = dff[input]
-            # INPUT DATA WITH OUTLIERS
-            x_scale_input = dff_input.loc[:, features_input].values
-            y_scale_input = dff_input.loc[:, ].values
-            x_scale_input = StandardScaler().fit_transform(x_scale_input)
-
-            pca_scale_input = PCA(n_components=len(features_input))
-            principalComponents_scale_input = pca_scale_input.fit_transform(x_scale_input)
-            principalDf_scale_input = pd.DataFrame(data=principalComponents_scale_input
-                                                   , columns=['PC' + str(i + 1) for i in range(len(features_input))])
-            finalDf_scale_input = pd.concat([df[[df.columns[0]]], principalDf_scale_input, dff_target], axis=1)
-            dfff_scale_input = finalDf_scale_input.fillna(0)
-            Var_scale_input = pca_scale_input.explained_variance_ratio_
-            # calculating loading vector plot
-            loading_scale_input = pca_scale_input.components_.T * np.sqrt(pca_scale_input.explained_variance_)
-            loading_scale_input_df = pd.DataFrame(data=loading_scale_input,
-                                                  columns=["PC" + str(i + 1) for i in range(len(features_input))])
-            line_group_scale_input_df = pd.DataFrame(data=features_input, columns=['Features'])
-            loading_scale_input_dataf = pd.concat([line_group_scale_input_df, loading_scale_input_df], axis=1)
-            data_frame = loading_scale_input_dataf
-        if outlier == 'Yes':
-            dff_input = dff.drop(columns=dff[input])
-            dff_target = dff[input]
-            z_scores_input = scipy.stats.zscore(dff_input)
-            abs_z_scores_input = np.abs(z_scores_input)
-            filtered_entries_input = (abs_z_scores_input < 3).all(axis=1)
-            dff_input_outlier = dff_input[filtered_entries_input]
-            features1_input_outlier = dff_input_outlier.columns
-            features_input_outlier = list(features1_input_outlier)
-            outlier_names_input1 = df[filtered_entries_input]
-            outlier_names_input = outlier_names_input1.iloc[:, 0]
-            # OUTLIER DATA TARGET
-            z_scores_target = scipy.stats.zscore(dff_target)
-            abs_z_scores_target = np.abs(z_scores_target)
-            filtered_entries_target = (abs_z_scores_target < 3).all(axis=1)
-            dff_target_outlier = dff_target[filtered_entries_target]
-            # INPUT DATA WITH REMOVING OUTLIERS
-            x_scale_input_outlier = dff_input_outlier.loc[:, features_input_outlier].values
-            y_scale_input_outlier = dff_input_outlier.loc[:, ].values
-            x_scale_input_outlier = StandardScaler().fit_transform(x_scale_input_outlier)
-            pca_scale_input_outlier = PCA(n_components=len(features_input_outlier))
-            principalComponents_scale_input_outlier = pca_scale_input_outlier.fit_transform(x_scale_input_outlier)
-            principalDf_scale_input_outlier = pd.DataFrame(data=principalComponents_scale_input_outlier
-                                                           , columns=['PC' + str(i + 1) for i in
-                                                                      range(len(features_input_outlier))])
-            finalDf_scale_input_outlier = pd.concat(
-                [outlier_names_input, principalDf_scale_input_outlier, dff_target_outlier],
-                axis=1)
-            dfff_scale_input_outlier = finalDf_scale_input_outlier.fillna(0)
-            Var_scale_input_outlier = pca_scale_input_outlier.explained_variance_ratio_
-            # calculating loading vector plot
-            loading_scale_input_outlier = pca_scale_input_outlier.components_.T * np.sqrt(
-                pca_scale_input_outlier.explained_variance_)
-            loading_scale_input_outlier_df = pd.DataFrame(data=loading_scale_input_outlier,
-                                                          columns=["PC" + str(i + 1)
-                                                                   for i in range(len(features_input_outlier))])
-            line_group_scale_input_outlier_df = pd.DataFrame(data=features_input_outlier, columns=['Features'])
-            loading_scale_input_outlier_dataf = pd.concat([line_group_scale_input_outlier_df,
-                                                           loading_scale_input_outlier_df], axis=1)
-            data_frame = loading_scale_input_outlier_dataf
-
-    data = data_frame.to_dict('records')
-    columns = [{"name": i, "id": i, "deletable": True, "selectable": True, 'type': 'numeric',
-                'format': Format(precision=3, scheme=Scheme.fixed)} for i in data_frame.columns]
-    csv_string = data_frame.to_csv(index=False, encoding='utf-8')
-    csv_string = "data:text/csv;charset=utf-8,%EF%BB%BF" + urllib.parse.quote(csv_string)
-    return data, columns, csv_string
-
-
-@app.callback(Output('download-link-cos2', 'download'),
-              [Input('eigenA-outlier', 'value')])
-def update_filename(outlier):
-    if outlier == 'Yes':
-        download = 'Cos2_data_removed_outliers.csv'
-    elif outlier == 'No':
-        download = 'Cos2_data.csv'
-    return download
-
-
-@app.callback([Output('data-table-cos2', 'data'),
-               Output('data-table-cos2', 'columns'),
-               Output('download-link-cos2', 'href'), ],
-              [Input('all-custom-choice', 'value'),
-               Input("eigenA-outlier", 'value'),
-               Input('feature-input', 'value')], )
-def update_output(all_custom, outlier, input):
-    if all_custom == "All":
-        if outlier == 'No':
-            features1 = dff.columns
-            features = list(features1)
-            x_scale = dff.loc[:, features].values
-            y_scale = dff.loc[:, ].values
-            x_scale = StandardScaler().fit_transform(x_scale)
-            pca_scale = PCA(n_components=len(features))
-            principalComponents_scale = pca_scale.fit_transform(x_scale)
-            principalDf_scale = pd.DataFrame(data=principalComponents_scale
-                                             , columns=['PC' + str(i + 1) for i in range(len(features))])
-            # combining principle components and target
-            finalDf_scale = pd.concat([df[[df.columns[0]]], principalDf_scale], axis=1)
-            Var_scale = pca_scale.explained_variance_ratio_
-            # calculating loading vector plot
-            loading_scale = pca_scale.components_.T * np.sqrt(pca_scale.explained_variance_)
-            loading_scale_df = pd.DataFrame(data=loading_scale,
-                                            columns=["PC" + str(i + 1) for i in range(len(features))])
-            for i in loading_scale_df.columns:
-                loading_scale_df[i] = (loading_scale_df[i] ** 2)
-            line_group_scale_df = pd.DataFrame(data=features, columns=['Features'])
-            loading_scale_dataf = pd.concat([line_group_scale_df, loading_scale_df], axis=1)
-            data_frame = loading_scale_dataf
-        if outlier == 'Yes':
-            # ORIGINAL DATA WITH REMOVING OUTLIERS
-            # OUTLIER DATA
-            z_scores = scipy.stats.zscore(dff)
-            abs_z_scores = np.abs(z_scores)
-            filtered_entries = (abs_z_scores < 3).all(axis=1)
-            outlier_dff = dff[filtered_entries]
-            features1_outlier = outlier_dff.columns
-            features_outlier = list(features1_outlier)
-            outlier_names1 = df[filtered_entries]
-            outlier_names = outlier_names1.iloc[:, 0]
-
-            x_outlier_scale = outlier_dff.loc[:, features_outlier].values
-            y_outlier_scale = outlier_dff.loc[:, ].values
-            x_outlier_scale = StandardScaler().fit_transform(x_outlier_scale)
-
-            pca_outlier_scale = PCA(n_components=len(features_outlier))
-            principalComponents_outlier_scale = pca_outlier_scale.fit_transform(x_outlier_scale)
-            principalDf_outlier_scale = pd.DataFrame(data=principalComponents_outlier_scale
-                                                     ,
-                                                     columns=['PC' + str(i + 1) for i in range(len(features_outlier))])
-            finalDf_outlier_scale = pd.concat([outlier_names, principalDf_outlier_scale], axis=1)
-            Var_outlier_scale = pca_outlier_scale.explained_variance_ratio_
-
-            loading_outlier_scale = pca_outlier_scale.components_.T * np.sqrt(pca_outlier_scale.explained_variance_)
-            loading_outlier_scale_df = pd.DataFrame(data=loading_outlier_scale,
-                                                    columns=["PC" + str(i + 1) for i in range(len(features_outlier))])
-
-            for i in loading_outlier_scale_df.columns:
-                loading_outlier_scale_df[i] = loading_outlier_scale_df[i] ** 2
-            line_group_outlier_scale_df = pd.DataFrame(data=features_outlier, columns=['Features'])
-            loading_outlier_scale_dataf = pd.concat([line_group_outlier_scale_df, loading_outlier_scale_df], axis=1)
-            data_frame = loading_outlier_scale_dataf
-    if all_custom == 'Custom':
-        if outlier == 'No':
-            dff_input = dff.drop(columns=dff[input])
-            features1_input = dff_input.columns
-            features_input = list(features1_input)
-            dff_target = dff[input]
-            # INPUT DATA WITH OUTLIERS
-            x_scale_input = dff_input.loc[:, features_input].values
-            y_scale_input = dff_input.loc[:, ].values
-            x_scale_input = StandardScaler().fit_transform(x_scale_input)
-
-            pca_scale_input = PCA(n_components=len(features_input))
-            principalComponents_scale_input = pca_scale_input.fit_transform(x_scale_input)
-            principalDf_scale_input = pd.DataFrame(data=principalComponents_scale_input
-                                                   , columns=['PC' + str(i + 1) for i in range(len(features_input))])
-            finalDf_scale_input = pd.concat([df[[df.columns[0]]], principalDf_scale_input, dff_target], axis=1)
-            dfff_scale_input = finalDf_scale_input.fillna(0)
-            Var_scale_input = pca_scale_input.explained_variance_ratio_
-            # calculating loading vector plot
-            loading_scale_input = pca_scale_input.components_.T * np.sqrt(pca_scale_input.explained_variance_)
-            loading_scale_input_df = pd.DataFrame(data=loading_scale_input,
-                                                  columns=["PC" + str(i + 1) for i in range(len(features_input))])
-            for i in loading_scale_input_df.columns:
-                loading_scale_input_df[i] = loading_scale_input_df[i] ** 2
-            line_group_scale_input_df = pd.DataFrame(data=features_input, columns=['Features'])
-            loading_scale_input_dataf = pd.concat([line_group_scale_input_df, loading_scale_input_df], axis=1)
-            data_frame = loading_scale_input_dataf
-        if outlier == "Yes":
-            dff_input = dff.drop(columns=dff[input])
-            features1_input = dff_input.columns
-            features_input = list(features1_input)
-            dff_target = dff[input]
-            # OUTLIER DATA INPUT
-            z_scores_input = scipy.stats.zscore(dff_input)
-            abs_z_scores_input = np.abs(z_scores_input)
-            filtered_entries_input = (abs_z_scores_input < 3).all(axis=1)
-            dff_input_outlier = dff_input[filtered_entries_input]
-            features1_input_outlier = dff_input_outlier.columns
-            features_input_outlier = list(features1_input_outlier)
-            outlier_names_input1 = df[filtered_entries_input]
-            outlier_names_input = outlier_names_input1.iloc[:, 0]
-            # OUTLIER DATA TARGET
-            z_scores_target = scipy.stats.zscore(dff_target)
-            abs_z_scores_target = np.abs(z_scores_target)
-            filtered_entries_target = (abs_z_scores_target < 3).all(axis=1)
-            dff_target_outlier = dff_target[filtered_entries_target]
-            x_scale_input_outlier = dff_input_outlier.loc[:, features_input_outlier].values
-            y_scale_input_outlier = dff_input_outlier.loc[:, ].values
-            x_scale_input_outlier = StandardScaler().fit_transform(x_scale_input_outlier)
-
-            pca_scale_input_outlier = PCA(n_components=len(features_input_outlier))
-            principalComponents_scale_input_outlier = pca_scale_input_outlier.fit_transform(x_scale_input_outlier)
-            principalDf_scale_input_outlier = pd.DataFrame(data=principalComponents_scale_input_outlier
-                                                           , columns=['PC' + str(i + 1) for i in
-                                                                      range(len(features_input_outlier))])
-            finalDf_scale_input_outlier = pd.concat(
-                [outlier_names_input, principalDf_scale_input_outlier, dff_target_outlier],
-                axis=1)
-            dfff_scale_input_outlier = finalDf_scale_input_outlier.fillna(0)
-            Var_scale_input_outlier = pca_scale_input_outlier.explained_variance_ratio_
-            # calculating loading vector plot
-            loading_scale_input_outlier = pca_scale_input_outlier.components_.T * np.sqrt(
-                pca_scale_input_outlier.explained_variance_)
-            loading_scale_input_outlier_df = pd.DataFrame(data=loading_scale_input_outlier,
-                                                          columns=["PC" + str(i + 1) for i in
-                                                                   range(len(features_input_outlier))])
-            for i in loading_scale_input_outlier_df.columns:
-                loading_scale_input_outlier_df[i] = (loading_scale_input_outlier_df[i] ** 2)
-            line_group_scale_input_outlier_df = pd.DataFrame(data=features_input_outlier, columns=['Features'])
-            loading_scale_input_outlier_dataf = pd.concat(
-                [line_group_scale_input_outlier_df, loading_scale_input_outlier_df], axis=1)
-            data_frame = loading_scale_input_outlier_dataf
-
-    data = data_frame.to_dict('records')
-    columns = [{"name": i, "id": i, "deletable": True, "selectable": True, 'type': 'numeric',
-                'format': Format(precision=3, scheme=Scheme.fixed)} for i in data_frame.columns]
-    csv_string = data_frame.to_csv(index=False, encoding='utf-8')
-    csv_string = "data:text/csv;charset=utf-8,%EF%BB%BF" + urllib.parse.quote(csv_string)
-    return data, columns, csv_string
-
-
-@app.callback(Output('download-link-contrib', 'download'),
-              [Input('eigenA-outlier', 'value')])
-def update_filename(outlier):
-    if outlier == 'Yes':
-        download = 'Contributions_data_removed_outliers.csv'
-    elif outlier == 'No':
-        download = 'Contributions_data.csv'
-    return download
-
-
-@app.callback([Output('data-table-contrib', 'data'),
-               Output('data-table-contrib', 'columns'),
-               Output('download-link-contrib', 'href')],
-              [Input('all-custom-choice', 'value'),
-               Input("eigenA-outlier", 'value'),
-               Input('feature-input', 'value')], )
-def update_output(all_custom, outlier, input):
-    if all_custom == "All":
-        if outlier == 'No':
-            features1 = dff.columns
-            features = list(features1)
-            x_scale = dff.loc[:, features].values
-            y_scale = dff.loc[:, ].values
-            x_scale = StandardScaler().fit_transform(x_scale)
-            pca_scale = PCA(n_components=len(features))
-            principalComponents_scale = pca_scale.fit_transform(x_scale)
-            principalDf_scale = pd.DataFrame(data=principalComponents_scale
-                                             , columns=['PC' + str(i + 1) for i in range(len(features))])
-            # combining principle components and target
-            finalDf_scale = pd.concat([df[[df.columns[0]]], principalDf_scale], axis=1)
-            Var_scale = pca_scale.explained_variance_ratio_
-            # calculating loading vector plot
-            loading_scale = pca_scale.components_.T * np.sqrt(pca_scale.explained_variance_)
-            loading_scale_df = pd.DataFrame(data=loading_scale,
-                                            columns=["PC" + str(i + 1) for i in range(len(features))])
-            for i in loading_scale_df.columns:
-                loading_scale_df[i] = ((loading_scale_df[i] ** 2) * 100) / (loading_scale_df[i] ** 2).sum(axis=0)
-            line_group_scale_df = pd.DataFrame(data=features, columns=['Features'])
-            loading_scale_dataf = pd.concat([line_group_scale_df, loading_scale_df], axis=1)
-            data_frame = loading_scale_dataf
-        if outlier == 'Yes':
-            # ORIGINAL DATA WITH REMOVING OUTLIERS
-            # OUTLIER DATA
-            z_scores = scipy.stats.zscore(dff)
-            abs_z_scores = np.abs(z_scores)
-            filtered_entries = (abs_z_scores < 3).all(axis=1)
-            outlier_dff = dff[filtered_entries]
-            features1_outlier = outlier_dff.columns
-            features_outlier = list(features1_outlier)
-            outlier_names1 = df[filtered_entries]
-            outlier_names = outlier_names1.iloc[:, 0]
-
-            x_outlier_scale = outlier_dff.loc[:, features_outlier].values
-            y_outlier_scale = outlier_dff.loc[:, ].values
-            x_outlier_scale = StandardScaler().fit_transform(x_outlier_scale)
-
-            pca_outlier_scale = PCA(n_components=len(features_outlier))
-            principalComponents_outlier_scale = pca_outlier_scale.fit_transform(x_outlier_scale)
-            principalDf_outlier_scale = pd.DataFrame(data=principalComponents_outlier_scale
-                                                     ,
-                                                     columns=['PC' + str(i + 1) for i in range(len(features_outlier))])
-            finalDf_outlier_scale = pd.concat([outlier_names, principalDf_outlier_scale], axis=1)
-            Var_outlier_scale = pca_outlier_scale.explained_variance_ratio_
-
-            loading_outlier_scale = pca_outlier_scale.components_.T * np.sqrt(pca_outlier_scale.explained_variance_)
-            loading_outlier_scale_df = pd.DataFrame(data=loading_outlier_scale,
-                                                    columns=["PC" + str(i + 1) for i in range(len(features_outlier))])
-
-            for i in loading_outlier_scale_df.columns:
-                loading_outlier_scale_df[i] = ((loading_outlier_scale_df[i] ** 2) * 100) / (
-                        loading_outlier_scale_df[i] ** 2).sum(axis=0)
-            line_group_outlier_scale_df = pd.DataFrame(data=features_outlier, columns=['Features'])
-            loading_outlier_scale_dataf = pd.concat([line_group_outlier_scale_df, loading_outlier_scale_df], axis=1)
-            data_frame = loading_outlier_scale_dataf
-    if all_custom == 'Custom':
-        if outlier == 'No':
-            dff_input = dff.drop(columns=dff[input])
-            features1_input = dff_input.columns
-            features_input = list(features1_input)
-            dff_target = dff[input]
-            # INPUT DATA WITH OUTLIERS
-            x_scale_input = dff_input.loc[:, features_input].values
-            y_scale_input = dff_input.loc[:, ].values
-            x_scale_input = StandardScaler().fit_transform(x_scale_input)
-
-            pca_scale_input = PCA(n_components=len(features_input))
-            principalComponents_scale_input = pca_scale_input.fit_transform(x_scale_input)
-            principalDf_scale_input = pd.DataFrame(data=principalComponents_scale_input
-                                                   , columns=['PC' + str(i + 1) for i in range(len(features_input))])
-            finalDf_scale_input = pd.concat([df[[df.columns[0]]], principalDf_scale_input, dff_target], axis=1)
-            dfff_scale_input = finalDf_scale_input.fillna(0)
-            Var_scale_input = pca_scale_input.explained_variance_ratio_
-            # calculating loading vector plot
-            loading_scale_input = pca_scale_input.components_.T * np.sqrt(pca_scale_input.explained_variance_)
-            loading_scale_input_df = pd.DataFrame(data=loading_scale_input,
-                                                  columns=["PC" + str(i + 1) for i in range(len(features_input))])
-            for i in loading_scale_input_df.columns:
-                loading_scale_input_df[i] = ((loading_scale_input_df[i] ** 2) * 100) / (
-                        loading_scale_input_df[i] ** 2).sum(axis=0)
-            line_group_scale_input_df = pd.DataFrame(data=features_input, columns=['Features'])
-            loading_scale_input_dataf = pd.concat([line_group_scale_input_df, loading_scale_input_df], axis=1)
-            data_frame = loading_scale_input_dataf
-        if outlier == "Yes":
-            dff_input = dff.drop(columns=dff[input])
-            features1_input = dff_input.columns
-            features_input = list(features1_input)
-            dff_target = dff[input]
-            # OUTLIER DATA INPUT
-            z_scores_input = scipy.stats.zscore(dff_input)
-            abs_z_scores_input = np.abs(z_scores_input)
-            filtered_entries_input = (abs_z_scores_input < 3).all(axis=1)
-            dff_input_outlier = dff_input[filtered_entries_input]
-            features1_input_outlier = dff_input_outlier.columns
-            features_input_outlier = list(features1_input_outlier)
-            outlier_names_input1 = df[filtered_entries_input]
-            outlier_names_input = outlier_names_input1.iloc[:, 0]
-            # OUTLIER DATA TARGET
-            z_scores_target = scipy.stats.zscore(dff_target)
-            abs_z_scores_target = np.abs(z_scores_target)
-            filtered_entries_target = (abs_z_scores_target < 3).all(axis=1)
-            dff_target_outlier = dff_target[filtered_entries_target]
-            x_scale_input_outlier = dff_input_outlier.loc[:, features_input_outlier].values
-            y_scale_input_outlier = dff_input_outlier.loc[:, ].values
-            x_scale_input_outlier = StandardScaler().fit_transform(x_scale_input_outlier)
-
-            pca_scale_input_outlier = PCA(n_components=len(features_input_outlier))
-            principalComponents_scale_input_outlier = pca_scale_input_outlier.fit_transform(x_scale_input_outlier)
-            principalDf_scale_input_outlier = pd.DataFrame(data=principalComponents_scale_input_outlier
-                                                           , columns=['PC' + str(i + 1) for i in
-                                                                      range(len(features_input_outlier))])
-            finalDf_scale_input_outlier = pd.concat(
-                [outlier_names_input, principalDf_scale_input_outlier, dff_target_outlier],
-                axis=1)
-            dfff_scale_input_outlier = finalDf_scale_input_outlier.fillna(0)
-            Var_scale_input_outlier = pca_scale_input_outlier.explained_variance_ratio_
-            # calculating loading vector plot
-            loading_scale_input_outlier = pca_scale_input_outlier.components_.T * np.sqrt(
-                pca_scale_input_outlier.explained_variance_)
-            loading_scale_input_outlier_df = pd.DataFrame(data=loading_scale_input_outlier,
-                                                          columns=["PC" + str(i + 1) for i in
-                                                                   range(len(features_input_outlier))])
-            for i in loading_scale_input_outlier_df.columns:
-                loading_scale_input_outlier_df[i] = ((loading_scale_input_outlier_df[i] ** 2) * 100) / \
-                                                    (loading_scale_input_outlier_df[i] ** 2).sum(axis=0)
-            line_group_scale_input_outlier_df = pd.DataFrame(data=features_input_outlier, columns=['Features'])
-            loading_scale_input_outlier_dataf = pd.concat(
-                [line_group_scale_input_outlier_df, loading_scale_input_outlier_df], axis=1)
-            data_frame = loading_scale_input_outlier_dataf
-
-    data = data_frame.to_dict('records')
-    columns = [{"name": i, "id": i, "deletable": True, "selectable": True, 'type': 'numeric',
-                'format': Format(precision=3, scheme=Scheme.fixed)} for i in data_frame.columns]
-    csv_string = data_frame.to_csv(index=False, encoding='utf-8')
-    csv_string = "data:text/csv;charset=utf-8,%EF%BB%BF" + urllib.parse.quote(csv_string)
-    return data, columns, csv_string
-
-
-# serve(server)
+                  Input('yaxis-stat', 'value'),
+                  Input('percentile-type', 'value'),
+                  Input('abs-value', 'value'),
+                  Input('anim-frame-violin', 'value'),
+                  Input('data-set', 'value'),
+                  Input('data-table-upload', 'contents')
+              ],
+              [State('data-table-upload', 'filename')]
+              )
+def update_graph_stat(yaxis_name, percentile_type, abs_value, frame_value, data_set, contents, filename):
+    df = parse_contents(contents, filename)
+    print()
+    traces = []
+    frame_set = set(df[frame_value])
+    frame_list = sorted(list(frame_set))
+    if data_set is None:
+        return dash.no_update
+    dfObj = pd.DataFrame()
+    flag1 = False
+    if percentile_type == 'All structures':
+        data = df
+    for frame in frame_list:
+        dff = df[(df[frame_value] == frame)]
+        if percentile_type == 'Top 1% of structures' and abs_value == 'Yes':
+            data = dff[abs(dff[(data_set)]) > abs(dff[data_set]).quantile(0.99)]
+            dfObj = pd.concat([dfObj, data], ignore_index=True)
+            flag1 = True
+        elif percentile_type == 'Top 1% of structures' and abs_value == 'No':
+            data = dff[dff[(data_set)] > dff[data_set].quantile(0.99)]
+            dfObj = pd.concat([dfObj, data], ignore_index=True)
+            flag1 = True
+        elif percentile_type == 'Top 5% of structures' and abs_value == 'Yes':
+            data = dff[abs(dff[data_set]) > abs(dff[data_set]).quantile(0.95)]
+            dfObj = pd.concat([dfObj, data], ignore_index=True)
+            flag1 = True
+        elif percentile_type == 'Top 5% of structures' and abs_value == 'No':
+            data = dff[dff[data_set] > dff[data_set].quantile(0.95)]
+            dfObj = pd.concat([dfObj, data], ignore_index=True)
+            flag1 = True
+        elif percentile_type == 'Top 10% of structures' and abs_value == 'Yes':
+            data = dff[abs(dff[data_set]) > abs(dff[data_set]).quantile(0.9)]
+            dfObj = pd.concat([dfObj, data], ignore_index=True)
+            flag1 = True
+        elif percentile_type == 'Top 10% of structures' and abs_value == 'No':
+            data = dff[dff[data_set] > dff[data_set].quantile(0.9)]
+            dfObj = pd.concat([dfObj, data], ignore_index=True)
+            flag1 = True
+    if yaxis_name is None:
+        return dash.no_update
+    if flag1 == True:
+        data = dfObj
+    for frame, color in zip(frame_list, colors):
+        traces.append(go.Violin(y=data[data[frame_value] == frame][yaxis_name], name=frame,
+                                line_color=color,
+                                marker={'size': 4}, box_visible=True, opacity=0.9, meanline_visible=True,
+                                points='all', text=data[df.columns[0]],
+                                hovertemplate=
+                                "<b>%{text}</b><br><br>" +
+                                "Variable: %{y:.0f}<br>"
+                                "Pressure: %{x:. bar}<br>"
+                                ))
+    return {'data': traces,
+
+            'layout': go.Layout(
+                title=f"<b> {''.join(str(i) for i in frame_value.translate(SUP))} against"
+                      f" {''.join(str(i) for i in yaxis_name.translate(SUP))} "
+                ,
+                xaxis=dict(rangeslider=dict(visible=True), mirror=True, ticks='outside',
+                           showline=True),
+                yaxis={'title': yaxis_name.translate(SUP), 'mirror': True,
+                       'ticks': 'outside', 'showline': True, 'tickformat': ".1f"},
+                font=dict(
+                    family="Helvetica",
+                ),
+                margin={'l': 60, 'b': 0, 't': 50, 'r': 50},
+                hovermode='closest',
+                annotations=[
+                    dict(x=0.5, y=-0.135, showarrow=False, text=frame_value.translate(SUP),
+                         xref='paper', yref='paper',
+                         font=dict(size=14))
+                ]
+            )
+            }
+
+
+# CLICK DATA VIOLIN PLOT
+@app.callback(
+    Output('click-data-stat', 'children'),
+    [Input('violin-plot', 'clickData'),
+     ])
+def display_click_data_stat(clickData):
+    return json.dumps(clickData, indent=2)
+
+
+# POPULATE DROPDOWN DATASET DIST PLOT
+@app.callback(Output('data-set-dist', 'options'),
+              [Input('data-table-upload', 'contents')],
+              [State('data-table-upload', 'filename')])
+def populate_df_dropdown_dist(contents, filename):
+    df = parse_contents(contents, filename)
+    return [{'label': i, 'value': i} for i in df.columns]
+
+
+# POPULATE X AXIS DROPDOWN DIST PLOT
+@app.callback(Output('xaxis-dist', 'options'),
+              [Input('data-table-upload', 'contents')],
+              [State('data-table-upload', 'filename')])
+def populate_xaxis_dropdown_dist(contents, filename):
+    df = parse_contents(contents, filename)
+    return [{'label': i, 'value': i} for i in df.columns]
+
+
+# SIZE MODAL CALLBACK 4VAR ENV ANIM
+@app.callback(
+    Output('modal-dist', 'is_open'),
+    [Input('data-set-dist', 'value'),
+     Input('data-table-upload', 'contents'),
+     Input('close-dist', 'n_clicks')],
+    [State('data-table-upload', 'filename')])
+def update_output(size_value, contents, modal_close, filename):
+    ctx = dash.callback_context
+    user_clicked = ctx.triggered[0]['prop_id'].split('.')[0]
+    df = parse_contents(contents, filename)
+    size_list = df[size_value].to_list()
+    if not user_clicked or user_clicked == 'close':
+        return dash.no_update, False
+
+    if contents is None:
+        return [], False
+
+    if filename is None:
+        return [], False
+
+    if size_value is None:
+        return [], False
+
+    for item in size_list:
+        if any(c.isalpha() for c in item):
+            return [], True
+
+
+# POPULATE DROPDOWN FOR DIST ANIMATION FRAME
+@app.callback(Output('anim-frame-dist', 'options'),
+              [Input('data-table-upload', 'contents')],
+              [State('data-table-upload', 'filename')])
+def populate_animation_frame_dist(contents, filename):
+    df = parse_contents(contents, filename)
+    dff = df.select_dtypes(exclude=['float', 'object'])
+    return [{'label': i, 'value': i} for i in dff.columns]
+
+
+# POPULATE DIST PLOT
+@app.callback(Output("dist-plot", "figure"),
+              [Input('xaxis-dist', "value"),
+               Input('dist-grouping', 'value'),
+               Input('data-set-dist', 'value'),
+               Input('percentile-type-dist', 'value'),
+               Input('abs-value-dist', 'value'),
+               Input('anim-frame-dist', 'value'),
+               Input('data-table-upload', 'contents'), ],
+              [State('data-table-upload', 'filename')])
+def make_figure(x, dist_type, data_set, percentile_type, abs_value, frame, contents, filename):
+    df = parse_contents(contents, filename)
+    if x is None:
+        return dash.no_update
+    if data_set is None:
+        return dash.no_update
+    pressure_set = set(df['Pressure'])
+    pressure_list = sorted(list(pressure_set))
+    dfObj = pd.DataFrame()
+    flag1 = False
+    if percentile_type == 'All structures':
+        data = df
+    for pressure in pressure_list:
+        dff = df[(df['Pressure'] == pressure)]
+        if percentile_type == 'Top 1% of structures' and abs_value == 'Yes':
+            data = dff[abs(dff[data_set]) > abs(dff[data_set]).quantile(0.99)]
+            dfObj = pd.concat([dfObj, data], ignore_index=True)
+            flag1 = True
+        elif percentile_type == 'Top 1% of structures' and abs_value == 'No':
+            data = dff[dff[data_set] > dff[data_set].quantile(0.99)]
+            dfObj = pd.concat([dfObj, data], ignore_index=True)
+            flag1 = True
+        elif percentile_type == 'Top 5% of structures' and abs_value == 'Yes':
+            data = dff[abs(dff[data_set]) > abs(dff[data_set]).quantile(0.95)]
+            dfObj = pd.concat([dfObj, data], ignore_index=True)
+            flag1 = True
+        elif percentile_type == 'Top 5% of structures' and abs_value == 'No':
+            data = dff[dff[data_set] > dff[data_set].quantile(0.95)]
+            dfObj = pd.concat([dfObj, data], ignore_index=True)
+            flag1 = True
+        elif percentile_type == 'Top 10% of structures' and abs_value == 'Yes':
+            data = dff[abs(dff[data_set]) > abs(dff[data_set]).quantile(0.9)]
+            dfObj = pd.concat([dfObj, data], ignore_index=True)
+            flag1 = True
+        elif percentile_type == 'Top 10% of structures' and abs_value == 'No':
+            data = dff[dff[data_set] > dff[data_set].quantile(0.9)]
+            dfObj = pd.concat([dfObj, data], ignore_index=True)
+            flag1 = True
+    if flag1 == True:
+        data = dfObj
+    return px.histogram(data, x=data[x], marginal="rug",
+                        color="Family" if dist_type == 'Family' else None,
+                        animation_frame=frame,
+                        hover_data=df.columns, hover_name=df.columns[0], template="none"
+                        ).update_xaxes(showgrid=False, autorange=True, ticks='outside',
+                                       mirror=True, showline=True, tickformat=".1f", title=' '
+                                       ).update_yaxes(showgrid=False, ticks='outside',
+                                                      mirror=True, autorange=True, showline=True, tickformat=".1f",
+                                                      title=' '
+                                                      ).update_layout(
+        hovermode='closest', margin={'l': 60, 'b': 80, 't': 50, 'r': 10}, autosize=True, font=dict(family='Helvetica'),
+        annotations=[dict(x=0.5, y=-0.17, showarrow=False, text=x.translate(SUP), xref='paper', yref='paper',
+                          font=dict(size=14)),
+                     dict(x=-0.13, y=0.5, showarrow=False, text="Number of Structures", textangle=-90, xref='paper',
+                          yref='paper', font=dict(size=14))]
+    ).update_traces(marker=dict(opacity=0.7, line=dict(width=0.5, color='DarkSlateGrey'),
+                                )).update_layout(
+        title=f"<b> Distribution of Structures against {''.join(str(i) for i in x.translate(SUP))}", font=dict(
+            family="Arial",
+        ), )
+
+
+# RUN APP
 if __name__ == '__main__':
-    # For Development only, otherwise use gunicorn or uwsgi to launch, e.g.
-    # gunicorn -b 0.0.0.0:8050 index:app.server
-    app.run_server(debug=False)
-
-# OUTPUT: YOU SHOULD USE AT LEAST X PRINCIPAL COMPONENTS (≥85% of explained variance)
-
-
+    app.run_server()
