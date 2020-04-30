@@ -70,7 +70,7 @@ python app.py
 You can then run the app on your browser at http://127.0.0.1:8050
 - To quit the app press (CTRL +C). You will have to run the app again with this command everytime you leave your terminal/ quit the app.
 
-#### Run the app on production server:
+#### Run the app on production server by Gunicorn:
 ```bash
 gunicorn app:server -b :8000
 ```
