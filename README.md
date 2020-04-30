@@ -17,7 +17,7 @@ Alternatively, you can deploy your own copy of the app using this button and cre
 
 - Note: Once you have created your own copy of the app, after a period of inactivity Heroku shuts down the app's containers. Once the app gets a web request (the link above is used), it will wake up, but the initial response can take 10-20 seconds.
 
-## Running app locally
+## Deploy app on server by Gunicorn
 
 ### Requirements
 - Download [Python 3](https://www.python.org) if not already installed 
@@ -64,7 +64,6 @@ pip install -r requirements.txt
 ```
 
 Run the app:
-- Deploy Dash on production server by Gunicorn
 ```bash
 gunicorn app:server -b :8000
 ```
