@@ -1548,7 +1548,6 @@ def update_figure(rows, derived_virtual_data, derived_virtual_selected_rows, xax
     if derived_virtual_selected_rows is None:
         return []
     dff = df if derived_virtual_data is None else pd.DataFrame(derived_virtual_data)
-    print(dff[marker_color])
     return [
         html.Div([dcc.Graph(id='HTS-graph',
                             figure={'data': [
@@ -1684,7 +1683,6 @@ def populate_animation_frame_dist(contents, filename):
               )
 def update_graph_stat(yaxis_name, percentile_type, abs_value, frame_value, data_set, contents, filename):
     df = parse_contents(contents, filename)
-    print()
     traces = []
     frame_set = set(df[frame_value])
     frame_list = sorted(list(frame_set))
