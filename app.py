@@ -16,7 +16,8 @@ import textwrap
 import dash_bootstrap_components as dbc
 
 # CREATE DASH APP
-app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP, 'https://codepen.io/chriddyp/pen/bWLwgP.css'])
+app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP, 'https://codepen.io/chriddyp/pen/bWLwgP.css',
+                                      "https://codepen.io/sutharson/pen/dyYzEGZ.css"])
 server = app.server
 
 # PREDEFINED TAB STYLES
