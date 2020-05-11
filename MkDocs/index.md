@@ -1,8 +1,6 @@
 # Welcome 
 
 - To deploy the app on command line access our GitHub repository [here](https://github.com/aaml-analytics/mof-explorer)
-- To open the app in your broswer click [here](https://a2ml-analytics.herokuapp.com)<br>
-    Note: After a period of inactivity, Heorku shuts down the app's containers. Once the app gets a web request (the link above is clicked), it will wake up, but the initial response can take 10-20 seconds
 
 ## **About**
 <p>These tools aim to provide a reproducible and consistent data visualisation platform where experimental and computational researchers can use big data and statistical analysis to explore their data or the adsorption related data we provide to find the best materials for specific applications.  Improving from the [original](http://aam.ceb.cam.ac.uk/visualisedata.html) Metal-organic Framework (MOF) Explorer, this tool now allows  individuals  to  upload  their  own  data  set  to  analyse  data  in  a  2D  and 3D environment in a animation frame, filter data through the interactive data table and also perform statistical analysis on top performing structures.</p>
