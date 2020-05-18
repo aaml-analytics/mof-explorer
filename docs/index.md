@@ -12,7 +12,7 @@
 
 ## **Data File Requirements**
 The data file to upload **must** meet the following requirements: <br>
-**1.**	A ```.xlsx, .csv``` or a ```.txt``` data file must be uploaded. Please note that large ```.xlsx``` files take time to process so ```.csv``` or ```.txt``` files are preferred. <br>
+**1.**	A ```.xlsx, .csv``` or a ```.txt``` data file must be uploaded. Please note that large ```.xlsx``` files take time to process so ```.csv``` or ```.txt``` files are preferred. For ```.txt```  files the application only accepts comma text separators. <br>
 **2.**	The uploaded datasheet must have the structure name or identifier on its first column (shown in table 1). <br>
 **3.**	The uploaded datasheet must be completely populated (no blank cells). Blank cells can be replaced to ‘0’ using the ‘Replace All’ function in Excel <br>
 **4.**	If required, data must be transposed so that there is a single column stating the variables simulated with a column for the desired animation frame containing discrete numerical values (e.g. pressures). Example data files before e.g. ```AAML_Oxygen_Raw_Data.csv``` and after transposition ``` AAML_Oxygen_Data.csv``` can be found [here](https://github.com/aaml-analytics/mof-explorer/tree/master/sample-data) <br>
