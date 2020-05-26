@@ -962,6 +962,10 @@ def parse_uploaded_file(contents, filename):
     return df.to_json(date_format='iso', orient='split')
 
 
+def scaleup(x):
+    return round(x * 1.1)
+
+
 # POPULATE AXIS DROPDOWN 2VAR ENV ANIM
 @app.callback([Output('xaxis-anim-2D', 'options'),
                Output('yaxis-anim-2D', 'options'), ],
@@ -980,7 +984,7 @@ def populate_animation_frame_2D(data):
     if not data:
         return dash.no_update
     df = pd.read_json(data, orient='split')
-    dff = df.select_dtypes(exclude=['float', 'object'])
+    dff = df.select_dtypes(exclude=['object'])
     options = [{'label': i, 'value': i} for i in dff.columns]
     return options
 
@@ -997,27 +1001,29 @@ def update_figure_2Var(x, y, frame, data):
     if not data:
         return dash.no_update
     df = pd.read_json(data, orient='split')
-    return px.scatter(df, x=df[x], y=df[y], title="", animation_frame=df[frame],
+    return px.scatter(df.sort_values(by=[frame]), x=x, y=y, title="", animation_frame=frame,
                       animation_group=df.columns[0],
                       hover_name=df.columns[0],
                       hover_data={}, template="none",
                       ).update_xaxes(showgrid=False, title=x.translate(SUP), autorange=True, ticks='outside',
                                      showline=True, showspikes=True, spikethickness=1, spikedash='solid',
-                                     mirror=True, tickformat=".1f", title_standoff=10).update_yaxes(spikedash='solid',
-                                                                                                    showgrid=False,
-                                                                                                    title_standoff=10,
-                                                                                                    title=dict(
-                                                                                                        text=y.translate(
-                                                                                                            SUP),
-                                                                                                        standoff=5),
-                                                                                                    autorange=True,
-                                                                                                    ticks='outside',
-                                                                                                    showspikes=True,
-                                                                                                    spikethickness=1,
-                                                                                                    showline=True,
-                                                                                                    mirror=True,
-                                                                                                    tickformat=".1f"
-                                                                                                    ).update_layout(
+                                     mirror=True, tickformat=".1f", title_standoff=10, range=[0, scaleup(df[x].max())]
+                                     ).update_yaxes(spikedash='solid',
+                                                    showgrid=False,
+                                                    title_standoff=10,
+                                                    title=dict(
+                                                        text=y.translate(
+                                                            SUP),
+                                                        standoff=5),
+                                                    autorange=True,
+                                                    ticks='outside',
+                                                    showspikes=True,
+                                                    spikethickness=1,
+                                                    showline=True,
+                                                    mirror=True,
+                                                    tickformat=".1f",
+                                                    range=[0, scaleup(df[y].max())]
+                                                    ).update_layout(
         clickmode='event+select', hovermode='closest', margin={'l': 80}, autosize=True, font=dict(family='Helvetica')
     ).update_traces(marker=dict(opacity=0.7, line=dict(width=0.5, color='DarkSlateGrey'),
                                 ))
@@ -1075,7 +1081,7 @@ def populate_animation_frame_3var(data):
     if not data:
         return dash.no_update
     df = pd.read_json(data, orient='split')
-    dff = df.select_dtypes(exclude=['float', 'object'])
+    dff = df.select_dtypes(exclude=['object'])
     options = [{'label': i, 'value': i} for i in dff.columns]
     return options
 
@@ -1096,11 +1102,11 @@ def update_figure_3Var(x, y, color, color_value, frame, data):
     for i in range(0, len(color_value), 1):
         color_val_float.append(float(color_value[i]))
     color_val = color_val_float
-    return px.scatter(df,
-                      x=df[x],
-                      y=df[y],
+    return px.scatter(df.sort_values(by=[frame]),
+                      x=x,
+                      y=y,
                       title="",
-                      animation_frame=df[frame],
+                      animation_frame=frame,
                       animation_group=df.columns[0],
                       hover_name=df.columns[0],
                       hover_data={},
@@ -1237,7 +1243,7 @@ def populate_animation_frame_4var(data):
     if not data:
         return dash.no_update
     df = pd.read_json(data, orient='split')
-    dff = df.select_dtypes(exclude=['float', 'object'])
+    dff = df.select_dtypes(exclude=['object'])
     options = [{'label': i, 'value': i} for i in dff.columns]
     return options
 
@@ -1262,8 +1268,8 @@ def update_figure_4Var(x, y, color, size, color_value, frame, data):
     for i in range(0, len(color_value), 1):
         color_val_float.append(float(color_value[i]))
     color_val = color_val_float
-    return px.scatter(df, x=df[x], y=df[y], title="", animation_frame=frame,
-                      animation_group=df.columns[0], size=df[size], color=df[color],
+    return px.scatter(df.sort_values(by=[frame]), x=x, y=y, title="", animation_frame=frame,
+                      animation_group=df.columns[0], size=size, color=color,
                       hover_name=df.columns[0],
                       color_continuous_scale='Viridis',
                       hover_data={}, template="none", range_color=color_val
@@ -1384,7 +1390,7 @@ def populate_animation_frame_5D(data):
     if not data:
         return dash.no_update
     df = pd.read_json(data, orient='split')
-    dff = df.select_dtypes(exclude=['float', 'object'])
+    dff = df.select_dtypes(exclude=['object'])
     options = [{'label': i, 'value': i} for i in dff.columns]
     return options
 
@@ -1410,8 +1416,8 @@ def make_figure(x, y, z, color, size, color_value, frame, data):
     for i in range(0, len(color_value), 1):
         color_val_float.append(float(color_value[i]))
     color_val = color_val_float
-    return px.scatter_3d(df, x=df[x], y=df[y], z=df[z], title="", animation_frame=frame,
-                         animation_group=df.columns[0], size=df[size], color=df[color],
+    return px.scatter_3d(df.sort_values(by=[frame]), x=x, y=y, z=z, title="", animation_frame=frame,
+                         animation_group=df.columns[0], size=size, color=color,
                          hover_name=df.columns[0],
                          color_continuous_scale='Viridis',
                          hover_data={}, template="none", range_color=color_val
@@ -1665,8 +1671,8 @@ def update_output(size_value, contents, modal_close, filename):
               [State('data-table-upload', 'filename')])
 def populate_animation_frame_dist(contents, filename):
     df = parse_contents(contents, filename)
-    dff = df.select_dtypes(exclude=['float'])
-    return [{'label': i, 'value': i} for i in dff.columns]
+    # dff = df.select_dtypes(exclude=['float'])
+    return [{'label': i, 'value': i} for i in df.columns]
 
 
 # POPULATE VIOLIN PLOT CHANGED
@@ -1723,6 +1729,7 @@ def update_graph_stat(yaxis_name, percentile_type, abs_value, frame_value, data_
     if flag1 == True:
         data = dfObj
     for frame, color in zip(frame_list, colors):
+        data.sort_values(by=[frame_value])
         traces.append(go.Violin(y=data[data[frame_value] == frame][yaxis_name], name=frame,
                                 line_color=color,
                                 marker={'size': 4}, box_visible=True, opacity=0.9, meanline_visible=True,
@@ -1818,7 +1825,7 @@ def update_output(size_value, contents, modal_close, filename):
               [State('data-table-upload', 'filename')])
 def populate_animation_frame_dist(contents, filename):
     df = parse_contents(contents, filename)
-    dff = df.select_dtypes(exclude=['float', 'object'])
+    dff = df.select_dtypes(exclude=['object'])
     return [{'label': i, 'value': i} for i in dff.columns]
 
 
@@ -1872,7 +1879,7 @@ def make_figure(x, dist_type, data_set, percentile_type, abs_value, frame, conte
             flag1 = True
     if flag1 == True:
         data = dfObj
-    return px.histogram(data, x=data[x], marginal="rug",
+    return px.histogram(data.sort_values(by=[frame]), x=x, marginal="rug",
                         color="Family" if dist_type == 'Family' else None,
                         animation_frame=frame,
                         hover_data=df.columns, hover_name=df.columns[0], template="none"
