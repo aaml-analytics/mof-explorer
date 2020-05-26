@@ -72,7 +72,7 @@ You can then run the app on your browser at http://127.0.0.1:8050
 
 #### Run the app on production server by Gunicorn:
 ```bash
-gunicorn app:server -b :8000
+gunicorn app:server -b :8080
 ```
 You can then run the app on your browser at http://0.0.0.0:8080
 - This URL will continue running and can be used to access the app even after you have left your terminal.
