@@ -1,6 +1,6 @@
 # Welcome 
 
-- To deploy the app on command line or to create a URL using Heroku, access our GitHub repository [here](https://github.com/aaml-analytics/mof-explorer)
+- To deploy the app on command line, to create a URL using Heroku or to access our GitHub repository click [here.](https://github.com/aaml-analytics/mof-explorer)
 
 
 ## **About**
