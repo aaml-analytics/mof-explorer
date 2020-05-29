@@ -75,28 +75,28 @@ MOF_tool_about = textwrap.wrap(' These tools aim to provide a reproducible and c
 twoD_threeD_about = textwrap.wrap(' The 2D Animated MOF Explorer and 3D Animated MOF Explorer provides a 2, 3, 4 and '
                                   '5-Dimensional variable environment to explore specific structures '
                                   'against a discrete data variable (animation frame) of their choice to find the best '
-                                  'materials for the users applications', width=50)
-MOF_data_filter = textwrap.wrap(' Using the sorting and filtering datatable, users are able to filter variables '
+                                  "materials for the user's applications", width=50)
+MOF_data_filter = textwrap.wrap(' Using the sorting and filtering data table, users can filter variables '
                                 'from their dataset to '
-                                'produce plots of their preference. All variables in the users dataset can be sorted, '
-                                'filtered and deleted in the interactive datatable. The arguments that the datatable '
+                                "produce plots of their preference. All variables in the user's dataset can be sorted," 
+                                'filtered and deleted in the interactive data table. The arguments that the data table '
                                 'can take are '
                                 'specified '
                                 'in the manual. After filtering there are options to choose a logarithmic or linear '
-                                'axis scale, and choose a colorscale of choice from the viridis color palette.'
+                                'axis scale, and choose a color scale of choice from the Viridis color palette.'
                                 , width=50)
-MOF_stat_analysis = textwrap.wrap('All structures, or top performing structures (1%, 5% or 10% of all structures) '
-                                  'can be analysed in accordance to a set variable decided by the user e.g. '
+MOF_stat_analysis = textwrap.wrap('All structures or top-performing structures (1%, 5% or 10% of all structures) '
+                                  'can be analysed in accordance with a set variable decided by the user e.g. '
                                   'Deliverable Capacity. In the violin plot, geometric properties can then be '
-                                  'analysed against a discrete data variable (X axis) to determine Q1, Q3, IQR, '
+                                  'analysed against a discrete data variable (X-axis) to determine Q1, Q3, IQR, '
                                   'mean, median, maximum and'
                                   ' minimum points for a dataset of the users choice, alongside the distribution of '
                                   'MOFs in said violin plot. In the distribution plot, the number of structures against '
-                                  'a variable in the users data frame can be analysed to determine the spread of '
-                                  'structures in the users data. The distribution can be further filtered by MOF '
+                                  "a variable in the user's data frame can be analysed to determine the spread of" 
+                                  "structures in the user's data. The distribution can be further filtered by MOF "
                                   'families (if the user has uploaded this information in its data frame). '
                                   'An animation feature is also available to view these frames in accordance'
-                                  ' to a discrete data variable of the users choice.', width=50, )
+                                  ' with a discrete data variable of the users choice.', width=50, )
 MOF_GH = textwrap.wrap(" to explore AAML's sample data and read more on"
                        " AAML's MOF Explorer Tool Manual, FAQ's & Troubleshooting"
                        " on GitHub... ", width=50)
@@ -1628,10 +1628,11 @@ def populate_yaxis_stat(contents, filename):
 
 
 # VIRIDIS AND PLASMA COLOR PALETTE
-# PLASMA
 colors = ('rgb(240, 249, 33)', 'rgb(253, 202, 38)', 'rgb(251, 159, 58)', 'rgb(237, 121, 83)', 'rgb(216, 87, 107)',
           'rgb(189, 55, 134)', 'rgb(156, 23, 158)', 'rgb(114, 1, 168)', 'rgb(70, 3, 159)', 'rgb(13, 8, 135)',
-colors2 = ('rgb(68, 1, 84)', 'rgb(72, 40, 120)', 'rgb(62, 73, 137)', 'rgb(49, 104, 142)', 'rgb(38, 130, 142)',)
+
+          )
+colors2 = ('rgb(68, 1, 84)', 'rgb(72, 40, 120)', 'rgb(62, 73, 137)', 'rgb(49, 104, 142)', 'rgb(38, 130, 142)',
            'rgb(31, 158, 137)', 'rgb(53, 183, 121)', 'rgb(110, 206, 88)', 'rgb(181, 222, 43)', 'rgb(253, 231, 37)')
 
 
