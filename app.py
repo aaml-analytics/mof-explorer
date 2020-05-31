@@ -1845,14 +1845,14 @@ def make_figure(x, dist_type, data_set, percentile_type, abs_value, frame, conte
         return dash.no_update
     if data_set is None:
         return dash.no_update
-    pressure_set = set(df['Pressure'])
-    pressure_list = sorted(list(pressure_set))
+    frame_set = set(df[frame])
+    frame_list = sorted(list(frame_set))
     dfObj = pd.DataFrame()
     flag1 = False
     if percentile_type == 'All structures':
         data = df
-    for pressure in pressure_list:
-        dff = df[(df['Pressure'] == pressure)]
+    for frame_item in frame_list:
+        dff = df[(df[frame] == frame_item)]
         if percentile_type == 'Top 1% of structures' and abs_value == 'Yes':
             data = dff[abs(dff[data_set]) > abs(dff[data_set]).quantile(0.99)]
             dfObj = pd.concat([dfObj, data], ignore_index=True)
