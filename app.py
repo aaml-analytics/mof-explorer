@@ -747,8 +747,7 @@ app.layout = html.Div([
                                                     size="xl"
                                                 )
                                             ], style={'padding': 10}),
-                                            html.Div([html.Label(["Select % of structures in dataset to analyse per "
-                                                                  "pressure:"
+                                            html.Div([html.Label(["Select % of structures in dataset to analyse:"
                                                                      , dcc.RadioItems(
                                                     id='percentile-type',
                                                     options=[{'label': 'All structures', 'value': 'All structures'},
@@ -835,8 +834,7 @@ app.layout = html.Div([
                                                     size="xl"
                                                 )
                                             ], style={'padding': 10}),
-                                                html.Div([html.Label(["Select % of structures in dataset to analyse per"
-                                                                      " pressure:"
+                                                html.Div([html.Label(["Select % of structures in dataset to analyse:"
                                                                          , dcc.RadioItems(
                                                         id='percentile-type-dist',
                                                         options=[{'label': 'All structures', 'value': 'All structures'},
@@ -1736,8 +1734,8 @@ def update_graph_stat(yaxis_name, percentile_type, abs_value, frame_value, data_
                                 points='all', text=data[df.columns[0]],
                                 hovertemplate=
                                 "<b>%{text}</b><br><br>" +
-                                "Variable: %{y:.0f}<br>"
-                                "Pressure: %{x:. bar}<br>"
+                                "X Variable: %{x:.2f}<br>" +
+                                "Y Variable: %{y:.0f}<br>"
                                 ))
     return {'data': traces,
 
