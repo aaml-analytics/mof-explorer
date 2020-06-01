@@ -70,12 +70,12 @@ SUP = str.maketrans("0123456789", "⁰¹²³⁴⁵⁶⁷⁸⁹")
 # APP ABOUT DESCRIPTION
 MOF_tool_about = textwrap.wrap(' These tools aim to provide a reproducible and consistent data visualisation platform '
                                'where experimental and computational researchers can use big data and statistical '
-                               'analysis to find the best materials for specific applications',
+                               'analysis to find the best materials for specific applications.',
                                width=50)
 twoD_threeD_about = textwrap.wrap(' The 2D Animated MOF Explorer and 3D Animated MOF Explorer provides a 2, 3, 4 and '
                                   '5-Dimensional variable environment to explore specific structures '
                                   'against a discrete data variable (animation frame) of their choice to find the best '
-                                  "materials for the user's applications", width=50)
+                                  "materials for the user's applications.", width=50)
 MOF_data_filter = textwrap.wrap(' Using the sorting and filtering data table, users can filter variables '
                                 'from their dataset to '
                                 "produce plots of their preference. All variables in the user's dataset can be sorted," 
