@@ -69,14 +69,14 @@ One can also drag the x and y axis in a horizontal and vertical motion respectiv
 <p>
   <img width="300" height="200" src=https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/docs/reset-axes-double.png>
 </p>
-***Figure 6: Reset axis *** <br><br>
+***Figure 6: Reset axis double arrow *** <br><br>
 
 When the user drags the top of the axis or the bottom of the axis, a single headed arrow will appear. This allows the user to adjust only the upper limit of the axis i.e. the upper bound or the lower limit of the axis i.e. the lower bound respectively. (Figure 7). Clicking 'Reset axes' will reset the axes.
 
 <p>
   <img width="300" height="200" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/docs/reset-axes-single.png">
 </p>
-***Figure 7: Reset axis *** <br><br>
+***Figure 7: Reset axis single arrow *** <br><br>
 
 #### **Hover options**
 One of these two buttons is selected at all times. Clicking ‘Show closest data on hover’ will display the data for just one point under the cursor. Clicking ‘Compare data on hover’ will show you the data for all points with the same x-value. 
