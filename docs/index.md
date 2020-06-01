@@ -1,6 +1,6 @@
 # Welcome 
 
-- To deploy the app on command line, to create a URL using Heroku or to access our GitHub repository click [here.](https://github.com/aaml-analytics/mof-explorer)
+- To deploy the app on command line or to create a URL using Heroku, access our GitHub repository [here](https://github.com/aaml-analytics/mof-explorer)
 
 
 ## **About**
@@ -64,18 +64,26 @@ If the plot’s mode is set to ‘Zoom’, click and drag on the plot to zoom-in
 ***Figure 5: Auto scale of both axis (Zoom)*** <br><br>
 
 #### **Reset axes**
-One can also drag the x and y axis in a horizontal and vertical motion respectively to move along the length of the axis (Figure 3).  Clicking ‘Reset axes’ will reset the axes.
+One can also drag the x and y axis in a horizontal and vertical motion respectively to move along the length of the axis. When the user drags the middle of the axis, a double headed arrow will appear. This allows the user to adjust the range of the axis i.e. both the lower and upper bound (Figure 6). Clicking ‘Reset axes’ will reset the axes.
+
 <p>
-  <img width="300" height="250" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/reset-axes.png">
+  <img width="300" height="200" src=https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/docs/reset-axes-double.png>
 </p>
 ***Figure 6: Reset axis *** <br><br>
+
+When the user drags the top of the axis or the bottom of the axis, a single headed arrow will appear. This allows the user to adjust only the upper limit of the axis i.e. the upper bound or the lower limit of the axis i.e. the lower bound respectively. (Figure 7). Clicking 'Reset axes' will reset the axes.
+
+<p>
+  <img width="300" height="200" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/docs/reset-axes-single.png">
+</p>
+***Figure 7: Reset axis *** <br><br>
 
 #### **Hover options**
 One of these two buttons is selected at all times. Clicking ‘Show closest data on hover’ will display the data for just one point under the cursor. Clicking ‘Compare data on hover’ will show you the data for all points with the same x-value. 
 <p>
   <img width="550" height="50" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/hover-options.png">
 </p>
-***Figure 7: Hover options *** <br>
+***Figure 8: Hover options *** <br>
 
 ## **Functions found on 3D Plots**
 As well as the icons found in 2D plots, 3D plots also have the following icons to assist with data exploration. The mode bar for 3D charts gives you additional options for controlling rotations and also lets you toggle between the default view and your last saved view.<br>
@@ -84,28 +92,28 @@ Orbital Rotation rotates the plot around its middle point in 3-Dimensional space
 <p>
   <img width="220" height="50" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/orbital-rotation.png">
 </p>
-***Figure 8: Orital Rotation *** <br>
+***Figure 9: Orital Rotation *** <br>
 
 #### **Turntable rotation**
 Turntable Rotation rotates the plot around its middle point while constraining the z-axis slightly. 
 <p>
   <img width="220" height="50" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/turntable-rotation.png">
 </p>
-***Figure 9: Turntable Rotation *** <br>
+***Figure 10: Turntable Rotation *** <br>
 
 #### **Reset camera position to default**
 Clicking Reset Camera to Default zooms back to the *default* position at 45 degrees from all axes. 
 <p>
   <img width="220" height="50" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/default-camera.png">
 </p>
-***Figure 10: Reset Camera to default *** <br>
+***Figure 11: Reset Camera to default *** <br>
 
 #### **Reset camera position to last save**
 Clicking Reset Camera to Last Save returns the plot to the *last saved* position as set in the Organise view.
 <p>
   <img width="200" height="50" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/save-camera.png">
 </p>
-***Figure 11: Reset Camera to last save *** <br>
+***Figure 12: Reset Camera to last save *** <br>
 
 ## **MOF Explorer Animation**
 #### **Auto scaling animations**
@@ -113,7 +121,7 @@ With all animations, auto range in frames is currently not supported in Plotly. 
 <p>
   <img width="250" height="50" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/autoscale.png">
 </p>
-***Figure 12: Auto scale button*** 
+***Figure 13: Auto scale button*** 
 
 ### **2D Animation Environment**
 <p>
@@ -126,7 +134,7 @@ Double-clicking on one structure will result in the plot focussing on a said sin
 <p>
   <img width="300" height="250" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/zoom-tool.png">
 </p>
-***Figure 13: Zoom in tool*** 
+***Figure 14: Zoom in tool*** 
 
 ### **3D Animation Environment**
 The 3D Animation Environment provides a 5-Dimensional variable environment to explore specific structures against an animation frame of choice to find the best materials for the user's applications. Populate ALL the dropdowns to produce your plot. The tab of the dashboard will be ‘Updating…’ and then return to ‘Dash’ once your command has been fully executed. Clicking Play and pause will play and pause your animation respectively. You can also use the slider to pause the animation at a specific frame.
@@ -140,16 +148,16 @@ Using the sorting and filtering data table, users can filter variables from thei
 <p>
   <img width="500" height="250" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/data-filtering.png">
 </p>
-***Figure 14: Interactive Data table *** <br>
+***Figure 15: Interactive Data table *** <br>
 Populate ALL dropdowns and radio items to produce your plot. The tab of the dashboard will be ‘Updating…’ and then return to ‘Dash’ once your command has been fully executed. The heading tab will also fade in color and return to its original color once the app has computed user inputs.
 
 #### **Filtering plots using the data table**
-The syntax for the data table can be seen in table 2. These criteria will filter both the data table that is present but also filter the data on your plot. For example, figure 15 shows the reproduced plot when the ‘Pressure’ column has the argument ‘>50’ and the ‘Family’ column has the argument ‘ZIF’. X and Y axis is linear and the ‘Plasma’ color scale is chosen. 
+The syntax for the data table can be seen in table 2. These criteria will filter both the data table that is present but also filter the data on your plot. For example, figure 16 shows the reproduced plot when the ‘Pressure’ column has the argument ‘>50’ and the ‘Family’ column has the argument ‘ZIF’. X and Y axis is linear and the ‘Plasma’ color scale is chosen. 
 <p>
   <img width="280" height="220" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/data-table-plot.png">
 </p>
 
-***Figure 15: Data table plot example*** 
+***Figure 16: Data table plot example*** 
 
 ***Table 2: Syntax for interactive data table*** 
 
@@ -176,20 +184,20 @@ All structures or top-performing structures (1%, 5% or 10% of all structures) ca
 <p>
   <img width="350" height="200" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/violin-plot.png">
 </p>
-***Figure 16: Violin plot*** 
+***Figure 17: Violin plot*** 
 
 #### **Using the legend to interact with your plot**
 The legend can be used to interact with the violin plots that are in the plot. Double-clicking on a legend box will isolate the plot to said violin plot. Double-clicking the legend will return the plot to the original plot.
 <p>
   <img width="250" height="200" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/violin-single-select.png">
 </p>
-***Figure 17: Violin plot single select*** 
+***Figure 18: Violin plot single select*** 
 
 #### **Using the range slider to interact with your plot**
 <p>
   <img width="250" height="200" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/violin-range-slider.png">
 </p>
-***Figure 18: Violin plot range slider*** 
+***Figure 19: Violin plot range slider*** 
 
 Single clicking on the desired legend box will remove the respective violin plot from the graph. A single click on the same X-axis grouping in the legend will add the violin plot back into the graph. Using the range slider (tool directly below the x-axis) can also isolate one or multiple violin plots. Dragging the left and right toggle will produce the same reflection that is on the range slider.
 ### **Distrbution Plot**
@@ -199,7 +207,7 @@ The user must populate ALL the dropdowns and radio items to produce a graph. If 
 <p>
   <img width="350" height="200" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/dist-plot.png">
 </p>
-***Figure 19: Distribution plot*** 
+***Figure 20: Distribution plot*** 
 
 ## **Contributing**
 For changes, please open an issue first to discuss what you would like to change. You can also contact the AAML research group to discuss further contributions and collaborations.
