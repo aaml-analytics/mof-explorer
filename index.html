@@ -161,7 +161,7 @@
               
                 <h1 id="welcome">Welcome</h1>
 <ul>
-<li>To deploy the app on command line, to create a URL using Heroku or to access our GitHub repository click <a href="https://github.com/aaml-analytics/mof-explorer">here.</a></li>
+<li>To deploy the app on command line or to create a URL using Heroku, access our GitHub repository <a href="https://github.com/aaml-analytics/mof-explorer">here</a></li>
 </ul>
 <h2 id="about"><strong>About</strong></h2>
 <p><p>These tools aim to provide a reproducible and consistent data visualisation platform where experimental and computational researchers can use big data and statistical analysis to explore their data or the adsorption related data we provide to find the best materials for specific applications.  Improving from the <a href="http://aam.ceb.cam.ac.uk/visualisedata.html">original</a> Metal-organic Framework (MOF) Explorer, this tool now allows  individuals  to  upload  their  data  set  to  analyse  data  in  a  2D  and 3D environment in an animation frame, filter data through the interactive data table and also perform statistical analysis on top performing structures.</p>
@@ -292,17 +292,24 @@ Example files showing datasets before and after being transposed can be seen in 
 </p>
 <strong><em>Figure 5: Auto scale of both axis (Zoom)</em></strong> <br><br></p>
 <h4 id="reset-axes"><strong>Reset axes</strong></h4>
-<p>One can also drag the x and y axis in a horizontal and vertical motion respectively to move along the length of the axis (Figure 3).  Clicking ‘Reset axes’ will reset the axes.
+<p>One can also drag the x and y axis in a horizontal and vertical motion respectively to move along the length of the axis. When the user drags the middle of the axis, a double headed arrow will appear. This allows the user to adjust the range of the axis i.e. both the lower and upper bound (Figure 6). Clicking ‘Reset axes’ will reset the axes.</p>
 <p>
-  <img width="300" height="250" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/reset-axes.png">
+  <img width="300" height="200" src=https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/docs/reset-axes-double.png>
 </p>
-<strong><em>Figure 6: Reset axis </em></strong> <br><br></p>
+
+<p><strong><em>Figure 6: Reset axis </em></strong> <br><br></p>
+<p>When the user drags the top of the axis or the bottom of the axis, a single headed arrow will appear. This allows the user to adjust only the upper limit of the axis i.e. the upper bound or the lower limit of the axis i.e. the lower bound respectively. (Figure 7). Clicking 'Reset axes' will reset the axes.</p>
+<p>
+  <img width="300" height="200" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/docs/reset-axes-single.png">
+</p>
+
+<p><strong><em>Figure 7: Reset axis </em></strong> <br><br></p>
 <h4 id="hover-options"><strong>Hover options</strong></h4>
 <p>One of these two buttons is selected at all times. Clicking ‘Show closest data on hover’ will display the data for just one point under the cursor. Clicking ‘Compare data on hover’ will show you the data for all points with the same x-value. 
 <p>
   <img width="550" height="50" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/hover-options.png">
 </p>
-<strong><em>Figure 7: Hover options </em></strong> <br></p>
+<strong><em>Figure 8: Hover options </em></strong> <br></p>
 <h2 id="functions-found-on-3d-plots"><strong>Functions found on 3D Plots</strong></h2>
 <p>As well as the icons found in 2D plots, 3D plots also have the following icons to assist with data exploration. The mode bar for 3D charts gives you additional options for controlling rotations and also lets you toggle between the default view and your last saved view.<br></p>
 <h4 id="orbital-rotation"><strong>Orbital rotation</strong></h4>
@@ -310,32 +317,32 @@ Example files showing datasets before and after being transposed can be seen in 
 <p>
   <img width="220" height="50" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/orbital-rotation.png">
 </p>
-<strong><em>Figure 8: Orital Rotation </em></strong> <br></p>
+<strong><em>Figure 9: Orital Rotation </em></strong> <br></p>
 <h4 id="turntable-rotation"><strong>Turntable rotation</strong></h4>
 <p>Turntable Rotation rotates the plot around its middle point while constraining the z-axis slightly. 
 <p>
   <img width="220" height="50" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/turntable-rotation.png">
 </p>
-<strong><em>Figure 9: Turntable Rotation </em></strong> <br></p>
+<strong><em>Figure 10: Turntable Rotation </em></strong> <br></p>
 <h4 id="reset-camera-position-to-default"><strong>Reset camera position to default</strong></h4>
 <p>Clicking Reset Camera to Default zooms back to the <em>default</em> position at 45 degrees from all axes. 
 <p>
   <img width="220" height="50" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/default-camera.png">
 </p>
-<strong><em>Figure 10: Reset Camera to default </em></strong> <br></p>
+<strong><em>Figure 11: Reset Camera to default </em></strong> <br></p>
 <h4 id="reset-camera-position-to-last-save"><strong>Reset camera position to last save</strong></h4>
 <p>Clicking Reset Camera to Last Save returns the plot to the <em>last saved</em> position as set in the Organise view.
 <p>
   <img width="200" height="50" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/save-camera.png">
 </p>
-<strong><em>Figure 11: Reset Camera to last save </em></strong> <br></p>
+<strong><em>Figure 12: Reset Camera to last save </em></strong> <br></p>
 <h2 id="mof-explorer-animation"><strong>MOF Explorer Animation</strong></h2>
 <h4 id="auto-scaling-animations"><strong>Auto scaling animations</strong></h4>
 <p>With all animations, auto range in frames is currently not supported in Plotly. Therefore, the user must slide the maximum animation frame and press the auto-scale button on the toolbar at the top right side of the plot. The user can then press play and the range will auto-scale automatically. 
 <p>
   <img width="250" height="50" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/autoscale.png">
 </p>
-<strong><em>Figure 12: Auto scale button</em></strong> </p>
+<strong><em>Figure 13: Auto scale button</em></strong> </p>
 <h3 id="2d-animation-environment"><strong>2D Animation Environment</strong></h3>
 <p><p>
   <img width="450" height="250" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/2d-anim.png">
@@ -346,7 +353,7 @@ The 2D Animation Environment provides a 2, 3, and 4 Dimensional variable environ
 <p>
   <img width="300" height="250" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/zoom-tool.png">
 </p>
-<strong><em>Figure 13: Zoom in tool</em></strong> </p>
+<strong><em>Figure 14: Zoom in tool</em></strong> </p>
 <h3 id="3d-animation-environment"><strong>3D Animation Environment</strong></h3>
 <p>The 3D Animation Environment provides a 5-Dimensional variable environment to explore specific structures against an animation frame of choice to find the best materials for the user's applications. Populate ALL the dropdowns to produce your plot. The tab of the dashboard will be ‘Updating…’ and then return to ‘Dash’ once your command has been fully executed. Clicking Play and pause will play and pause your animation respectively. You can also use the slider to pause the animation at a specific frame.
 <p>
@@ -358,14 +365,14 @@ The 2D Animation Environment provides a 2, 3, and 4 Dimensional variable environ
 <p><p>
   <img width="500" height="250" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/data-filtering.png">
 </p>
-<strong><em>Figure 14: Interactive Data table </em></strong> <br>
+<strong><em>Figure 15: Interactive Data table </em></strong> <br>
 Populate ALL dropdowns and radio items to produce your plot. The tab of the dashboard will be ‘Updating…’ and then return to ‘Dash’ once your command has been fully executed. The heading tab will also fade in color and return to its original color once the app has computed user inputs.</p>
 <h4 id="filtering-plots-using-the-data-table"><strong>Filtering plots using the data table</strong></h4>
-<p>The syntax for the data table can be seen in table 2. These criteria will filter both the data table that is present but also filter the data on your plot. For example, figure 15 shows the reproduced plot when the ‘Pressure’ column has the argument ‘&gt;50’ and the ‘Family’ column has the argument ‘ZIF’. X and Y axis is linear and the ‘Plasma’ color scale is chosen. 
+<p>The syntax for the data table can be seen in table 2. These criteria will filter both the data table that is present but also filter the data on your plot. For example, figure 16 shows the reproduced plot when the ‘Pressure’ column has the argument ‘&gt;50’ and the ‘Family’ column has the argument ‘ZIF’. X and Y axis is linear and the ‘Plasma’ color scale is chosen. 
 <p>
   <img width="280" height="220" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/data-table-plot.png">
 </p></p>
-<p><strong><em>Figure 15: Data table plot example</em></strong> </p>
+<p><strong><em>Figure 16: Data table plot example</em></strong> </p>
 <p><strong><em>Table 2: Syntax for interactive data table</em></strong> </p>
 <table>
 <thead>
@@ -425,18 +432,18 @@ Populate ALL dropdowns and radio items to produce your plot. The tab of the dash
 <p><p>
   <img width="350" height="200" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/violin-plot.png">
 </p>
-<strong><em>Figure 16: Violin plot</em></strong> </p>
+<strong><em>Figure 17: Violin plot</em></strong> </p>
 <h4 id="using-the-legend-to-interact-with-your-plot"><strong>Using the legend to interact with your plot</strong></h4>
 <p>The legend can be used to interact with the violin plots that are in the plot. Double-clicking on a legend box will isolate the plot to said violin plot. Double-clicking the legend will return the plot to the original plot.
 <p>
   <img width="250" height="200" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/violin-single-select.png">
 </p>
-<strong><em>Figure 17: Violin plot single select</em></strong> </p>
+<strong><em>Figure 18: Violin plot single select</em></strong> </p>
 <h4 id="using-the-range-slider-to-interact-with-your-plot"><strong>Using the range slider to interact with your plot</strong></h4>
 <p><p>
   <img width="250" height="200" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/violin-range-slider.png">
 </p>
-<strong><em>Figure 18: Violin plot range slider</em></strong> </p>
+<strong><em>Figure 19: Violin plot range slider</em></strong> </p>
 <p>Single clicking on the desired legend box will remove the respective violin plot from the graph. A single click on the same X-axis grouping in the legend will add the violin plot back into the graph. Using the range slider (tool directly below the x-axis) can also isolate one or multiple violin plots. Dragging the left and right toggle will produce the same reflection that is on the range slider.</p>
 <h3 id="distrbution-plot"><strong>Distrbution Plot</strong></h3>
 <p>As mentioned in MOF Explorer Animations, with all animations, auto range in frames is currently not supported in Plotly. Therefore, the user must slide the maximum animation frame and press the auto-scale button on the toolbar at the top right side of the plot. The user can then press play and the range will auto-scale automatically.</p>
@@ -444,7 +451,7 @@ Populate ALL dropdowns and radio items to produce your plot. The tab of the dash
 <p>
   <img width="350" height="200" src="https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/MkDocs/dist-plot.png">
 </p>
-<strong><em>Figure 19: Distribution plot</em></strong> </p>
+<strong><em>Figure 20: Distribution plot</em></strong> </p>
 <h2 id="contributing"><strong>Contributing</strong></h2>
 <p>For changes, please open an issue first to discuss what you would like to change. You can also contact the AAML research group to discuss further contributions and collaborations.</p>
 <h2 id="contact-us"><strong>Contact Us</strong></h2>
@@ -512,5 +519,5 @@ CB3 0AS</p>
 
 <!--
 MkDocs version : 1.1
-Build Date UTC : 2020-06-01 13:35:36
+Build Date UTC : 2020-06-01 14:22:47
 -->
