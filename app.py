@@ -38,7 +38,7 @@ tab_mini_style = {
     'borderBottom': '1px solid #d6d6d6',
     'padding': '6px',
     'fontWeight': 'bold',
-    'width': '50px',
+    'width': '150px',
     'color': '#000000',
     'fontColor': '#000000',
 }
@@ -51,7 +51,7 @@ tab_mini_selected_style = {
     # 'fontColor': '#004a4a',
     'fontWeight': 'bold',
     'padding': '6px',
-    'width': '50px'
+    'width': '150px'
 }
 
 tab_selected_style = {
@@ -198,12 +198,151 @@ app.layout = html.Div([
                                             , style={'display': 'inline-block'})
                                         ], style={'backgroundColor': '#ffffff'}
                                        )]),
+dcc.Tab(label='MOF Explorer', style=tab_style, selected_style=tab_selected_style,
+                    children=[html.Div([html.Div([dash_table.DataTable(id='data-table-interact',
+                                                                       editable=True,
+                                                                       filter_action='native',
+                                                                       sort_action='native',
+                                                                       sort_mode='multi',
+                                                                       selected_columns=[],
+                                                                       selected_rows=[],
+                                                                       page_action='native',
+                                                                       column_selectable='single',
+                                                                       page_current=0,
+                                                                       page_size=20,
+                                                                       style_data={'height': 'auto'},
+                                                                       style_table={'overflowX': 'scroll',
+                                                                                    'maxHeight': '300px',
+                                                                                    'overflowY': 'scroll'},
+                                                                       style_cell={
+                                                                           'minWidth': '0px', 'maxWidth': '220px',
+                                                                           'whiteSpace': 'normal',
+                                                                       }
+                                                                       ),
+                                                  html.Div(id='data-table-container'), ], style={'padding': 15}),
+
+                                        html.Div([html.Div([
+                                            html.Label(["Select X variable:",
+                                                        (dcc.Dropdown(id='xaxis', placeholder="Select an option for X",
+                                                                      multi=False))
+                                                        ], className="six columns",
+                                                       style={'fontSize': 14, 'font-family': 'Raleway',
+                                                              'width': '20%', 'display': 'inline-block', 'padding': 5
+                                                              })
+                                        ]),
+                                            html.Div([
+                                                html.Label(["Select Y variable:",
+                                                            (dcc.Dropdown(id='yaxis',
+                                                                          placeholder="Select an option for Y",
+                                                                          multi=False))
+                                                            ], className="six columns",
+                                                           style={'fontSize': 14, 'font-family': 'Raleway',
+                                                                  'width': '20%',
+                                                                  'display': 'inline-block', 'padding': 5
+                                                                  })
+                                            ]),
+                                            html.Div([
+                                                html.Label(["Select size variable:",
+                                                            dcc.Dropdown(id='saxis',
+                                                                         placeholder="Select an option for size",
+                                                                         multi=False),
+                                                            ],
+                                                           className="six columns",
+                                                           style={'fontSize': 14, 'font-family': 'Raleway',
+                                                                  'width': '20%',
+                                                                  'display': 'inline-block', 'padding': 5}
+                                                           ),
+                                                dbc.Modal(
+                                                    [
+                                                        dbc.ModalHeader(
+                                                            "Selection Error!"),
+                                                        dbc.ModalBody(
+                                                            "Please select a size variable that contains numerical values."),
+                                                        dbc.ModalFooter(
+                                                            dbc.Button("Close",
+                                                                       id="close-data",
+                                                                       className="ml-auto")
+                                                        ),
+                                                    ],
+                                                    id="modal-data",
+                                                    is_open=False,
+                                                    centered=True,
+                                                    size="xl"
+                                                )
+
+                                            ]),
+                                            html.Div([
+                                                html.Label(["Select color variable:",
+                                                            (dcc.Dropdown(id='caxis',
+                                                                          placeholder="Select an option for color",
+                                                                          multi=False))
+                                                            ], className="six columns",
+                                                           style={'fontSize': 14, 'font-family': 'Raleway',
+                                                                  'width': '20%',
+                                                                  'display': 'inline-block', 'padding': 5
+                                                                  }),
+                                                dbc.Modal(
+                                                    [
+                                                        dbc.ModalHeader(
+                                                            "Selection Error!"),
+                                                        dbc.ModalBody(
+                                                            "Please select a color variable that contains numerical values."),
+                                                        dbc.ModalFooter(
+                                                            dbc.Button("Close",
+                                                                       id="close-datac",
+                                                                       className="ml-auto")
+                                                        ),
+                                                    ],
+                                                    id="modal-datac",
+                                                    is_open=False,
+                                                    centered=True,
+                                                    size="xl"
+                                                )
+                                            ]),
+                                        ],
+                                            style={'padding-left': '15%', 'padding-right': '5%'}
+                                        ),
+                                        html.Div([html.Label(["Select X axis scale:",
+                                                              dcc.RadioItems(
+                                                                  id='xaxis-type',
+                                                                  options=[{'label': i, 'value': i} for i in
+                                                                           ['Linear', 'Log']],
+                                                                  value='Linear',
+                                                                  labelStyle={'display': 'inline-block', }
+                                                              )]),
+                                                  ], style={'display': 'inline-block', 'width': '24%'}),
+                                        html.Div([html.Label(["Select Y axis scale:",
+                                                              dcc.RadioItems(
+                                                                  id='yaxis-type',
+                                                                  options=[{'label': i, 'value': i} for i in
+                                                                           ['Linear', 'Log']],
+                                                                  value='Linear',
+                                                                  labelStyle={'display': 'inline-block'}
+                                                              )]),
+                                                  ], style={'display': 'inline-block', 'width': '24%'}),
+                                        html.Div([html.Label(["Select color scale:",
+                                                              dcc.RadioItems(
+                                                                  id='colorscale',
+                                                                  options=[{'label': i, 'value': i} for i in
+                                                                           ['Viridis', 'Plasma']],
+                                                                  value='Plasma'
+                                                              )]),
+                                                  ], style={'display': 'inline-block', 'width': '24%', }),
+                                        html.Div([html.Label(["Size range:"
+                                                                 , html.Div(id='size-output-container-filter')])
+                                                  ], style={'display': 'inline-block', 'width': '24%', }
+                                                 ),
+                                        app.css.append_css({
+                                            'external_url': 'https://codepen.io/chriddyp/pen/bWLwgP.css'
+                                        })
+                                        ], style={'backgroundColor': '#ffffff'})]
+                    ),
             dcc.Tab(label='MOF Explorer Animation', style=tab_style, selected_style=tab_selected_style,
                     children=[
                         dcc.Tabs(id='sub-tabs1', style=tabs_styles, children=[
                             dcc.Tab(label='2D Animation', style=tab_style, selected_style=tab_selected_style,
                                     children=[dcc.Tabs(id='subsub-tabs', style=tabs_styles,
-                                                       children=[dcc.Tab(label='2', style=tab_mini_style,
+                                                       children=[dcc.Tab(label='2 Variables', style=tab_mini_style,
                                                                          selected_style=tab_mini_selected_style,
                                                                          children=[
                                                                              html.Div([html.Div([dcc.Graph(
@@ -255,7 +394,7 @@ app.layout = html.Div([
                                                                                  style={'padding': 20,
                                                                                         'backgroundColor': '#ffffff'})
                                                                          ]),
-                                                                 dcc.Tab(label='3', style=tab_mini_style,
+                                                                 dcc.Tab(label='3 Variables', style=tab_mini_style,
                                                                          selected_style=tab_mini_selected_style,
                                                                          children=[
                                                                              html.Div(
@@ -372,7 +511,7 @@ app.layout = html.Div([
                                                                                  ]
                                                                              )
                                                                          ]),
-                                                                 dcc.Tab(label='4', style=tab_mini_style,
+                                                                 dcc.Tab(label='4 Variables', style=tab_mini_style,
                                                                          selected_style=tab_mini_selected_style,
                                                                          children=[html.Div([html.Div(
                                                                              [dcc.Graph(id='my-graph', animate=False)],
@@ -570,145 +709,6 @@ app.layout = html.Div([
                                     ], className='container', style={'backgroundColor': '#ffffff', 'padding': 20})])
                         ])
                     ]),
-            dcc.Tab(label='MOF Data Filtering', style=tab_style, selected_style=tab_selected_style,
-                    children=[html.Div([html.Div([dash_table.DataTable(id='data-table-interact',
-                                                                       editable=True,
-                                                                       filter_action='native',
-                                                                       sort_action='native',
-                                                                       sort_mode='multi',
-                                                                       selected_columns=[],
-                                                                       selected_rows=[],
-                                                                       page_action='native',
-                                                                       column_selectable='single',
-                                                                       page_current=0,
-                                                                       page_size=20,
-                                                                       style_data={'height': 'auto'},
-                                                                       style_table={'overflowX': 'scroll',
-                                                                                    'maxHeight': '300px',
-                                                                                    'overflowY': 'scroll'},
-                                                                       style_cell={
-                                                                           'minWidth': '0px', 'maxWidth': '220px',
-                                                                           'whiteSpace': 'normal',
-                                                                       }
-                                                                       ),
-                                                  html.Div(id='data-table-container'), ], style={'padding': 15}),
-
-                                        html.Div([html.Div([
-                                            html.Label(["Select X variable:",
-                                                        (dcc.Dropdown(id='xaxis', placeholder="Select an option for X",
-                                                                      multi=False))
-                                                        ], className="six columns",
-                                                       style={'fontSize': 14, 'font-family': 'Raleway',
-                                                              'width': '20%', 'display': 'inline-block', 'padding': 5
-                                                              })
-                                        ]),
-                                            html.Div([
-                                                html.Label(["Select Y variable:",
-                                                            (dcc.Dropdown(id='yaxis',
-                                                                          placeholder="Select an option for Y",
-                                                                          multi=False))
-                                                            ], className="six columns",
-                                                           style={'fontSize': 14, 'font-family': 'Raleway',
-                                                                  'width': '20%',
-                                                                  'display': 'inline-block', 'padding': 5
-                                                                  })
-                                            ]),
-                                            html.Div([
-                                                html.Label(["Select size variable:",
-                                                            dcc.Dropdown(id='saxis',
-                                                                         placeholder="Select an option for size",
-                                                                         multi=False),
-                                                            ],
-                                                           className="six columns",
-                                                           style={'fontSize': 14, 'font-family': 'Raleway',
-                                                                  'width': '20%',
-                                                                  'display': 'inline-block', 'padding': 5}
-                                                           ),
-                                                dbc.Modal(
-                                                    [
-                                                        dbc.ModalHeader(
-                                                            "Selection Error!"),
-                                                        dbc.ModalBody(
-                                                            "Please select a size variable that contains numerical values."),
-                                                        dbc.ModalFooter(
-                                                            dbc.Button("Close",
-                                                                       id="close-data",
-                                                                       className="ml-auto")
-                                                        ),
-                                                    ],
-                                                    id="modal-data",
-                                                    is_open=False,
-                                                    centered=True,
-                                                    size="xl"
-                                                )
-
-                                            ]),
-                                            html.Div([
-                                                html.Label(["Select color variable:",
-                                                            (dcc.Dropdown(id='caxis',
-                                                                          placeholder="Select an option for color",
-                                                                          multi=False))
-                                                            ], className="six columns",
-                                                           style={'fontSize': 14, 'font-family': 'Raleway',
-                                                                  'width': '20%',
-                                                                  'display': 'inline-block', 'padding': 5
-                                                                  }),
-                                                dbc.Modal(
-                                                    [
-                                                        dbc.ModalHeader(
-                                                            "Selection Error!"),
-                                                        dbc.ModalBody(
-                                                            "Please select a color variable that contains numerical values."),
-                                                        dbc.ModalFooter(
-                                                            dbc.Button("Close",
-                                                                       id="close-datac",
-                                                                       className="ml-auto")
-                                                        ),
-                                                    ],
-                                                    id="modal-datac",
-                                                    is_open=False,
-                                                    centered=True,
-                                                    size="xl"
-                                                )
-                                            ]),
-                                        ],
-                                            style={'padding-left': '15%', 'padding-right': '5%'}
-                                        ),
-                                        html.Div([html.Label(["Select X axis scale:",
-                                                              dcc.RadioItems(
-                                                                  id='xaxis-type',
-                                                                  options=[{'label': i, 'value': i} for i in
-                                                                           ['Linear', 'Log']],
-                                                                  value='Linear',
-                                                                  labelStyle={'display': 'inline-block', }
-                                                              )]),
-                                                  ], style={'display': 'inline-block', 'width': '24%'}),
-                                        html.Div([html.Label(["Select Y axis scale:",
-                                                              dcc.RadioItems(
-                                                                  id='yaxis-type',
-                                                                  options=[{'label': i, 'value': i} for i in
-                                                                           ['Linear', 'Log']],
-                                                                  value='Linear',
-                                                                  labelStyle={'display': 'inline-block'}
-                                                              )]),
-                                                  ], style={'display': 'inline-block', 'width': '24%'}),
-                                        html.Div([html.Label(["Select color scale:",
-                                                              dcc.RadioItems(
-                                                                  id='colorscale',
-                                                                  options=[{'label': i, 'value': i} for i in
-                                                                           ['Viridis', 'Plasma']],
-                                                                  value='Plasma'
-                                                              )]),
-                                                  ], style={'display': 'inline-block', 'width': '24%', }),
-                                        html.Div([html.Label(["Size range:"
-                                                                 , html.Div(id='size-output-container-filter')])
-                                                  ], style={'display': 'inline-block', 'width': '24%', }
-                                                 ),
-                                        app.css.append_css({
-                                            'external_url': 'https://codepen.io/chriddyp/pen/bWLwgP.css'
-                                        })
-                                        ], style={'backgroundColor': '#ffffff'})]
-                    ),
             dcc.Tab(label='Statistical Analysis of Top Structures', style=tab_style,
                     selected_style=tab_selected_style,
                     children=[
@@ -750,13 +750,14 @@ app.layout = html.Div([
                                             html.Div([html.Label(["Select % of structures in dataset to analyse:"
                                                                      , dcc.RadioItems(
                                                     id='percentile-type',
-                                                    options=[{'label': 'All structures', 'value': 'All structures'},
+                                                    options=[
                                                              {'label': 'Top 1% of structures',
                                                               'value': 'Top 1% of structures'},
                                                              {'label': 'Top 5% of structures',
                                                               'value': 'Top 5% of structures'},
                                                              {'label': 'Top 10% of structures',
-                                                              'value': 'Top 10% of structures'}],
+                                                              'value': 'Top 10% of structures'},
+                                                    {'label': 'All structures', 'value': 'All structures'}],
                                                     value='All structures',
 
                                                 )]),
@@ -837,13 +838,14 @@ app.layout = html.Div([
                                                 html.Div([html.Label(["Select % of structures in dataset to analyse:"
                                                                          , dcc.RadioItems(
                                                         id='percentile-type-dist',
-                                                        options=[{'label': 'All structures', 'value': 'All structures'},
+                                                        options=[
                                                                  {'label': 'Top 1% of structures',
                                                                   'value': 'Top 1% of structures'},
                                                                  {'label': 'Top 5% of structures',
                                                                   'value': 'Top 5% of structures'},
                                                                  {'label': 'Top 10% of structures',
-                                                                  'value': 'Top 10% of structures'}],
+                                                                  'value': 'Top 10% of structures'},
+                                                        {'label': 'All structures', 'value': 'All structures'},],
                                                         value='All structures',
 
                                                     )]),
