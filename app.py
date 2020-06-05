@@ -27,7 +27,7 @@ styles = {
         'overflowX': 'scroll'
     }
 }
-tabs_styles = {'height': '40px', 'font-family': 'Arial', 'fontSize': 14}
+tabs_styles = {'height': '40px', 'font-family': 'Raleway', 'fontSize': 14}
 tab_style = {
     'borderBottom': '1px solid #d6d6d6',
     'padding': '6px',
@@ -55,10 +55,10 @@ tab_mini_selected_style = {
 }
 
 tab_selected_style = {
-    'borderTop': '3px solid #004a4a',
+    'borderTop': '3px solid #333333',
     'borderBottom': '1px solid #d6d6d6 ',
     'backgroundColor': '#f6f6f6',
-    'color': '#004a4a',
+    'color': '#333333',
     # 'fontColor': '#004a4a',
     'fontWeight': 'bold',
     'padding': '6px'
@@ -70,12 +70,12 @@ SUP = str.maketrans("0123456789", "⁰¹²³⁴⁵⁶⁷⁸⁹")
 # APP ABOUT DESCRIPTION
 MOF_tool_about = textwrap.wrap(' These tools aim to provide a reproducible and consistent data visualisation platform '
                                'where experimental and computational researchers can use big data and statistical '
-                               'analysis to find the best materials for specific applications.',
+                               'analysis to find the best materials for specific applications',
                                width=50)
 twoD_threeD_about = textwrap.wrap(' The 2D Animated MOF Explorer and 3D Animated MOF Explorer provides a 2, 3, 4 and '
                                   '5-Dimensional variable environment to explore specific structures '
                                   'against a discrete data variable (animation frame) of their choice to find the best '
-                                  "materials for the user's applications.", width=50)
+                                  "materials for the user's applications", width=50)
 MOF_data_filter = textwrap.wrap(' Using the sorting and filtering data table, users can filter variables '
                                 'from their dataset to '
                                 "produce plots of their preference. All variables in the user's dataset can be sorted," 
@@ -111,14 +111,14 @@ app.layout = html.Div([
                  height='60', width='160', style={'float': 'right', 'display': 'inline-block', 'padding-right': '2%'}),
         html.H1("Metal-Organic Framework Data Visualisation Tools",
                 style={'display': 'inline-block', 'padding-left': '10%', 'text-align': 'center', 'fontSize': 36,
-                       'color': 'white', 'font-family': 'Georgia'}),
+                       'color': 'white', 'font-family': 'Raleway'}),
         html.H1("...", style={'fontColor': '#3c3c3c', 'fontSize': 6})
-    ], style={'backgroundColor': '#004040'}),
+    ], style={'backgroundColor': '#333333'}),
     html.Div([html.A('Refresh', href='/')], style={}),
     html.Div([
-        html.H2("Upload Data", style={'fontSize': 24, 'font-family': 'Arial', 'color': '#004a4a'}, ),
+        html.H2("Upload Data", style={'fontSize': 24, 'font-family': 'Raleway', 'color': '#333333'}, ),
         html.H3("Upload .txt, .csv or .xls files to starting exploring data...", style={'fontSize': 16,
-                                                                                        'font-family': 'Arial'}),
+                                                                                        'font-family': 'Raleway'}),
         dcc.Store(id='csv-data', storage_type='session', data=None),
         html.Div([dcc.Upload(
             id='data-table-upload',
@@ -150,44 +150,44 @@ app.layout = html.Div([
             )
         ]), ], style={'display': 'inline-block', 'width': '48%', 'padding-left': '1%', }),
     html.Div([html.Div([html.H2("Explore Data", style={'fontSize': 24,
-                                                       'font-family': 'Arial',
-                                                       'color': '#004a4a'})],
+                                                       'font-family': 'Raleway',
+                                                       'color': '#333333'})],
                        style={}),
               html.Div(['', html.A('Download',
                                    href='https://github.com/aaml-analytics/mof-explorer/tree/master/sample-data')]),
               html.H3("...AAML's sample file to explore tool functions...", style={'fontSize': 16,
-                                                                                   'font-family': 'Arial',
+                                                                                   'font-family': 'Raleway',
                                                                                    'display': 'inline-block'}),
-              html.U(id='file-list')], style={'display': 'inline-block', 'width': '44%', 'font-family': 'Arial'}),
+              html.U(id='file-list')], style={'display': 'inline-block', 'width': '44%', 'font-family': 'Raleway'}),
     html.Div([
         dcc.Tabs([
             dcc.Tab(label='About', style=tab_style, selected_style=tab_selected_style,
                     children=[html.Div([html.H2(" What are AAML's MOF Data Visualisation tools?",
-                                                style={'fontSize': 18, 'font-family': 'Arial', 'font-weight': 'bold'
+                                                style={'fontSize': 18, 'font-family': 'Raleway', 'font-weight': 'bold'
                                                        }),
                                         html.Div([' '.join(MOF_tool_about)]
-                                                 , style={'font-family': 'Arial'}),
+                                                 , style={'font-family': 'Raleway'}),
                                         html.H2([" 2D and 3D Animation Environment"],
                                                 style={'fontSize': 18,
-                                                       'font-family': 'Arial', 'font-weight': 'bold'}),
-                                        html.Div([' '.join(twoD_threeD_about)], style={'font-family': 'Arial'}),
+                                                       'font-family': 'Raleway', 'font-weight': 'bold'}),
+                                        html.Div([' '.join(twoD_threeD_about)], style={'font-family': 'Raleway'}),
                                         html.H2([" MOF Data Filtering Environment"], style={'fontSize': 18,
                                                                                             'font-weight': 'bold',
-                                                                                            'font-family': 'Arial'}),
-                                        html.Div([' '.join(MOF_data_filter)], style={'font-family': 'Arial', }),
+                                                                                            'font-family': 'Raleway'}),
+                                        html.Div([' '.join(MOF_data_filter)], style={'font-family': 'Raleway', }),
                                         html.H2([" MOF Statistical Analysis Environment"],
                                                 style={'fontSize': 18, 'font-weight': 'bold',
-                                                       'font-family': 'Arial'}),
-                                        html.Div([' '.join(MOF_stat_analysis)], style={'font-family': 'Arial'}),
+                                                       'font-family': 'Raleway'}),
+                                        html.Div([' '.join(MOF_stat_analysis)], style={'font-family': 'Raleway'}),
                                         # ADD LINK
                                         html.Div([html.Plaintext(
                                             [' Click ', html.A('here ',
                                                                href='https://github.com/aaml-analytics/mof-explorer')],
                                             style={'display': 'inline-block',
-                                                   'fontSize': 14, 'font-family': 'Arial'}),
+                                                   'fontSize': 14, 'font-family': 'Raleway'}),
                                             html.Div([' '.join(MOF_GH)], style={'display': 'inline-block',
                                                                                 'fontSize': 14,
-                                                                                'font-family': 'Arial'}),
+                                                                                'font-family': 'Raleway'}),
                                             html.Img(
                                                 src='https://raw.githubusercontent.com/aaml-analytics/mof'
                                                     '-explorer/master/github.png',
@@ -249,7 +249,7 @@ app.layout = html.Div([
                                                                                          'width': '32%',
                                                                                          'float': 'right',
                                                                                          'fontSize': 14,
-                                                                                         'font-family': 'Arial',
+                                                                                         'font-family': 'Raleway',
                                                                                          'backgroundColor': '#ffffff'})
                                                                              ], className='container',
                                                                                  style={'padding': 20,
@@ -337,7 +337,7 @@ app.layout = html.Div([
                                                                                                          ],
                                                                                                          style={
                                                                                                              'fontSize': 14,
-                                                                                                             'font-family': 'Arial',
+                                                                                                             'font-family': 'Raleway',
                                                                                                              'padding': 15,
                                                                                                          }
                                                                                                      ),
@@ -359,7 +359,7 @@ app.layout = html.Div([
                                                                                                      'width': '32%',
                                                                                                      'float': 'right',
                                                                                                      'fontSize': 14,
-                                                                                                     'font-family': 'Arial',
+                                                                                                     'font-family': 'Raleway',
                                                                                                      'backgroundColor': '#ffffff'}
                                                                                              )
                                                                                          ],
@@ -451,7 +451,7 @@ app.layout = html.Div([
                                                                                      ]
                                                                                  )], style={
                                                                                      'fontSize': 14,
-                                                                                     'font-family': 'Arial',
+                                                                                     'font-family': 'Raleway',
                                                                                      'padding': 7,
                                                                                  }
                                                                                  ),
@@ -473,7 +473,7 @@ app.layout = html.Div([
                                                                                      'width': '32%',
                                                                                      'float': 'right',
                                                                                      'fontSize': 14,
-                                                                                     'font-family': 'Arial',
+                                                                                     'font-family': 'Raleway',
                                                                                      'backgroundColor': '#ffffff'})
                                                                          ], className='container',
                                                                              style={'padding': 20,
@@ -545,7 +545,7 @@ app.layout = html.Div([
                                                 ]
                                             )], style={
                                                 'fontSize': 14,
-                                                'font-family': 'Arial',
+                                                'font-family': 'Raleway',
                                                 'padding': 7,
                                             }
                                             ),
@@ -562,7 +562,7 @@ app.layout = html.Div([
                                                 style={
                                                     'padding': 10})
                                         ],
-                                            style={'fontSize': 14, 'fpmt-family': 'Arial', 'display': 'inline-block',
+                                            style={'fontSize': 14, 'fpmt-family': 'Raleway', 'display': 'inline-block',
                                                    'width': '32%', 'float': 'right',
                                                    'backgroundColor': '#ffffff'})
                                         ,
@@ -598,7 +598,7 @@ app.layout = html.Div([
                                                         (dcc.Dropdown(id='xaxis', placeholder="Select an option for X",
                                                                       multi=False))
                                                         ], className="six columns",
-                                                       style={'fontSize': 14, 'font-family': 'Arial',
+                                                       style={'fontSize': 14, 'font-family': 'Raleway',
                                                               'width': '20%', 'display': 'inline-block', 'padding': 5
                                                               })
                                         ]),
@@ -608,7 +608,7 @@ app.layout = html.Div([
                                                                           placeholder="Select an option for Y",
                                                                           multi=False))
                                                             ], className="six columns",
-                                                           style={'fontSize': 14, 'font-family': 'Arial',
+                                                           style={'fontSize': 14, 'font-family': 'Raleway',
                                                                   'width': '20%',
                                                                   'display': 'inline-block', 'padding': 5
                                                                   })
@@ -620,7 +620,7 @@ app.layout = html.Div([
                                                                          multi=False),
                                                             ],
                                                            className="six columns",
-                                                           style={'fontSize': 14, 'font-family': 'Arial',
+                                                           style={'fontSize': 14, 'font-family': 'Raleway',
                                                                   'width': '20%',
                                                                   'display': 'inline-block', 'padding': 5}
                                                            ),
@@ -649,7 +649,7 @@ app.layout = html.Div([
                                                                           placeholder="Select an option for color",
                                                                           multi=False))
                                                             ], className="six columns",
-                                                           style={'fontSize': 14, 'font-family': 'Arial',
+                                                           style={'fontSize': 14, 'font-family': 'Raleway',
                                                                   'width': '20%',
                                                                   'display': 'inline-block', 'padding': 5
                                                                   }),
@@ -793,7 +793,7 @@ app.layout = html.Div([
            """)),
                                             html.Pre(id='click-data-stat'),
 
-                                        ], style={'fontSize': 14, 'font-family': 'Arial', 'width': '30%',
+                                        ], style={'fontSize': 14, 'font-family': 'Raleway', 'width': '30%',
                                                   'display': 'inline-block',
                                                   'float': 'right'})
                                                            ,
@@ -883,7 +883,7 @@ app.layout = html.Div([
                                                 ), ],
                                                     style={
                                                         'padding': 10})
-                                            ], style={'fontSize': 14, 'font-family': 'Arial', 'width': '30%',
+                                            ], style={'fontSize': 14, 'font-family': 'Raleway', 'width': '30%',
                                                       'display': 'inline-block',
                                                       'float': 'right'})
 
@@ -894,8 +894,8 @@ app.layout = html.Div([
 
                     ])
         ], style=tabs_styles)
-    ], style={'padding': 15})
-], style={'backgroundColor': '#f6f6f6'})
+    ], style={'padding': 15, 'font-family': 'Raleway'})
+], style={'backgroundColor': '#f6f6f6', 'font-family': 'Raleway'})
 
 
 # DOWNLOAD UPLOADED FILE
@@ -1895,7 +1895,7 @@ def make_figure(x, dist_type, data_set, percentile_type, abs_value, frame, conte
     ).update_traces(marker=dict(opacity=0.7, line=dict(width=0.5, color='DarkSlateGrey'),
                                 )).update_layout(
         title=f"<b> Distribution of Structures against {''.join(str(i) for i in x.translate(SUP))}", font=dict(
-            family="Arial",
+            family="Helvetica",
         ), )
 
 
