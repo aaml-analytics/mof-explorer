@@ -14,7 +14,7 @@ import plotly.express as px
 import json
 import textwrap
 import dash_bootstrap_components as dbc
-
+from natsort import natsorted
 # CREATE DASH APP
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP, 'https://codepen.io/chriddyp/pen/bWLwgP.css',
                                       "https://codepen.io/sutharson/pen/zYvEVPW.css"])
@@ -1692,6 +1692,7 @@ def update_graph_stat(yaxis_name, percentile_type, abs_value, frame_value, data_
     traces = []
     frame_set = set(df[frame_value])
     frame_list = sorted(list(frame_set))
+    frame_list = natsorted(frame_list)
     if data_set is None:
         return dash.no_update
     dfObj = pd.DataFrame()
