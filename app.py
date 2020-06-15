@@ -15,6 +15,7 @@ import json
 import textwrap
 import dash_bootstrap_components as dbc
 from natsort import natsorted
+
 # CREATE DASH APP
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP, 'https://codepen.io/chriddyp/pen/bWLwgP.css',
                                       "https://codepen.io/sutharson/pen/zYvEVPW.css"])
@@ -78,7 +79,7 @@ twoD_threeD_about = textwrap.wrap(' The 2D Animated MOF Explorer and 3D Animated
                                   "materials for the user's applications", width=50)
 MOF_data_filter = textwrap.wrap(' Using the sorting and filtering data table, users can filter variables '
                                 'from their dataset to '
-                                "produce plots of their preference. All variables in the user's dataset can be sorted," 
+                                "produce plots of their preference. All variables in the user's dataset can be sorted,"
                                 'filtered and deleted in the interactive data table. The arguments that the data table '
                                 'can take are '
                                 'specified '
@@ -92,7 +93,7 @@ MOF_stat_analysis = textwrap.wrap('All structures or top-performing structures (
                                   'mean, median, maximum and'
                                   ' minimum points for a dataset of the users choice, alongside the distribution of '
                                   'MOFs in said violin plot. In the distribution plot, the number of structures against '
-                                  "a variable in the user's data frame can be analysed to determine the spread of" 
+                                  "a variable in the user's data frame can be analysed to determine the spread of"
                                   "structures in the user's data. The distribution can be further filtered by MOF "
                                   'families (if the user has uploaded this information in its data frame). '
                                   'An animation feature is also available to view these frames in accordance'
@@ -198,7 +199,7 @@ app.layout = html.Div([
                                             , style={'display': 'inline-block'})
                                         ], style={'backgroundColor': '#ffffff'}
                                        )]),
-dcc.Tab(label='MOF Explorer', style=tab_style, selected_style=tab_selected_style,
+            dcc.Tab(label='MOF Explorer', style=tab_style, selected_style=tab_selected_style,
                     children=[html.Div([html.Div([dash_table.DataTable(id='data-table-interact',
                                                                        editable=True,
                                                                        filter_action='native',
@@ -302,36 +303,106 @@ dcc.Tab(label='MOF Explorer', style=tab_style, selected_style=tab_selected_style
                                         ],
                                             style={'padding-left': '15%', 'padding-right': '5%'}
                                         ),
-                                        html.Div([html.Label(["Select X axis scale:",
-                                                              dcc.RadioItems(
-                                                                  id='xaxis-type',
-                                                                  options=[{'label': i, 'value': i} for i in
-                                                                           ['Linear', 'Log']],
-                                                                  value='Linear',
-                                                                  labelStyle={'display': 'inline-block', }
-                                                              )]),
-                                                  ], style={'display': 'inline-block', 'width': '24%'}),
-                                        html.Div([html.Label(["Select Y axis scale:",
-                                                              dcc.RadioItems(
-                                                                  id='yaxis-type',
-                                                                  options=[{'label': i, 'value': i} for i in
-                                                                           ['Linear', 'Log']],
-                                                                  value='Linear',
-                                                                  labelStyle={'display': 'inline-block'}
-                                                              )]),
-                                                  ], style={'display': 'inline-block', 'width': '24%'}),
-                                        html.Div([html.Label(["Select color scale:",
-                                                              dcc.RadioItems(
-                                                                  id='colorscale',
-                                                                  options=[{'label': i, 'value': i} for i in
-                                                                           ['Viridis', 'Plasma']],
-                                                                  value='Plasma'
-                                                              )]),
-                                                  ], style={'display': 'inline-block', 'width': '24%', }),
-                                        html.Div([html.Label(["Size range:"
-                                                                 , html.Div(id='size-output-container-filter')])
-                                                  ], style={'display': 'inline-block', 'width': '24%', }
-                                                 ),
+                                        html.Div([html.Div([html.Label(["Select X axis scale:",
+                                                                        dcc.RadioItems(
+                                                                            id='xaxis-type',
+                                                                            options=[{'label': i, 'value': i} for i in
+                                                                                     ['Linear', 'Log']],
+                                                                            value='Linear',
+                                                                            labelStyle={'display': 'inline-block', }
+                                                                        )]),
+                                                            ], style={'padding-left': '45%', }),
+                                                  html.Div([html.Label(["Select Y axis scale:",
+                                                                        dcc.RadioItems(
+                                                                            id='yaxis-type',
+                                                                            options=[{'label': i, 'value': i} for i in
+                                                                                     ['Linear', 'Log']],
+                                                                            value='Linear',
+                                                                            labelStyle={'display': 'inline-block',
+                                                                                        }
+                                                                        )]),
+                                                            ], style={'padding-left': '45%', }),
+                                                  html.Div([html.Label(["Select color scale:",
+                                                                        dcc.RadioItems(
+                                                                            id='colorscale',
+                                                                            options=[{'label': i, 'value': i} for i in
+                                                                                     ['Viridis', 'Plasma']],
+                                                                            value='Plasma',
+                                                                            labelStyle={'display': 'inline-block',
+                                                                                        }
+                                                                        )]),
+                                                            ], style={'padding-left': '45%', }),
+                                                  html.Div([html.Label(["Size range:",
+                                                                        html.Div(id='size-output-container-filter')])
+                                                            ], style={'padding-left': '45%', }
+                                                           ), ], style={'display': 'inline-block', 'width': '35%',
+                                                                        }),
+                                        html.Div([html.Div(
+                                            [
+                                                html.Label(
+                                                    [
+                                                        "Select color bar range:",
+                                                        dcc.RangeSlider(
+                                                            id='colorbar-slider-data-table',
+                                                        ),
+                                                        html.Div(
+                                                            id='slider-output-data-table-container')
+                                                    ]
+                                                )
+                                            ],
+                                            style={
+                                                'fontSize': 14,
+                                                # 'width': '40%',
+                                                'font-family': 'Raleway',
+                                                'padding': 15,
+                                            }
+                                        ),
+                                            html.Div([html.Div(
+                                                [
+                                                    html.Label(
+                                                        [
+                                                            "Select size variable reference:",
+                                                            dcc.Slider(
+                                                                id='sizebar-slider-data-table',
+                                                                min=1,
+                                                                max=15,
+                                                                value=7.5,
+                                                                step=0.1
+                                                            ),
+                                                            html.Div(
+                                                                id='slider-output-data-table-size-container')
+                                                        ]
+                                                    )
+                                                ],
+                                                style={
+                                                    'fontSize': 14,
+                                                    'width': '50%',
+                                                    'font-family': 'Raleway',
+                                                    'padding': 15,
+                                                    'display': 'inline-block'
+                                                }),
+                                                html.Div([
+                                                    html.Label([
+                                                        "Select minimum size value:",
+                                                        dcc.Slider(
+                                                            id='sizebar-min-slider-data-table',
+                                                            min=1,
+                                                            max=15,
+                                                            value=7.5,
+                                                            step=0.1
+                                                        ),
+                                                        html.Div(
+                                                            id='slider-output-data-table-size-min-container')
+                                                    ])
+                                                ], style={'display': 'inline-block',
+                                                          'fontSize': 14,
+                                                          'width': '50%',
+                                                          'font-family': 'Raleway',
+                                                          'padding': 15,
+                                                          }
+                                                )], style={'display': 'inline-block', 'width': '100%'})
+
+                                        ], style={'display': 'inline-block', 'width': '45%'}),
                                         app.css.append_css({
                                             'external_url': 'https://codepen.io/chriddyp/pen/bWLwgP.css'
                                         })
@@ -751,13 +822,13 @@ dcc.Tab(label='MOF Explorer', style=tab_style, selected_style=tab_selected_style
                                                                      , dcc.RadioItems(
                                                     id='percentile-type',
                                                     options=[
-                                                             {'label': 'Top 1% of structures',
-                                                              'value': 'Top 1% of structures'},
-                                                             {'label': 'Top 5% of structures',
-                                                              'value': 'Top 5% of structures'},
-                                                             {'label': 'Top 10% of structures',
-                                                              'value': 'Top 10% of structures'},
-                                                    {'label': 'All structures', 'value': 'All structures'}],
+                                                        {'label': 'Top 1% of structures',
+                                                         'value': 'Top 1% of structures'},
+                                                        {'label': 'Top 5% of structures',
+                                                         'value': 'Top 5% of structures'},
+                                                        {'label': 'Top 10% of structures',
+                                                         'value': 'Top 10% of structures'},
+                                                        {'label': 'All structures', 'value': 'All structures'}],
                                                     value='All structures',
 
                                                 )]),
@@ -839,13 +910,13 @@ dcc.Tab(label='MOF Explorer', style=tab_style, selected_style=tab_selected_style
                                                                          , dcc.RadioItems(
                                                         id='percentile-type-dist',
                                                         options=[
-                                                                 {'label': 'Top 1% of structures',
-                                                                  'value': 'Top 1% of structures'},
-                                                                 {'label': 'Top 5% of structures',
-                                                                  'value': 'Top 5% of structures'},
-                                                                 {'label': 'Top 10% of structures',
-                                                                  'value': 'Top 10% of structures'},
-                                                        {'label': 'All structures', 'value': 'All structures'},],
+                                                            {'label': 'Top 1% of structures',
+                                                             'value': 'Top 1% of structures'},
+                                                            {'label': 'Top 5% of structures',
+                                                             'value': 'Top 5% of structures'},
+                                                            {'label': 'Top 10% of structures',
+                                                             'value': 'Top 10% of structures'},
+                                                            {'label': 'All structures', 'value': 'All structures'}, ],
                                                         value='All structures',
 
                                                     )]),
@@ -1535,6 +1606,52 @@ def update_output(size, __, data):
     return '{}'.format(size_range)
 
 
+# POPULATE COLORBAR SLIDER SCATTER 3VAR ENV ANIM
+@app.callback([Output('colorbar-slider-data-table', 'min'),
+               Output('colorbar-slider-data-table', 'max'),
+               Output('colorbar-slider-data-table', 'step'),
+               Output('colorbar-slider-data-table', 'value')
+               ],
+              [
+                  Input('caxis', 'value'),
+                  Input('csv-data', 'data')
+              ],
+              [State('csv-data', 'data')])
+def populate_pressure_slider_3Var(color, __, data):
+    if not data:
+        return dash.no_update
+    df = pd.read_json(data, orient='split')
+    if not color:
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update
+    min_v = round(float(df[color].min()), 1)
+    max_v = round(float(df[color].max()), 1)
+    step = 0.1
+    value = [round(float(df[color].min()), 1), round(float(df[color].max()), 1)]
+    return min_v, max_v, step, value
+
+
+# STATE VALUE COLORBAR SLIDER SCATTER 3VAR ENV ANIM
+@app.callback(
+    Output('slider-output-data-table-container', 'children'),
+    [Input('colorbar-slider-data-table', 'value')])
+def update_output_3Var(value):
+    return 'You have selected "{}"'.format(value)
+
+
+@app.callback(
+    Output('slider-output-data-table-size-container', 'children'),
+    [Input('sizebar-slider-data-table', 'value')])
+def update_output_3Var(value):
+    return 'You have selected "{}"'.format(value)
+
+
+@app.callback(
+    Output('slider-output-data-table-size-min-container', 'children'),
+    [Input('sizebar-min-slider-data-table', 'value')])
+def update_output_3Var(value):
+    return 'You have selected "{}"'.format(value)
+
+
 # INTERACT FIGURE WITH POPULATED FIELDS SCATTER
 @app.callback(Output('data-table-container', 'children'),
               [Input('data-table-interact', 'data'),
@@ -1546,14 +1663,27 @@ def update_output(size, __, data):
                Input('saxis', 'value'),
                Input('xaxis-type', 'value'),
                Input('yaxis-type', 'value'),
-               Input('colorscale', 'value')
+               Input('colorscale', 'value'),
+               Input('colorbar-slider-data-table', 'value'),
+Input('sizebar-slider-data-table', 'value'),
+Input('sizebar-min-slider-data-table', 'value')
                ])
 def update_figure(rows, derived_virtual_data, derived_virtual_selected_rows, xaxis_name, yaxis_name,
-                  marker_color, marker_size, xaxis_type, yaxis_type, colorscale):
+                  marker_color, marker_size, xaxis_type, yaxis_type, colorscale, color_value, size_value, size_min):
     df = pd.DataFrame(rows)
     if derived_virtual_selected_rows is None:
         return []
     dff = df if derived_virtual_data is None else pd.DataFrame(derived_virtual_data)
+    if not color_value:
+        return dash.no_update
+    if not size_value:
+        return dash.no_update
+    if not size_min:
+        return dash.no_update
+    color_val_float = []
+    for i in range(0, len(color_value), 1):
+        color_val_float.append(float(color_value[i]))
+    color_val = color_val_float
     return [
         html.Div([dcc.Graph(id='HTS-graph',
                             figure={'data': [
@@ -1561,10 +1691,12 @@ def update_figure(rows, derived_virtual_data, derived_virtual_selected_rows, xax
                                            mode='markers',
                                            marker_color=dff[marker_color],
                                            marker_size=dff[marker_size],
-                                           marker=dict(sizemode='area', sizeref=max(dff[marker_size]) / (15 ** 2),
-                                                       sizemin=4,
+                                           marker=dict(sizemode='area',
+                                                       sizeref=max(dff[marker_size]) / (int(size_value) ** 3.5),
+                                                       sizemin=size_min,
                                                        opacity=0.7, showscale=True,
                                                        line=dict(width=0.7, color='DarkSlateGrey'),
+                                                       cmin=min(color_val), cmax=max(color_val),
                                                        colorbar=dict(title=dict(text=marker_color.translate(SUP),
                                                                                 font=dict(family='Helvetica'),
                                                                                 side='right'), ypad=0),
