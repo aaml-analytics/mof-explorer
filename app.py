@@ -14,32 +14,13 @@ import plotly.express as px
 import json
 import textwrap
 import dash_bootstrap_components as dbc
-import numpy as np
 from natsort import natsorted
 
-pd.options.mode.chained_assignment = None
 # CREATE DASH APP
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP, 'https://codepen.io/chriddyp/pen/bWLwgP.css',
                                       "https://codepen.io/sutharson/pen/zYvEVPW.css"])
 server = app.server
-# READ FILE
-df = pd.read_csv(https://raw.githubusercontent.com/aaml-analytics/mof-explorer/master/sample-data/pb4binned.csv')
-df = df.rename(columns={'Pore limiting diameter (A)': 'Pore limiting diameter (Å)',
-                        'Large cavity diameter (A)': 'Large cavity diameter (Å)',
-                        'Pore Limiting Diameter (A)': 'Pore Limiting Diameter (Å)',
-                        'Large Cavity Diameter (A)': 'Large Cavity Diameter (Å)'})
-df_obj = df.select_dtypes(exclude=['object'])
-df_stat = df.select_dtypes(exclude=['int', 'float'])
-df_stat = df_stat.drop(['Refcode'], axis=1)
-df_explorer = df.iloc[:, np.r_[0:10]]
-df_explorer = df_explorer.sort_values(by=['Year'])
-is_2019 = df_explorer['Year'] == 2019
-df_explorer_2019 = df_explorer[is_2019]
-df_explorer_2019['Year'] = df_explorer_2019['Year'].map({2019: 'All years'})
-dff_explorer_2019 = pd.concat([df_explorer_2019, df_explorer], axis=0)
-dff_explorer_2019 = dff_explorer_2019.reset_index(drop=True)
-df_explorer_y = dff_explorer_2019.drop(['Refcode'], axis=1)
-df_explorer_color = df_explorer_y.drop(['Porosity'], axis=1)
+
 # PREDEFINED TAB STYLES
 styles = {
     'pre': {
@@ -64,9 +45,9 @@ tab_mini_style = {
 }
 
 tab_mini_selected_style = {
-    'borderTop': '3px solid #333333',
+    'borderTop': '3px solid #5e5e5e',
     'borderBottom': '1px solid #d6d6d6 ',
-    'backgroundColor': '#333333',
+    'backgroundColor': '#5e5e5e',
     'color': '#ffffff',
     # 'fontColor': '#004a4a',
     'fontWeight': 'bold',
@@ -90,12 +71,12 @@ SUP = str.maketrans("0123456789", "⁰¹²³⁴⁵⁶⁷⁸⁹")
 # APP ABOUT DESCRIPTION
 MOF_tool_about = textwrap.wrap(' These tools aim to provide a reproducible and consistent data visualisation platform '
                                'where experimental and computational researchers can use big data and statistical '
-                               'analysis to find the best materials for specific applications.',
+                               'analysis to find the best materials for specific applications',
                                width=50)
 twoD_threeD_about = textwrap.wrap(' The 2D Animated MOF Explorer and 3D Animated MOF Explorer provides a 2, 3, 4 and '
                                   '5-Dimensional variable environment to explore specific structures '
                                   'against a discrete data variable (animation frame) of their choice to find the best '
-                                  "materials for the user's applications.", width=50)
+                                  "materials for the user's applications", width=50)
 MOF_data_filter = textwrap.wrap(' Using the sorting and filtering data table, users can filter variables '
                                 'from their dataset to '
                                 "produce plots of their preference. All variables in the user's dataset can be sorted,"
@@ -114,15 +95,11 @@ MOF_stat_analysis = textwrap.wrap('All structures or top-performing structures (
                                   'MOFs in said violin plot. In the distribution plot, the number of structures against '
                                   "a variable in the user's data frame can be analysed to determine the spread of"
                                   "structures in the user's data. The distribution can be further filtered by MOF "
-                                  'families (if the user has uploaded this information in their data frame). '
+                                  'families (if the user has uploaded this information in its data frame). '
                                   'An animation feature is also available to view these frames in accordance'
                                   ' with a discrete data variable of the users choice.', width=50, )
-MOF_GH_1 = textwrap.wrap(' The app manual, which explains features of the', width=50)
-MOF_GH_1_5 = textwrap.wrap(' tool, can be found', width=50)
-MOF_GH_2 = textwrap.wrap(" Since data is already uploaded on this particular app, please ignore the tab "
-                         "'Data File Requirements'"
-                         " in the manual.", width=50)
-MOF_GH = textwrap.wrap(" to explore AAML's repository and deploy your own tool"
+MOF_GH = textwrap.wrap(" to explore AAML's sample data and read more on"
+                       " AAML's MOF Explorer Tool Manual, FAQ's & Troubleshooting"
                        " on GitHub... ", width=50)
 
 # APP LAYOUT
@@ -138,6 +115,51 @@ app.layout = html.Div([
                        'color': 'white', 'font-family': 'Raleway'}),
         html.H1("...", style={'fontColor': '#3c3c3c', 'fontSize': 6})
     ], style={'backgroundColor': '#333333'}),
+    html.Div([html.A('Refresh', href='/')], style={}),
+    html.Div([
+        html.H2("Upload Data", style={'fontSize': 24, 'font-family': 'Raleway', 'color': '#333333'}, ),
+        html.H3("Upload .txt, .csv or .xls files to starting exploring data...", style={'fontSize': 16,
+                                                                                        'font-family': 'Raleway'}),
+        dcc.Store(id='csv-data', storage_type='session', data=None),
+        html.Div([dcc.Upload(
+            id='data-table-upload',
+            children=html.Div([html.Button('Upload File')],
+                              style={'width': '49%', 'height': "60px", 'borderWidth': '1px',
+                                     'borderRadius': '5px',
+                                     'textAlign': 'center',
+
+                                     }),
+            multiple=False
+        ),
+            html.Div(id='output-data-upload'),
+            dbc.Modal(
+                [
+                    dbc.ModalHeader(
+                        "Upload Error!"),
+                    dbc.ModalBody(
+                        "Please upload a .txt, .csv or .xls file."),
+                    dbc.ModalFooter(
+                        dbc.Button("Close",
+                                   id="close-upload",
+                                   className="ml-auto")
+                    ),
+                ],
+                id="modal-upload",
+                is_open=False,
+                centered=True,
+                size="xl"
+            )
+        ]), ], style={'display': 'inline-block', 'width': '48%', 'padding-left': '1%', }),
+    html.Div([html.Div([html.H2("Explore Data", style={'fontSize': 24,
+                                                       'font-family': 'Raleway',
+                                                       'color': '#333333'})],
+                       style={}),
+              html.Div(['', html.A('Download',
+                                   href='https://github.com/aaml-analytics/mof-explorer/tree/master/sample-data')]),
+              html.H3("...AAML's sample file to explore tool functions...", style={'fontSize': 16,
+                                                                                   'font-family': 'Raleway',
+                                                                                   'display': 'inline-block'}),
+              html.U(id='file-list')], style={'display': 'inline-block', 'width': '44%', 'font-family': 'Raleway'}),
     html.Div([
         dcc.Tabs([
             dcc.Tab(label='About', style=tab_style, selected_style=tab_selected_style,
@@ -158,23 +180,14 @@ app.layout = html.Div([
                                                 style={'fontSize': 18, 'font-weight': 'bold',
                                                        'font-family': 'Raleway'}),
                                         html.Div([' '.join(MOF_stat_analysis)], style={'font-family': 'Raleway'}),
-                                        html.Div([
-                                            html.Div([''.join(MOF_GH_1), ''.join(MOF_GH_1_5)],
-                                                     style={'display': 'inline-block',
-                                                            'font-family': 'Raleway'}),
-                                            html.Plaintext(
-                                                [html.A(' here. ',
-                                                        href='https://aaml-analytics.github.io/mof-explorer/')],
-                                                style={'display': 'inline-block', 'font-family': 'Raleway'}),
-                                            html.Div([' '.join(MOF_GH_2)], style={'display': 'inline-block',
-                                                                                  'font-family': 'Raleway'})
-                                        ]),
                                         # ADD LINK
                                         html.Div([html.Plaintext(
                                             [' Click ', html.A('here ',
                                                                href='https://github.com/aaml-analytics/mof-explorer')],
-                                            style={'display': 'inline-block', 'font-family': 'Raleway'}),
+                                            style={'display': 'inline-block',
+                                                   'fontSize': 14, 'font-family': 'Raleway'}),
                                             html.Div([' '.join(MOF_GH)], style={'display': 'inline-block',
+                                                                                'fontSize': 14,
                                                                                 'font-family': 'Raleway'}),
                                             html.Img(
                                                 src='https://raw.githubusercontent.com/aaml-analytics/mof'
@@ -183,18 +196,11 @@ app.layout = html.Div([
                                                 style={'display': 'inline-block', 'float': "right"
                                                        })
                                         ]
-                                            , style={'display': 'inline-block'}),
-
+                                            , style={'display': 'inline-block'})
                                         ], style={'backgroundColor': '#ffffff'}
                                        )]),
             dcc.Tab(label='MOF Explorer', style=tab_style, selected_style=tab_selected_style,
                     children=[html.Div([html.Div([dash_table.DataTable(id='data-table-interact',
-                                                                       data=df_explorer.to_dict('records'),
-                                                                       columns=[{"name": i, "id": i, "deletable": True,
-                                                                                 "selectable": True, 'type': 'numeric',
-                                                                                 'format': Format(precision=3,
-                                                                                                  scheme=Scheme.fixed)}
-                                                                                for i in df_explorer.columns],
                                                                        editable=True,
                                                                        filter_action='native',
                                                                        sort_action='native',
@@ -212,28 +218,24 @@ app.layout = html.Div([
                                                                        style_cell={
                                                                            'minWidth': '0px', 'maxWidth': '220px',
                                                                            'whiteSpace': 'normal',
-                                                                       },
+                                                                       }
                                                                        ),
                                                   html.Div(id='data-table-container'), ], style={'padding': 15}),
 
                                         html.Div([html.Div([
                                             html.Label(["Select X variable:",
                                                         (dcc.Dropdown(id='xaxis', placeholder="Select an option for X",
-                                                                      multi=False,
-                                                                      options=[{'label': i, 'value': i} for i in
-                                                                               df_explorer_color.columns]))
+                                                                      multi=False))
                                                         ], className="six columns",
                                                        style={'fontSize': 14, 'font-family': 'Raleway',
-                                                              'width': '20%', 'display': 'inline-block', 'padding': 5,
+                                                              'width': '20%', 'display': 'inline-block', 'padding': 5
                                                               })
                                         ]),
                                             html.Div([
                                                 html.Label(["Select Y variable:",
                                                             (dcc.Dropdown(id='yaxis',
                                                                           placeholder="Select an option for Y",
-                                                                          multi=False,
-                                                                          options=[{'label': i, 'value': i} for i in
-                                                                                   df_explorer_color.columns]))
+                                                                          multi=False))
                                                             ], className="six columns",
                                                            style={'fontSize': 14, 'font-family': 'Raleway',
                                                                   'width': '20%',
@@ -244,9 +246,7 @@ app.layout = html.Div([
                                                 html.Label(["Select size variable:",
                                                             dcc.Dropdown(id='saxis',
                                                                          placeholder="Select an option for size",
-                                                                         multi=False,
-                                                                         options=[{'label': i, 'value': i} for i in
-                                                                                  df_explorer_color.columns]),
+                                                                         multi=False),
                                                             ],
                                                            className="six columns",
                                                            style={'fontSize': 14, 'font-family': 'Raleway',
@@ -276,9 +276,7 @@ app.layout = html.Div([
                                                 html.Label(["Select color variable:",
                                                             (dcc.Dropdown(id='caxis',
                                                                           placeholder="Select an option for color",
-                                                                          multi=False,
-                                                                          options=[{'label': i, 'value': i} for i in
-                                                                                   df_explorer_color.columns]))
+                                                                          multi=False))
                                                             ], className="six columns",
                                                            style={'fontSize': 14, 'font-family': 'Raleway',
                                                                   'width': '20%',
@@ -422,7 +420,7 @@ app.layout = html.Div([
                                                                                  id='my-2D-graph', animate=False)],
                                                                                  style={
                                                                                      'display': 'inline-block',
-                                                                                     'width': '58%',
+                                                                                     'width': '56%',
                                                                                  }),
                                                                                  html.Div([
                                                                                      html.Div([html.Label(
@@ -431,11 +429,7 @@ app.layout = html.Div([
                                                                                               id='xaxis-anim-2D',
                                                                                               multi=False,
                                                                                               placeholder="Select an option "
-                                                                                                          "for X",
-                                                                                              options=[{'label': i,
-                                                                                                        'value': i} for
-                                                                                                       i in
-                                                                                                       dff_explorer_2019.columns])],
+                                                                                                          "for X")],
                                                                                      )],
                                                                                          style={
                                                                                              'padding': 10}),
@@ -445,11 +439,17 @@ app.layout = html.Div([
                                                                                               id='yaxis-anim-2D',
                                                                                               multi=False,
                                                                                               placeholder='Select an option '
-                                                                                                          'for Y',
-                                                                                              options=[{'label': i,
-                                                                                                        'value': i} for
-                                                                                                       i in
-                                                                                                       dff_explorer_2019.columns])],
+                                                                                                          'for Y')],
+                                                                                     ), ],
+                                                                                         style={
+                                                                                             'padding': 10}),
+                                                                                     html.Div([html.Label(
+                                                                                         ["Select Animation Frame:",
+                                                                                          dcc.Dropdown(
+                                                                                              id='anim-frame-2D',
+                                                                                              multi=False,
+                                                                                              placeholder='Select an option '
+                                                                                                          'for Animation Frame')],
                                                                                      ), ],
                                                                                          style={
                                                                                              'padding': 10}),
@@ -480,7 +480,7 @@ app.layout = html.Div([
                                                                                                  ],
                                                                                                  style={
                                                                                                      'display': 'inline-block',
-                                                                                                     'width': '57%',
+                                                                                                     'width': '56%',
                                                                                                  }
                                                                                              ),
                                                                                              html.Div(
@@ -493,15 +493,7 @@ app.layout = html.Div([
                                                                                                                      dcc.Dropdown(
                                                                                                                          id='xaxis-anim-3D',
                                                                                                                          multi=False,
-                                                                                                                         placeholder="Select an option for X",
-                                                                                                                         options=[
-                                                                                                                             {
-                                                                                                                                 'label': i,
-                                                                                                                                 'value': i}
-                                                                                                                             for
-                                                                                                                             i
-                                                                                                                             in
-                                                                                                                             dff_explorer_2019.columns])
+                                                                                                                         placeholder="Select an option for X")
                                                                                                                  ],
                                                                                                              )
                                                                                                          ],
@@ -517,15 +509,7 @@ app.layout = html.Div([
                                                                                                                      dcc.Dropdown(
                                                                                                                          id='yaxis-anim-3D',
                                                                                                                          multi=False,
-                                                                                                                         placeholder='Select an option for Y',
-                                                                                                                         options=[
-                                                                                                                             {
-                                                                                                                                 'label': i,
-                                                                                                                                 'value': i}
-                                                                                                                             for
-                                                                                                                             i
-                                                                                                                             in
-                                                                                                                             df_explorer.columns]
+                                                                                                                         placeholder='Select an option for Y'
                                                                                                                      )
                                                                                                                  ],
                                                                                                              ),
@@ -541,15 +525,7 @@ app.layout = html.Div([
                                                                                                                      dcc.Dropdown(
                                                                                                                          id='caxis-anim-3D',
                                                                                                                          multi=False,
-                                                                                                                         placeholder='Select an option for color',
-                                                                                                                         options=[
-                                                                                                                             {
-                                                                                                                                 'label': i,
-                                                                                                                                 'value': i}
-                                                                                                                             for
-                                                                                                                             i
-                                                                                                                             in
-                                                                                                                             dff_explorer_2019.columns])
+                                                                                                                         placeholder='Select an option for color')
                                                                                                                  ],
                                                                                                              )
                                                                                                          ],
@@ -574,7 +550,19 @@ app.layout = html.Div([
                                                                                                              'font-family': 'Raleway',
                                                                                                              'padding': 15,
                                                                                                          }
-                                                                                                     )
+                                                                                                     ),
+                                                                                                     html.Div(
+                                                                                                         [html.Label(
+                                                                                                             [
+                                                                                                                 "Select Animation Frame:",
+                                                                                                                 dcc.Dropdown(
+                                                                                                                     id='anim-frame-3Var',
+                                                                                                                     multi=False,
+                                                                                                                     placeholder='Select an option '
+                                                                                                                                 'for Animation Frame')],
+                                                                                                         ), ],
+                                                                                                         style={
+                                                                                                             'padding': 10})
                                                                                                  ],
                                                                                                  style={
                                                                                                      'display': 'inline-block',
@@ -599,7 +587,7 @@ app.layout = html.Div([
                                                                          children=[html.Div([html.Div(
                                                                              [dcc.Graph(id='my-graph', animate=False)],
                                                                              style={'display': 'inline-block',
-                                                                                    'width': '57%',
+                                                                                    'width': '56%',
                                                                                     }),
 
                                                                              html.Div([
@@ -609,11 +597,7 @@ app.layout = html.Div([
                                                                                          id='xaxis-anim',
                                                                                          multi=False,
                                                                                          placeholder="Select an option "
-                                                                                                     "for X",
-                                                                                         options=[
-                                                                                             {'label': i, 'value': i}
-                                                                                             for i in
-                                                                                             dff_explorer_2019.columns])],
+                                                                                                     "for X")],
                                                                                  )],
                                                                                      style={
                                                                                          'padding': 10}),
@@ -623,11 +607,7 @@ app.layout = html.Div([
                                                                                          id='yaxis-anim',
                                                                                          multi=False,
                                                                                          placeholder='Select an option '
-                                                                                                     'for Y',
-                                                                                         options=[
-                                                                                             {'label': i, 'value': i}
-                                                                                             for i in
-                                                                                             dff_explorer_2019.columns])],
+                                                                                                     'for Y')],
                                                                                  ), ],
                                                                                      style={
                                                                                          'padding': 10}),
@@ -637,11 +617,7 @@ app.layout = html.Div([
                                                                                          dcc.Dropdown(
                                                                                              id='saxis-anim',
                                                                                              multi=False,
-                                                                                             placeholder='Select an option for size',
-                                                                                             options=[{'label': i,
-                                                                                                       'value': i} for i
-                                                                                                      in
-                                                                                                      dff_explorer_2019.columns]),
+                                                                                             placeholder='Select an option for size'),
                                                                                          html.Div(
                                                                                              id='size-container-4D')
                                                                                      ],
@@ -671,11 +647,7 @@ app.layout = html.Div([
                                                                                          dcc.Dropdown(
                                                                                              id="caxis-anim",
                                                                                              multi=False,
-                                                                                             placeholder='Select an option for color',
-                                                                                             options=[{'label': i,
-                                                                                                       'value': i} for i
-                                                                                                      in
-                                                                                                      dff_explorer_2019.columns])],
+                                                                                             placeholder='Select an option for color')],
                                                                                  )], style={
                                                                                      'padding': 10}),
                                                                                  html.Div([html.Label(
@@ -692,7 +664,19 @@ app.layout = html.Div([
                                                                                      'font-family': 'Raleway',
                                                                                      'padding': 7,
                                                                                  }
-                                                                                 )
+                                                                                 ),
+                                                                                 html.Div(
+                                                                                     [html.Label(
+                                                                                         [
+                                                                                             "Select Animation Frame:",
+                                                                                             dcc.Dropdown(
+                                                                                                 id='anim-frame-4Var',
+                                                                                                 multi=False,
+                                                                                                 placeholder='Select an option '
+                                                                                                             'for Animation Frame')],
+                                                                                     ), ],
+                                                                                     style={
+                                                                                         'padding': 10})
                                                                              ],
                                                                                  style={
                                                                                      'display': 'inline-block',
@@ -714,23 +698,18 @@ app.layout = html.Div([
                                         html.Div([
                                             html.Div([html.Label(["Select X variable:",
                                                                   dcc.Dropdown(id='xaxis-3D', multi=False,
-                                                                               placeholder="Select an option for X",
-                                                                               options=[{'label': i, 'value': i}
-                                                                                        for i in df_explorer.columns])],
+                                                                               placeholder="Select an option for X", )],
                                                                  )],
                                                      style={'padding': 10}),
                                             html.Div([html.Label(["Select Y variable:",
                                                                   dcc.Dropdown(id='yaxis-3D', multi=False,
 
-                                                                               placeholder='Select an option for Y',
-                                                                               options=[{'label': i, 'value': i}
-                                                                                        for i in df_explorer.columns])],
+                                                                               placeholder='Select an option for Y')],
                                                                  ), ],
                                                      style={'padding': 10}),
                                             html.Div([html.Label(["Select Z variable:",
                                                                   dcc.Dropdown(id='zaxis-3D', multi=False,
-                                                                               options=[{'label': i, 'value': i} for i
-                                                                                        in df_explorer.columns],
+
                                                                                placeholder='Select an option for Z')],
                                                                  ), ],
                                                      style={'padding': 10}),
@@ -738,8 +717,7 @@ app.layout = html.Div([
                                                 ["Select size variable:",
                                                  dcc.Dropdown(id='saxis-3D', multi=False,
                                                               placeholder='Select an option for size',
-                                                              options=[{'label': i, 'value': i} for i in
-                                                                       df_explorer.columns]
+
                                                               ),
                                                  html.Div(
                                                      id='size-slider-container-5D')
@@ -764,9 +742,8 @@ app.layout = html.Div([
                                             html.Div([html.Label(
                                                 ["Select color variable:",
                                                  dcc.Dropdown(id="caxis-3D", multi=False,
-                                                              placeholder='Select an option for color',
-                                                              options=[{'label': i, 'value': i} for i in
-                                                                       df_explorer_color.columns])],
+
+                                                              placeholder='Select an option for color')],
                                             )], style={'padding': 10}),
                                             html.Div([html.Label(
                                                 [
@@ -782,6 +759,18 @@ app.layout = html.Div([
                                                 'padding': 7,
                                             }
                                             ),
+                                            html.Div(
+                                                [html.Label(
+                                                    [
+                                                        "Select Animation Frame:",
+                                                        dcc.Dropdown(
+                                                            id='anim-frame-5D',
+                                                            multi=False,
+                                                            placeholder='Select an option '
+                                                                        'for Animation Frame')],
+                                                ), ],
+                                                style={
+                                                    'padding': 10})
                                         ],
                                             style={'fontSize': 14, 'fpmt-family': 'Raleway', 'display': 'inline-block',
                                                    'width': '32%', 'float': 'right',
@@ -803,16 +792,13 @@ app.layout = html.Div([
                                                                  style={'width': '65%', 'display': 'inline-block', })
                                                            , html.Div([
                                             html.Div([html.Label(
-                                                [
-                                                    'Select variable to determine top performing structures (tool will filter '
-                                                    'percentiles according to selected column):',
-                                                    dcc.Dropdown(
-                                                        id='data-set',
-                                                        placeholder="Select an option for dataset",
-                                                        multi=False,
-                                                        options=[{'label': i, 'value': i} for i in
-                                                                 df_explorer_y.columns]
-                                                    )]
+                                                ['Select variable to determine top performing structures (will filter '
+                                                 'percentiles according to selected column):',
+                                                 dcc.Dropdown(
+                                                     id='data-set',
+                                                     placeholder="Select an option for dataset",
+                                                     multi=False,
+                                                 )]
                                             ),
                                                 dbc.Modal(
                                                     [
@@ -842,7 +828,7 @@ app.layout = html.Div([
                                                          'value': 'Top 5% of structures'},
                                                         {'label': 'Top 10% of structures',
                                                          'value': 'Top 10% of structures'},
-                                                        {'label': 'All structures', 'value': 'All structures'}, ],
+                                                        {'label': 'All structures', 'value': 'All structures'}],
                                                     value='All structures',
 
                                                 )]),
@@ -853,18 +839,24 @@ app.layout = html.Div([
                                                      id='anim-frame-violin',
                                                      multi=False,
                                                      placeholder='Select an option '
-                                                                 'for X',
-                                                     options=[{'label': i, 'value': i} for i in df_stat.columns])],
+                                                                 'for X')],
                                             ), ],
                                                 style={
                                                     'padding': 10}),
-                                            html.Div([html.Label(["Select Y variable (geometrical properties):",
+                                            html.Div([html.Label(["Select Y variable (Geometrical Property):",
                                                                   dcc.Dropdown(id='yaxis-stat',
                                                                                placeholder="Select an option for Y",
                                                                                multi=False,
-                                                                               options=[{'label': i, 'value': i} for i
-                                                                                        in df_explorer_y.columns]
                                                                                )])
+                                                      ], style={'padding': 10}),
+                                            html.Div([html.Label(["Take absolute values of data:",
+                                                                  dcc.RadioItems(id='abs-value',
+                                                                                 options=[
+                                                                                     {'label': 'Yes', 'value': 'Yes'},
+                                                                                     {'label': 'No', 'value': 'No'}],
+                                                                                 value='Yes'
+
+                                                                                 )])
                                                       ], style={'padding': 10}),
                                             dcc.Markdown(d("""
                **Click Data**
@@ -888,16 +880,13 @@ app.layout = html.Div([
                                                      style={'width': '65%', 'display': 'inline-block',
                                                             }),
                                             html.Div([html.Div([html.Label(
-                                                [
-                                                    'Select variable to determine top performing structures (tool will filter '
-                                                    'percentiles according to selected column):',
-                                                    dcc.Dropdown(
-                                                        id='data-set-dist',
-                                                        placeholder="Select an option for dataset",
-                                                        multi=False,
-                                                        options=[{'label': i, 'value': i} for i in
-                                                                 df_explorer_y.columns]
-                                                    )]
+                                                ['Select variable to determine top performing structures (will filter '
+                                                 'percentiles according to selected column):',
+                                                 dcc.Dropdown(
+                                                     id='data-set-dist',
+                                                     placeholder="Select an option for dataset",
+                                                     multi=False,
+                                                 )]
                                             ),
                                                 dbc.Modal(
                                                     [
@@ -935,20 +924,38 @@ app.layout = html.Div([
                                                 html.Div([html.Label(["Select X variable:",
                                                                       dcc.Dropdown(id='xaxis-dist',
                                                                                    multi=False,
-                                                                                   placeholder="Select an option for X",
-                                                                                   options=[{'label': i, 'value': i} for
-                                                                                            i in df_explorer_y.columns]
+                                                                                   placeholder="Select an option for X"
                                                                                    )]), ],
                                                          style={'padding': 10
                                                                 }),
+                                                html.Div([html.Label(["Take absolute values of data:",
+                                                                      dcc.RadioItems(id='abs-value-dist',
+                                                                                     options=[{'label': 'Yes',
+                                                                                               'value': 'Yes'},
+                                                                                              {'label': 'No',
+                                                                                               'value': 'No'}],
+                                                                                     value='Yes'
+
+                                                                                     )])
+                                                          ], style={'padding': 10}),
                                                 html.Div([html.Label(["Select Grouping:",
                                                                       dcc.RadioItems(
                                                                           id='dist-grouping',
                                                                           options=[{'label': i, 'value': i} for i in
-                                                                                   ['None', 'Porosity']],
+                                                                                   ['None', 'Family']],
                                                                           value='None',
                                                                           labelStyle={'display': 'inline-block'})])
-                                                          ])
+                                                          ]),
+                                                html.Div([html.Label(
+                                                    ["Select Animation Frame:",
+                                                     dcc.Dropdown(
+                                                         id='anim-frame-dist',
+                                                         multi=False,
+                                                         placeholder='Select an option '
+                                                                     'for Animation Frame')],
+                                                ), ],
+                                                    style={
+                                                        'padding': 10})
                                             ], style={'fontSize': 14, 'font-family': 'Raleway', 'width': '30%',
                                                       'display': 'inline-block',
                                                       'float': 'right'})
@@ -960,37 +967,125 @@ app.layout = html.Div([
 
                     ])
         ], style=tabs_styles)
-    ], style={'padding': 5})
+    ], style={'padding': 15, 'font-family': 'Raleway'})
 ], style={'backgroundColor': '#f6f6f6', 'font-family': 'Raleway'})
+
+
+# DOWNLOAD UPLOADED FILE
+def file_download_link(filename):
+    """Create a Plotly Dash 'A' element that downloads a file from the app."""
+    location = "/download/{}".format(urlquote(filename))
+    return html.A(filename, href=location)
+
+
+# READ FILE
+def parse_contents(contents, filename):
+    content_type, content_string = contents.split(',')
+    decoded = base64.b64decode(content_string)
+    try:
+        if 'csv' in filename:
+            # Assume that the user uploaded a CSV file
+            df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
+        elif 'xls' in filename:
+            # Assume that the user uploaded an excel file
+            df = pd.read_excel(io.BytesIO(decoded))
+        elif 'txt' or 'tsv' in filename:
+            df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), delimiter=r'\s+'
+                             )
+    except Exception as e:
+        print(e)
+        return html.Div([
+            'There was an error processing this file.'
+        ])
+    return df
+
+
+# SIZE MODAL CALLBACK UPLOAD FILE
+@app.callback(
+    [Output('modal-upload', 'is_open'),
+     Output('output-data-upload', 'children')],
+    [
+        Input('data-table-upload', 'contents'),
+        Input('close-upload', 'n_clicks')],
+    [State('data-table-upload', 'filename')])
+def update_output(contents, modal_close, filename):
+    ctx = dash.callback_context
+    user_clicked = ctx.triggered[0]['prop_id'].split('.')[0]
+    df = parse_contents(contents, filename)
+    if not user_clicked or user_clicked == 'close':
+        return dash.no_update, False
+
+    if contents is None:
+        return [], False
+
+    if not filename.endswith(('.xls', '.csv', '.txt')):
+        return [], True
+    return df
+
+
+@app.callback(Output('csv-data', 'data'),
+              [Input('data-table-upload', 'contents')],
+              [State('data-table-upload', 'filename')])
+def parse_uploaded_file(contents, filename):
+    if not filename:
+        return dash.no_update
+    df = parse_contents(contents, filename)
+    return df.to_json(date_format='iso', orient='split')
 
 
 def scaleup(x):
     return round(x * 1.1)
 
 
+# POPULATE AXIS DROPDOWN 2VAR ENV ANIM
+@app.callback([Output('xaxis-anim-2D', 'options'),
+               Output('yaxis-anim-2D', 'options'), ],
+              [Input('csv-data', 'data')])
+def populate_dropdown_2var_anim(data):
+    if not data:
+        return dash.no_update, dash.no_update
+    df = pd.read_json(data, orient='split')
+    options = [{'label': i, 'value': i} for i in df.columns]
+    return options, options
+
+
+@app.callback(Output('anim-frame-2D', 'options'),
+              [Input('csv-data', 'data')])
+def populate_animation_frame_2D(data):
+    if not data:
+        return dash.no_update
+    df = pd.read_json(data, orient='split')
+    dff = df.select_dtypes(exclude=['object'])
+    options = [{'label': i, 'value': i} for i in dff.columns]
+    return options
+
+
 # POPULATE GRAPH 2VAR ENV ANIM
 @app.callback(Output('my-2D-graph', 'figure'),
               [
                   Input('xaxis-anim-2D', 'value'),
-                  Input('yaxis-anim-2D', 'value')],
+                  Input('yaxis-anim-2D', 'value'),
+                  Input('anim-frame-2D', 'value')],
+              [State('csv-data', 'data')]
               )
-def update_figure_2Var(x, y):
-    # data = df_explorer.sort_values(by=['Year'])
-    data = dff_explorer_2019
-    return px.scatter(data, x=x, y=y, title="", animation_frame='Year',
-                      animation_group=data.columns[0],
-                      hover_name=data.columns[0],
+def update_figure_2Var(x, y, frame, data):
+    if not data:
+        return dash.no_update
+    df = pd.read_json(data, orient='split')
+    return px.scatter(df.sort_values(by=[frame]), x=x, y=y, title="", animation_frame=frame,
+                      animation_group=df.columns[0],
+                      hover_name=df.columns[0],
                       hover_data={}, template="none",
                       ).update_xaxes(showgrid=False, title=x.translate(SUP), autorange=True, ticks='outside',
                                      showline=True, showspikes=True, spikethickness=1, spikedash='solid',
-                                     mirror=True, tickformat=".1f", title_standoff=10,
+                                     mirror=True, tickformat=".1f", title_standoff=10, range=[0, scaleup(df[x].max())]
                                      ).update_yaxes(spikedash='solid',
                                                     showgrid=False,
-                                                    # title_standoff=8,
+                                                    title_standoff=10,
                                                     title=dict(
                                                         text=y.translate(
                                                             SUP),
-                                                        standoff=13),
+                                                        standoff=5),
                                                     autorange=True,
                                                     ticks='outside',
                                                     showspikes=True,
@@ -998,13 +1093,25 @@ def update_figure_2Var(x, y):
                                                     showline=True,
                                                     mirror=True,
                                                     tickformat=".1f",
+                                                    range=[0, scaleup(df[y].max())]
                                                     ).update_layout(
-        clickmode='event+select', hovermode='closest', margin={'l': 91}, autosize=True, font=dict(family='Helvetica')
+        clickmode='event+select', hovermode='closest', margin={'l': 80}, autosize=True, font=dict(family='Helvetica')
     ).update_traces(marker=dict(opacity=0.7, line=dict(width=0.5, color='DarkSlateGrey'),
                                 ))
 
 
-########################################################################################################################
+# POPULATE AXIS DROPDOWN 3VAR ENV ANIM
+@app.callback([Output('xaxis-anim-3D', 'options'),
+               Output('yaxis-anim-3D', 'options'),
+               Output('caxis-anim-3D', 'options')],
+              [Input('csv-data', 'data')])
+def populate_dropdown_3var_anim(data):
+    if not data:
+        return dash.no_update, dash.no_update, dash.no_update
+    df = pd.read_json(data, orient='split')
+    options = [{'label': i, 'value': i} for i in df.columns]
+    return options, options, options
+
 
 # POPULATE COLORBAR SLIDER SCATTER 3VAR ENV ANIM
 @app.callback([Output('colorbar-slider', 'min'),
@@ -1012,16 +1119,19 @@ def update_figure_2Var(x, y):
                Output('colorbar-slider', 'step'),
                Output('colorbar-slider', 'value')
                ],
-              [
-                  Input('caxis-anim-3D', 'value')
-              ])
-def populate_pressure_slider_3Var(color):
-    if not color:
+              [Input('csv-data', 'data'),
+               Input('caxis-anim-3D', 'value')
+               ],
+              [State('csv-data', 'data')])
+def populate_pressure_slider_3Var(_, color, data):
+    if not data or not color:
         return dash.no_update, dash.no_update, dash.no_update, dash.no_update
-    min_v = round(float(df_explorer[color].min()), 1)
-    max_v = round(float(df_explorer[color].max()), 1)
+
+    df = pd.read_json(data, orient='split')
+    min_v = round(float(df[color].min()), 1)
+    max_v = round(float(df[color].max()), 1)
     step = 0.1
-    value = [round(float(df_explorer[color].min()), 1), round(float(df_explorer[color].max()), 1)]
+    value = [round(float(df[color].min()), 1), round(float(df[color].max()), 1)]
     return min_v, max_v, step, value
 
 
@@ -1033,31 +1143,46 @@ def update_output_3Var(value):
     return 'You have selected "{}"'.format(value)
 
 
+# POPULATE 3VAR ENV ANIM FRAME
+@app.callback(
+    Output('anim-frame-3Var', 'options'),
+    [Input('csv-data', 'data')]
+)
+def populate_animation_frame_3var(data):
+    if not data:
+        return dash.no_update
+    df = pd.read_json(data, orient='split')
+    dff = df.select_dtypes(exclude=['object'])
+    options = [{'label': i, 'value': i} for i in dff.columns]
+    return options
+
+
 # POPULATE GRAPH 3VAR ENV ANIM
 @app.callback(Output('my-3D-graph', 'figure'),
               [Input('xaxis-anim-3D', 'value'),
                Input('yaxis-anim-3D', 'value'),
                Input('caxis-anim-3D', 'value'),
-               Input('colorbar-slider', 'value')])
-def update_figure_3Var(x, y, color, color_value):
-    data = dff_explorer_2019
-    if not color_value:
+               Input('colorbar-slider', 'value'),
+               Input('anim-frame-3Var', 'value')],
+              [State('csv-data', 'data')])
+def update_figure_3Var(x, y, color, color_value, frame, data):
+    if not data or not color_value:
         return dash.no_update
+    df = pd.read_json(data, orient='split')
     color_val_float = []
     for i in range(0, len(color_value), 1):
         color_val_float.append(float(color_value[i]))
     color_val = color_val_float
-    return px.scatter(data,
+    return px.scatter(df.sort_values(by=[frame]),
                       x=x,
                       y=y,
                       title="",
-                      animation_frame='Year',
-                      animation_group=data.columns[0],
-                      hover_name=data.columns[0],
+                      animation_frame=frame,
+                      animation_group=df.columns[0],
+                      hover_name=df.columns[0],
                       hover_data={},
                       template="none",
-                      color=color,
-                      category_orders={color: natsorted(data[color].unique())},
+                      color=df[color],
                       color_continuous_scale='Viridis',
                       range_color=color_val
                       ).update_xaxes(showgrid=False, title_standoff=10,
@@ -1069,10 +1194,10 @@ def update_figure_3Var(x, y, color, color_value):
                                      spikethickness=1,
                                      spikedash='solid',
                                      mirror=True,
-                                     tickformat=".1f").update_yaxes(spikedash='solid',
+                                     tickformat=".1f").update_yaxes(spikedash='solid', title_standoff=10,
                                                                     showgrid=False,
                                                                     title=dict(text=y.translate(SUP)
-                                                                               , standoff=12),
+                                                                               , standoff=5),
                                                                     autorange=True,
                                                                     ticks='outside',
                                                                     showspikes=True,
@@ -1082,10 +1207,9 @@ def update_figure_3Var(x, y, color, color_value):
                                                                     tickformat=".1f").update_layout(
         clickmode='event+select',
         hovermode='closest',
-        margin={'l': 91},
+        margin={'l': 80},
         autosize=True,
-        font=dict(family='Helvetica'),
-        legend=dict(traceorder='normal'),
+        font=dict(family='Helvetica', ),
         coloraxis_colorbar=dict(title=dict(text=color.translate(SUP), side='right'), ypad=0),
     ).update_traces(marker=dict(size=10,
                                 opacity=0.7,
@@ -1094,17 +1218,41 @@ def update_figure_3Var(x, y, color, color_value):
                                 colorscale="Viridis"))
 
 
+# POPULATE AXIS DROPDOWN 4VAR ENV ANIM
+@app.callback([Output('xaxis-anim', 'options'),
+               Output('yaxis-anim', 'options'),
+               Output('caxis-anim', 'options'),
+               Output('saxis-anim', 'options')
+               ],
+              [Input('csv-data', 'data')])
+def populate_dropdown_4var_anim(data):
+    if not data:
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update
+    df = pd.read_json(data, orient='split')
+    options = [{'label': i, 'value': i} for i in df.columns]
+    return options, options, options, options
+
+
 # SIZE MODAL CALLBACK 4VAR ENV ANIM
 @app.callback(
     Output('modal-4Var', 'is_open'),
     [Input('saxis-anim', 'value'),
-     Input('close', 'n_clicks')])
-def update_output_4Var(size_value, modal_close):
+     Input('data-table-upload', 'contents'),
+     Input('close', 'n_clicks')],
+    [State('data-table-upload', 'filename')])
+def update_output_4Var(size_value, contents, modal_close, filename):
     ctx = dash.callback_context
     user_clicked = ctx.triggered[0]['prop_id'].split('.')[0]
-    size_list = df_explorer[size_value].to_list()
+    df = parse_contents(contents, filename)
+    size_list = df[size_value].to_list()
     if not user_clicked or user_clicked == 'close':
         return dash.no_update, False
+
+    if contents is None:
+        return [], False
+
+    if filename is None:
+        return [], False
 
     if size_value is None:
         return [], False
@@ -1120,16 +1268,18 @@ def update_output_4Var(size_value, modal_close):
                Output('colorbar-slider-4D', 'step'),
                Output('colorbar-slider-4D', 'value')
                ],
-              [
-                  Input('caxis-anim', 'value')
-              ])
-def populate_pressure_slider_4Var(color):
-    if not color:
+              [Input('csv-data', 'data'),
+               Input('caxis-anim', 'value')
+               ],
+              [State('csv-data', 'data')])
+def populate_pressure_slider_4Var(_, color, data):
+    if not data or not color:
         return dash.no_update, dash.no_update, dash.no_update, dash.no_update
-    min_v = round(float(df_explorer[color].min()), 1)
-    max_v = round(float(df_explorer[color].max()), 1)
+    df = pd.read_json(data, orient='split')
+    min_v = round(float(df[color].min()), 1)
+    max_v = round(float(df[color].max()), 1)
     step = 0.1
-    value = [round(float(df_explorer[color].min()), 1), round(float(df_explorer[color].max()), 1)]
+    value = [round(float(df[color].min()), 1), round(float(df[color].max()), 1)]
     return min_v, max_v, step, value
 
 
@@ -1143,13 +1293,30 @@ def update_output_4Var(value):
 # SIZE RANGE
 @app.callback(
     Output('size-container-4D', 'children'),
-    [Input('saxis-anim', 'value')],
+    [Input('saxis-anim', 'value'),
+     Input('csv-data', 'data')],
+    [State('csv-data', 'data')]
 )
-def update_output_size_range_4Var(size):
-    if not size:
+def update_output_size_range_4Var(size, __, data):
+    if not data or not size:
         return dash.no_update
-    size_range = [round(df_explorer[size].min(), 2), round(df_explorer[size].max(), 2)]
+    df = pd.read_json(data, orient='split')
+    size_range = [round(df[size].min(), 2), round(df[size].max(), 2)]
     return 'Size range: {}'.format(size_range)
+
+
+# POPULATE GRAPH 4VAR ENV ANIM FRAME
+@app.callback(
+    Output('anim-frame-4Var', 'options'),
+    [Input('csv-data', 'data')]
+)
+def populate_animation_frame_4var(data):
+    if not data:
+        return dash.no_update
+    df = pd.read_json(data, orient='split')
+    dff = df.select_dtypes(exclude=['object'])
+    options = [{'label': i, 'value': i} for i in dff.columns]
+    return options
 
 
 # POPULATE GRAPH 4VAR ENV ANIM
@@ -1159,37 +1326,37 @@ def update_output_size_range_4Var(size):
                   Input('yaxis-anim', 'value'),
                   Input('caxis-anim', 'value'),
                   Input('saxis-anim', 'value'),
-                  Input('colorbar-slider-4D', 'value')],
+                  Input('colorbar-slider-4D', 'value'),
+                  Input('anim-frame-4Var', 'value')],
+              [State('csv-data', 'data')]
               )
-def update_figure_4Var(x, y, color, size, color_value):
-    data = dff_explorer_2019
-    if not color_value:
+def update_figure_4Var(x, y, color, size, color_value, frame, data):
+    if not data or not color_value:
         return dash.no_update
+    df = pd.read_json(data, orient='split')
     # size_range = [df[size].min(), df[size].max()]
     color_val_float = []
     for i in range(0, len(color_value), 1):
         color_val_float.append(float(color_value[i]))
     color_val = color_val_float
-    return px.scatter(data, x=x, y=y, title="", animation_frame="Year",
-                      animation_group=data.columns[0], size=size, color=color,
-                      hover_name=data.columns[0],
+    return px.scatter(df.sort_values(by=[frame]), x=x, y=y, title="", animation_frame=frame,
+                      animation_group=df.columns[0], size=size, color=color,
+                      hover_name=df.columns[0],
                       color_continuous_scale='Viridis',
-                      hover_data={}, template="none", range_color=color_val,
-                      category_orders={color: natsorted(data[color].unique())},
+                      hover_data={}, template="none", range_color=color_val
                       ).update_xaxes(showgrid=False, title=x.translate(SUP), autorange=True, ticks='outside',
                                      showline=True, showspikes=True, spikethickness=1, spikedash='solid',
                                      title_standoff=10,
                                      mirror=True, tickformat=".1f").update_yaxes(spikedash='solid',
-                                                                                 showgrid=False,
+                                                                                 showgrid=False, title_standoff=10,
                                                                                  title=dict(text=y.translate(SUP),
-                                                                                            standoff=13),
+                                                                                            standoff=5),
                                                                                  autorange=True, ticks='outside',
                                                                                  showspikes=True, spikethickness=1,
                                                                                  showline=True, mirror=True,
                                                                                  tickformat=".1f").update_layout(
-        clickmode='event+select', hovermode='closest', margin={'l': 91}, autosize=True, font=dict(family='Helvetica'),
+        clickmode='event+select', hovermode='closest', margin={'l': 80}, autosize=True, font=dict(family='Helvetica'),
         coloraxis_colorbar=dict(title=dict(text=color.translate(SUP), side='right', font=dict(size=14)), ypad=0),
-        legend=dict(traceorder='normal'),
         # annotations=[
         #     dict(x=1.5, y=-0.15, showarrow=False, align='left',
         #          text='Size range: {}'.format(size_range), xref='paper', yref='paper', font=dict(size=14))
@@ -1198,17 +1365,42 @@ def update_figure_4Var(x, y, color, size, color_value):
                                 ))
 
 
+# POPULATE AXIS DROPDOWN 5VAR (3D) ENV ANIM
+@app.callback([Output('xaxis-3D', 'options'),
+               Output('yaxis-3D', 'options'),
+               Output('zaxis-3D', 'options'),
+               Output('saxis-3D', 'options'),
+               Output('caxis-3D', 'options')
+               ],
+              [Input('csv-data', 'data')], )
+def populate_dropdown_5D_anim(data):
+    if not data:
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update
+    df = pd.read_json(data, orient='split')
+    options = [{'label': i, 'value': i} for i in df.columns]
+    return options, options, options, options, options
+
+
 # SIZE MODAL CALLBACK 5VAR (3D) ENV ANIM
 @app.callback(
     Output('modal-5Var', 'is_open'),
     [Input('saxis-3D', 'value'),
-     Input('close-5D', 'n_clicks')], )
-def update_output_modal5(size_value, modal_close):
+     Input('data-table-upload', 'contents'),
+     Input('close-5D', 'n_clicks')],
+    [State('data-table-upload', 'filename')])
+def update_output_modal5(size_value, contents, modal_close, filename):
     ctx = dash.callback_context
     user_clicked = ctx.triggered[0]['prop_id'].split('.')[0]
-    size_list = df_explorer[size_value].to_list()
+    df = parse_contents(contents, filename)
+    size_list = df[size_value].to_list()
     if not user_clicked or user_clicked == 'close':
         return dash.no_update, False
+
+    if contents is None:
+        return [], False
+
+    if filename is None:
+        return [], False
 
     if size_value is None:
         return [], False
@@ -1224,15 +1416,18 @@ def update_output_modal5(size_value, modal_close):
                Output('colorbar-slider-5D', 'step'),
                Output('colorbar-slider-5D', 'value')
                ],
-              [Input('caxis-3D', 'value')
-               ])
-def populate_pressure_slider_5D(color):
-    if not color:
+              [Input('csv-data', 'data'),
+               Input('caxis-3D', 'value')
+               ],
+              [State('csv-data', 'data')])
+def populate_pressure_slider_5D(_, color, data):
+    if not data or not color:
         return dash.no_update, dash.no_update, dash.no_update, dash.no_update
-    min_v = round(float(df_explorer[color].min()), 1)
-    max_v = round(float(df_explorer[color].max()), 1)
+    df = pd.read_json(data, orient='split')
+    min_v = round(float(df[color].min()), 1)
+    max_v = round(float(df[color].max()), 1)
     step = 0.1
-    value = [round(float(df_explorer[color].min()), 1), round(float(df_explorer[color].max()), 1)]
+    value = [round(float(df[color].min()), 1), round(float(df[color].max()), 1)]
     return min_v, max_v, step, value
 
 
@@ -1246,13 +1441,29 @@ def update_output_colorbar_5D(value):
 # SIZE RANGE
 @app.callback(
     Output('size-slider-container-5D', 'children'),
-    [Input('saxis-3D', 'value')],
+    [Input('saxis-3D', 'value'),
+     Input('csv-data', 'data')],
+    [State('csv-data', 'data')]
 )
-def update_output_size_range_5D(size):
-    if not size:
+def update_output_size_range_5D(size, __, data):
+    if not data or not size:
         return dash.no_update
-    size_range = [round(df_explorer[size].min(), 2), round(df_explorer[size].max(), 2)]
+    df = pd.read_json(data, orient='split')
+    size_range = [round(df[size].min(), 2), round(df[size].max(), 2)]
     return 'Size range: {}'.format(size_range)
+
+
+@app.callback(
+    Output('anim-frame-5D', 'options'),
+    [Input('csv-data', 'data')]
+)
+def populate_animation_frame_5D(data):
+    if not data:
+        return dash.no_update
+    df = pd.read_json(data, orient='split')
+    dff = df.select_dtypes(exclude=['object'])
+    options = [{'label': i, 'value': i} for i in dff.columns]
+    return options
 
 
 # POPULATE GRAPH 5VAR (3D) ENV ANIM
@@ -1262,22 +1473,23 @@ def update_output_size_range_5D(size):
                Input('zaxis-3D', 'value'),
                Input('caxis-3D', 'value'),
                Input('saxis-3D', 'value'),
-               Input('colorbar-slider-5D', 'value')],
+               Input('colorbar-slider-5D', 'value'),
+               Input('anim-frame-5D', 'value')],
+              [State('csv-data', 'data')]
               )
-def make_figure(x, y, z, color, size, color_value):
-    if not color_value:
+def make_figure(x, y, z, color, size, color_value, frame, data):
+    if not data or not color_value:
         return dash.no_update
     if x and y and z and color and size is None:
         return dash.no_update
+    df = pd.read_json(data, orient='split')
     color_val_float = []
     for i in range(0, len(color_value), 1):
         color_val_float.append(float(color_value[i]))
     color_val = color_val_float
-    data = dff_explorer_2019
-    return px.scatter_3d(dff_explorer_2019, x=x, y=y, z=z, title="", animation_frame='Year',
-                         animation_group=dff_explorer_2019.columns[0], size=size, color=color,
-                         category_orders={color: natsorted(data[color].unique())},
-                         hover_name=dff_explorer_2019.columns[0],
+    return px.scatter_3d(df.sort_values(by=[frame]), x=x, y=y, z=z, title="", animation_frame=frame,
+                         animation_group=df.columns[0], size=size, color=color,
+                         hover_name=df.columns[0],
                          color_continuous_scale='Viridis',
                          hover_data={}, template="none", range_color=color_val
                          ).update_xaxes(showgrid=False, title=x.translate(SUP), autorange=True, tickformat=".1f"
@@ -1291,17 +1503,41 @@ def make_figure(x, y, z, color, size, color_value):
                     ))
 
 
+# POPULATE AXIS DROPDOWN SCATTER DATA TABLE FIGURE
+@app.callback([Output('xaxis', 'options'),
+               Output('yaxis', 'options'),
+               Output('caxis', 'options'),
+               Output('saxis', 'options')
+               ],
+              [Input('csv-data', 'data')], )
+def populate_scatter_dropdown(data):
+    if not data:
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update
+    df = pd.read_json(data, orient='split')
+    options = [{'label': i, 'value': i} for i in df.columns]
+    return options, options, options, options
+
+
 # SIZE MODAL CALLBACK SCATTER DATA TABLE
 @app.callback(
     Output('modal-data', 'is_open'),
     [Input('saxis', 'value'),
-     Input('close-data', 'n_clicks')])
-def update_output(size_value, modal_close):
+     Input('data-table-upload', 'contents'),
+     Input('close-data', 'n_clicks')],
+    [State('data-table-upload', 'filename')])
+def update_output(size_value, contents, modal_close, filename):
     ctx = dash.callback_context
     user_clicked = ctx.triggered[0]['prop_id'].split('.')[0]
-    size_list = df_explorer[size_value].to_list()
+    df = parse_contents(contents, filename)
+    size_list = df[size_value].to_list()
     if not user_clicked or user_clicked == 'close':
         return dash.no_update, False
+
+    if contents is None:
+        return [], False
+
+    if filename is None:
+        return [], False
 
     if size_value is None:
         return [], False
@@ -1315,13 +1551,22 @@ def update_output(size_value, modal_close):
 @app.callback(
     Output('modal-datac', 'is_open'),
     [Input('caxis', 'value'),
-     Input('close-datac', 'n_clicks')], )
-def update_output(color_value, modal_close):
+     Input('data-table-upload', 'contents'),
+     Input('close-datac', 'n_clicks')],
+    [State('data-table-upload', 'filename')])
+def update_output(color_value, contents, modal_close, filename):
     ctx = dash.callback_context
     user_clicked = ctx.triggered[0]['prop_id'].split('.')[0]
-    color_list = df_explorer[color_value].to_list()
+    df = parse_contents(contents, filename)
+    color_list = df[color_value].to_list()
     if not user_clicked or user_clicked == 'close':
         return dash.no_update, False
+
+    if contents is None:
+        return [], False
+
+    if filename is None:
+        return [], False
 
     if color_value is None:
         return [], False
@@ -1331,15 +1576,33 @@ def update_output(color_value, modal_close):
             return [], True
 
 
+# POPULATE DATA TABLE SCATTER
+@app.callback([Output('data-table-interact', 'data'),
+               Output('data-table-interact', 'columns')],
+              [Input('data-table-upload', 'contents')],
+              [State('data-table-upload', 'filename')])
+def update_output(contents, filename):
+    if contents is None:
+        return [{}], []
+    df = parse_contents(contents, filename)
+    data = df.to_dict('records')
+    columns = [{"name": i, "id": i, "deletable": True, "selectable": True, 'type': 'numeric',
+                'format': Format(precision=3, scheme=Scheme.fixed)} for i in df.columns]
+    return data, columns
+
+
 # SIZE RANGE
 @app.callback(
     Output('size-output-container-filter', 'children'),
-    [Input('saxis', 'value')]
+    [Input('saxis', 'value'),
+     Input('csv-data', 'data')],
+    [State('csv-data', 'data')]
 )
-def update_output(size):
-    if not size:
+def update_output(size, __, data):
+    if not data or not size:
         return dash.no_update
-    size_range = [round(df_explorer[size].min(), 2), round(df_explorer[size].max(), 2)]
+    df = pd.read_json(data, orient='split')
+    size_range = [round(df[size].min(), 2), round(df[size].max(), 2)]
     return '{}'.format(size_range)
 
 
@@ -1349,16 +1612,19 @@ def update_output(size):
                Output('colorbar-slider-data-table', 'step'),
                Output('colorbar-slider-data-table', 'value')
                ],
-              [
-                  Input('caxis', 'value')
-              ])
-def populate_pressure_slider_3Var(color):
+              [Input('caxis', 'value'),
+                  Input('csv-data', 'data')],
+              [State('csv-data', 'data')])
+def populate_pressure_slider_3Var(color, __, data):
+    if not data:
+        return dash.no_update
+    df = pd.read_json(data, orient='split')
     if not color:
         return dash.no_update, dash.no_update, dash.no_update, dash.no_update
-    min_v = round(float(df_explorer[color].min()), 1)
-    max_v = round(float(df_explorer[color].max()), 1)
+    min_v = round(float(df[color].min()), 1)
+    max_v = round(float(df[color].max()), 1)
     step = 0.1
-    value = [round(float(df_explorer[color].min()), 1), round(float(df_explorer[color].max()), 1)]
+    value = [round(float(df[color].min()), 1), round(float(df[color].max()), 1)]
     return min_v, max_v, step, value
 
 
@@ -1397,15 +1663,15 @@ def update_output_3Var(value):
                Input('yaxis-type', 'value'),
                Input('colorscale', 'value'),
                Input('colorbar-slider-data-table', 'value'),
-               Input('sizebar-slider-data-table', 'value'),
-               Input('sizebar-min-slider-data-table', 'value')
+Input('sizebar-slider-data-table', 'value'),
+Input('sizebar-min-slider-data-table', 'value')
                ])
 def update_figure(rows, derived_virtual_data, derived_virtual_selected_rows, xaxis_name, yaxis_name,
                   marker_color, marker_size, xaxis_type, yaxis_type, colorscale, color_value, size_value, size_min):
-    df_explorer = pd.DataFrame(rows)
+    df = pd.DataFrame(rows)
     if derived_virtual_selected_rows is None:
         return []
-    dff = df_explorer if derived_virtual_data is None else pd.DataFrame(derived_virtual_data)
+    dff = df if derived_virtual_data is None else pd.DataFrame(derived_virtual_data)
     if not color_value:
         return dash.no_update
     if not size_value:
@@ -1426,15 +1692,14 @@ def update_figure(rows, derived_virtual_data, derived_virtual_selected_rows, xax
                                            marker=dict(sizemode='area',
                                                        sizeref=max(dff[marker_size]) / (int(size_value) ** 3.5),
                                                        sizemin=size_min,
-                                                       cmin=min(color_val), cmax=max(color_val),
                                                        opacity=0.7, showscale=True,
                                                        line=dict(width=0.7, color='DarkSlateGrey'),
+                                                       cmin=min(color_val), cmax=max(color_val),
                                                        colorbar=dict(title=dict(text=marker_color.translate(SUP),
                                                                                 font=dict(family='Helvetica'),
-                                                                                side='right'), ypad=0,
-                                                                     ),
+                                                                                side='right'), ypad=0),
                                                        colorscale="Viridis" if colorscale == 'Viridis' else "Plasma"),
-                                           text=dff[df_explorer.columns[0]],
+                                           text=dff[df.columns[0]],
                                            hoverinfo=['x', 'y', 'text', 'name'],
                                            )],
                                 'layout': go.Layout(
@@ -1465,7 +1730,7 @@ def update_figure(rows, derived_virtual_data, derived_virtual_selected_rows, xax
                             )
                   ], style={'textAlign': 'center', 'padding': 25,
                             'horizontal-align': 'middle',
-                            'padding-left': '25%', 'padding-right': '32%'
+                            'padding-left': '25%', 'padding-right': '25%'
                             })
         for column in [xaxis_name] if column in dff
         for column in [yaxis_name] if column in dff
@@ -1474,12 +1739,27 @@ def update_figure(rows, derived_virtual_data, derived_virtual_selected_rows, xax
     ]
 
 
+# POPULATE DROPDOWN DATASET VIOLIN
+@app.callback(Output('data-set', 'options'),
+              [Input('data-table-upload', 'contents')],
+              [State('data-table-upload', 'filename')])
+def populate_df_dropdown(contents, filename):
+    df = parse_contents(contents, filename)
+    return [{'label': i, 'value': i} for i in df.columns]
+
+
+# POPULATE DROPDOWN Y AXIS VIOLIN
+@app.callback(Output('yaxis-stat', 'options'),
+              [Input('data-table-upload', 'contents')],
+              [State('data-table-upload', 'filename')])
+def populate_yaxis_stat(contents, filename):
+    df = parse_contents(contents, filename)
+    return [{'label': i, 'value': i} for i in df.columns]
+
+
 # VIRIDIS AND PLASMA COLOR PALETTE
-# PLASMA
-colors = ('rgb(240, 249, 33)', 'rgb(249, 221, 37)', 'rgb(254, 176, 49)', 'rgb(249, 152, 61)',
-          'rgb(241, 131, 76)', 'rgb(231, 110, 90)', 'rgb(219, 93, 104)', 'rgb(204, 74, 119)', 'rgb(189, 55, 134)',
-          'rgb(172, 36, 148)', 'rgb(150, 35, 161)', 'rgb(128, 35, 167)', 'rgb(104, 33, 168)', 'rgb(77, 30, 162)',
-          'rgb(49, 27, 152)', 'rgb(13, 22, 135)',
+colors = ('rgb(240, 249, 33)', 'rgb(253, 202, 38)', 'rgb(251, 159, 58)', 'rgb(237, 121, 83)', 'rgb(216, 87, 107)',
+          'rgb(189, 55, 134)', 'rgb(156, 23, 158)', 'rgb(114, 1, 168)', 'rgb(70, 3, 159)', 'rgb(13, 8, 135)',
 
           )
 colors2 = ('rgb(68, 1, 84)', 'rgb(72, 40, 120)', 'rgb(62, 73, 137)', 'rgb(49, 104, 142)', 'rgb(38, 130, 142)',
@@ -1490,13 +1770,22 @@ colors2 = ('rgb(68, 1, 84)', 'rgb(72, 40, 120)', 'rgb(62, 73, 137)', 'rgb(49, 10
 @app.callback(
     Output('modal-violin', 'is_open'),
     [Input('data-set', 'value'),
-     Input('close-violin', 'n_clicks')])
-def update_output(size_value, modal_close):
+     Input('data-table-upload', 'contents'),
+     Input('close-violin', 'n_clicks')],
+    [State('data-table-upload', 'filename')])
+def update_output(size_value, contents, modal_close, filename):
     ctx = dash.callback_context
     user_clicked = ctx.triggered[0]['prop_id'].split('.')[0]
-    size_list = df_explorer[size_value].to_list()
+    df = parse_contents(contents, filename)
+    size_list = df[size_value].to_list()
     if not user_clicked or user_clicked == 'close':
         return dash.no_update, False
+
+    if contents is None:
+        return [], False
+
+    if filename is None:
+        return [], False
 
     if size_value is None:
         return [], False
@@ -1506,16 +1795,30 @@ def update_output(size_value, modal_close):
             return [], True
 
 
+# POPULATE VIOLIN PLOT X AXIS GROUPING
+@app.callback(Output('anim-frame-violin', 'options'),
+              [Input('data-table-upload', 'contents')],
+              [State('data-table-upload', 'filename')])
+def populate_animation_frame_dist(contents, filename):
+    df = parse_contents(contents, filename)
+    # dff = df.select_dtypes(exclude=['float'])
+    return [{'label': i, 'value': i} for i in df.columns]
+
+
 # POPULATE VIOLIN PLOT CHANGED
 @app.callback(Output('violin-plot', 'figure'),
               [
                   Input('yaxis-stat', 'value'),
                   Input('percentile-type', 'value'),
+                  Input('abs-value', 'value'),
                   Input('anim-frame-violin', 'value'),
                   Input('data-set', 'value'),
+                  Input('data-table-upload', 'contents')
               ],
+              [State('data-table-upload', 'filename')]
               )
-def update_graph_stat(yaxis_name, percentile_type, frame_value, data_set):
+def update_graph_stat(yaxis_name, percentile_type, abs_value, frame_value, data_set, contents, filename):
+    df = parse_contents(contents, filename)
     traces = []
     frame_set = set(df[frame_value])
     frame_list = sorted(list(frame_set))
@@ -1528,16 +1831,28 @@ def update_graph_stat(yaxis_name, percentile_type, frame_value, data_set):
         data = df
     for frame in frame_list:
         dff = df[(df[frame_value] == frame)]
-        if percentile_type == 'Top 1% of structures':
+        if percentile_type == 'Top 1% of structures' and abs_value == 'Yes':
             data = dff[abs(dff[(data_set)]) > abs(dff[data_set]).quantile(0.99)]
             dfObj = pd.concat([dfObj, data], ignore_index=True)
             flag1 = True
-        elif percentile_type == 'Top 5% of structures':
+        elif percentile_type == 'Top 1% of structures' and abs_value == 'No':
+            data = dff[dff[(data_set)] > dff[data_set].quantile(0.99)]
+            dfObj = pd.concat([dfObj, data], ignore_index=True)
+            flag1 = True
+        elif percentile_type == 'Top 5% of structures' and abs_value == 'Yes':
             data = dff[abs(dff[data_set]) > abs(dff[data_set]).quantile(0.95)]
             dfObj = pd.concat([dfObj, data], ignore_index=True)
             flag1 = True
-        elif percentile_type == 'Top 10% of structures':
+        elif percentile_type == 'Top 5% of structures' and abs_value == 'No':
+            data = dff[dff[data_set] > dff[data_set].quantile(0.95)]
+            dfObj = pd.concat([dfObj, data], ignore_index=True)
+            flag1 = True
+        elif percentile_type == 'Top 10% of structures' and abs_value == 'Yes':
             data = dff[abs(dff[data_set]) > abs(dff[data_set]).quantile(0.9)]
+            dfObj = pd.concat([dfObj, data], ignore_index=True)
+            flag1 = True
+        elif percentile_type == 'Top 10% of structures' and abs_value == 'No':
+            data = dff[dff[data_set] > dff[data_set].quantile(0.9)]
             dfObj = pd.concat([dfObj, data], ignore_index=True)
             flag1 = True
     if yaxis_name is None:
@@ -1545,17 +1860,15 @@ def update_graph_stat(yaxis_name, percentile_type, frame_value, data_set):
     if flag1 == True:
         data = dfObj
     for frame, color in zip(frame_list, colors):
-        data = data.sort_values(by=[frame_value])
+        data.sort_values(by=[frame_value])
         traces.append(go.Violin(y=data[data[frame_value] == frame][yaxis_name], name=frame,
                                 line_color=color,
-                                # category_orders={frame_value: natsorted(df[frame_value].unique())},
                                 marker={'size': 4}, box_visible=True, opacity=0.9, meanline_visible=True,
                                 points='all', text=data[df.columns[0]],
                                 hovertemplate=
                                 "<b>%{text}</b><br><br>" +
                                 "X Variable: %{x:.2f}<br>" +
                                 "Y Variable: %{y:.0f}<br>"
-
                                 ))
     return {'data': traces,
 
@@ -1564,20 +1877,19 @@ def update_graph_stat(yaxis_name, percentile_type, frame_value, data_set):
                       f" {''.join(str(i) for i in yaxis_name.translate(SUP))} "
                 ,
                 xaxis=dict(rangeslider=dict(visible=True), mirror=True, ticks='outside',
-                           showline=True, title=frame_value.translate(SUP)),
+                           showline=True),
                 yaxis={'title': yaxis_name.translate(SUP), 'mirror': True,
-                       'ticks': 'outside', 'showline': True, 'tickformat': ".1f",
-                       'title_standoff': 15},
+                       'ticks': 'outside', 'showline': True, 'tickformat': ".1f"},
                 font=dict(
                     family="Helvetica",
                 ),
-                margin={'l': 74, 'b': 35, 't': 50, 'r': 50},
+                margin={'l': 60, 'b': 0, 't': 50, 'r': 50},
                 hovermode='closest',
-                # annotations=[
-                #     dict(x=0.5, y=-0.44, showarrow=False, text=frame_value.translate(SUP),
-                #          xref='paper', yref='paper',
-                #          font=dict(size=14))
-                # ]
+                annotations=[
+                    dict(x=0.5, y=-0.135, showarrow=False, text=frame_value.translate(SUP),
+                         xref='paper', yref='paper',
+                         font=dict(size=14))
+                ]
             )
             }
 
@@ -1591,17 +1903,44 @@ def display_click_data_stat(clickData):
     return json.dumps(clickData, indent=2)
 
 
+# POPULATE DROPDOWN DATASET DIST PLOT
+@app.callback(Output('data-set-dist', 'options'),
+              [Input('data-table-upload', 'contents')],
+              [State('data-table-upload', 'filename')])
+def populate_df_dropdown_dist(contents, filename):
+    df = parse_contents(contents, filename)
+    return [{'label': i, 'value': i} for i in df.columns]
+
+
+# POPULATE X AXIS DROPDOWN DIST PLOT
+@app.callback(Output('xaxis-dist', 'options'),
+              [Input('data-table-upload', 'contents')],
+              [State('data-table-upload', 'filename')])
+def populate_xaxis_dropdown_dist(contents, filename):
+    df = parse_contents(contents, filename)
+    return [{'label': i, 'value': i} for i in df.columns]
+
+
 # SIZE MODAL CALLBACK 4VAR ENV ANIM
 @app.callback(
     Output('modal-dist', 'is_open'),
     [Input('data-set-dist', 'value'),
-     Input('close-dist', 'n_clicks')])
-def update_output(size_value, modal_close):
+     Input('data-table-upload', 'contents'),
+     Input('close-dist', 'n_clicks')],
+    [State('data-table-upload', 'filename')])
+def update_output(size_value, contents, modal_close, filename):
     ctx = dash.callback_context
     user_clicked = ctx.triggered[0]['prop_id'].split('.')[0]
-    size_list = df_explorer_y[size_value].to_list()
+    df = parse_contents(contents, filename)
+    size_list = df[size_value].to_list()
     if not user_clicked or user_clicked == 'close':
         return dash.no_update, False
+
+    if contents is None:
+        return [], False
+
+    if filename is None:
+        return [], False
 
     if size_value is None:
         return [], False
@@ -1611,60 +1950,86 @@ def update_output(size_value, modal_close):
             return [], True
 
 
+# POPULATE DROPDOWN FOR DIST ANIMATION FRAME
+@app.callback(Output('anim-frame-dist', 'options'),
+              [Input('data-table-upload', 'contents')],
+              [State('data-table-upload', 'filename')])
+def populate_animation_frame_dist(contents, filename):
+    df = parse_contents(contents, filename)
+    dff = df.select_dtypes(exclude=['object'])
+    return [{'label': i, 'value': i} for i in dff.columns]
+
+
 # POPULATE DIST PLOT
 @app.callback(Output("dist-plot", "figure"),
               [Input('xaxis-dist', "value"),
                Input('dist-grouping', 'value'),
                Input('data-set-dist', 'value'),
-               Input('percentile-type-dist', 'value')])
-def make_figure(x, dist_type, data_set, percentile_type):
+               Input('percentile-type-dist', 'value'),
+               Input('abs-value-dist', 'value'),
+               Input('anim-frame-dist', 'value'),
+               Input('data-table-upload', 'contents'), ],
+              [State('data-table-upload', 'filename')])
+def make_figure(x, dist_type, data_set, percentile_type, abs_value, frame, contents, filename):
+    df = parse_contents(contents, filename)
     if x is None:
         return dash.no_update
     if data_set is None:
         return dash.no_update
-    frame_set = set(dff_explorer_2019['Year'])
-    frame_list = list(frame_set)
+    frame_set = set(df[frame])
+    frame_list = sorted(list(frame_set))
     dfObj = pd.DataFrame()
     flag1 = False
     if percentile_type == 'All structures':
-        data = dff_explorer_2019
+        data = df
     for frame_item in frame_list:
-        dff = dff_explorer_2019[(dff_explorer_2019['Year'] == frame_item)]
-        if percentile_type == 'Top 1% of structures':
+        dff = df[(df[frame] == frame_item)]
+        if percentile_type == 'Top 1% of structures' and abs_value == 'Yes':
             data = dff[abs(dff[data_set]) > abs(dff[data_set]).quantile(0.99)]
             dfObj = pd.concat([dfObj, data], ignore_index=True)
             flag1 = True
-        elif percentile_type == 'Top 5% of structures':
+        elif percentile_type == 'Top 1% of structures' and abs_value == 'No':
+            data = dff[dff[data_set] > dff[data_set].quantile(0.99)]
+            dfObj = pd.concat([dfObj, data], ignore_index=True)
+            flag1 = True
+        elif percentile_type == 'Top 5% of structures' and abs_value == 'Yes':
             data = dff[abs(dff[data_set]) > abs(dff[data_set]).quantile(0.95)]
             dfObj = pd.concat([dfObj, data], ignore_index=True)
             flag1 = True
-        elif percentile_type == 'Top 10% of structures':
+        elif percentile_type == 'Top 5% of structures' and abs_value == 'No':
+            data = dff[dff[data_set] > dff[data_set].quantile(0.95)]
+            dfObj = pd.concat([dfObj, data], ignore_index=True)
+            flag1 = True
+        elif percentile_type == 'Top 10% of structures' and abs_value == 'Yes':
             data = dff[abs(dff[data_set]) > abs(dff[data_set]).quantile(0.9)]
+            dfObj = pd.concat([dfObj, data], ignore_index=True)
+            flag1 = True
+        elif percentile_type == 'Top 10% of structures' and abs_value == 'No':
+            data = dff[dff[data_set] > dff[data_set].quantile(0.9)]
             dfObj = pd.concat([dfObj, data], ignore_index=True)
             flag1 = True
     if flag1 == True:
         data = dfObj
-    return px.histogram(data, x=x, marginal="rug",
-                        color="Porosity" if dist_type == 'Porosity' else None,
-                        animation_frame="Year",
-                        hover_data=data.columns, hover_name=data.columns[0], template="none",
-                        category_orders={"Porosity": natsorted(data["Porosity"].unique())}
+    return px.histogram(data.sort_values(by=[frame]), x=x, marginal="rug",
+                        color="Family" if dist_type == 'Family' else None,
+                        animation_frame=frame,
+                        hover_data=df.columns, hover_name=df.columns[0], template="none"
                         ).update_xaxes(showgrid=False, autorange=True, ticks='outside',
-                                       mirror=True, showline=True, tickformat=".1f", title=' ',
+                                       mirror=True, showline=True, tickformat=".1f", title=' '
                                        ).update_yaxes(showgrid=False, ticks='outside',
                                                       mirror=True, autorange=True, showline=True, tickformat=".1f",
                                                       title=' '
                                                       ).update_layout(
-        hovermode='closest', margin={'l': 85, 'b': 80, 't': 50, 'r': 5}, autosize=True, font=dict(family='Helvetica'),
+        hovermode='closest', margin={'l': 60, 'b': 80, 't': 50, 'r': 10}, autosize=True, font=dict(family='Helvetica'),
         annotations=[dict(x=0.5, y=-0.17, showarrow=False, text=x.translate(SUP), xref='paper', yref='paper',
                           font=dict(size=14)),
-                     dict(x=-0.17, y=0.5, showarrow=False, text="Number of Structures", textangle=-90, xref='paper',
+                     dict(x=-0.13, y=0.5, showarrow=False, text="Number of Structures", textangle=-90, xref='paper',
                           yref='paper', font=dict(size=14))]
     ).update_traces(marker=dict(opacity=0.7, line=dict(width=0.5, color='DarkSlateGrey'),
                                 )).update_layout(
-        title=f"<b> Distribution of Structures against {''.join(str(i) for i in x.translate(SUP))}",
-        font=dict(family='Helvetica'),
-    )
+        title=f"<b> Distribution of Structures against {''.join(str(i) for i in x.translate(SUP))}", font=dict(
+            family="Helvetica",
+        ), )
 
 
 # RUN APP
