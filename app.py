@@ -18,7 +18,8 @@ from natsort import natsorted
 
 # CREATE DASH APP
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP, 'https://codepen.io/chriddyp/pen/bWLwgP.css',
-                                      "https://codepen.io/sutharson/pen/zYvEVPW.css"])
+                                      "https://codepen.io/sutharson/pen/zYvEVPW.css",
+                                     "https://fonts.googleapis.com/css2?family=Raleway&display=swap"])
 server = app.server
 
 # PREDEFINED TAB STYLES
