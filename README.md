@@ -74,6 +74,7 @@ You can then run the app on your browser at http://127.0.0.1:8050
 - To quit the app press (CTRL +C). You will have to run the app again with this command everytime you leave your terminal/ quit the app.
 
 #### Run the app on production server by Gunicorn:
+The suggested number of workers is (2*CPU)+1. For a dual-core (2 CPU) machine, 5 is the suggested workers value. The number of workers should equal the number of threads. The user can either use the below or change the worker and threads number accordingly.
 ```bash
 gunicorn app:server -b :8080
 ```
