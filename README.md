@@ -1,4 +1,4 @@
-# Metal-organic Framework Visualisation Tools
+# Metal-organic Framework Data Visualisation Tools
 
 ## About
 These tools aim to provide a reproducible and consistent data visualisation platform where experimental and computational researchers can use big data and statistical analysis to explore their data or the adsorption related data we provide to find the best materials for specific applications.
